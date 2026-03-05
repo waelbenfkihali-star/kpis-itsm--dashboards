@@ -12,7 +12,7 @@ import App from "./App";
 import Dashboard from "./page/dashboard/Dashboard";
 import Team from "./page/team/Team";
 import Contacts from "./page/contacts/Contacts";
-import Invoices from "./page/invoices/Invoices";
+
 import Form from "./page/form/Form";
 import Calendar from "./page/calendar/Calendar";
 import FAQ from "./page/faq/FAQ";
@@ -22,6 +22,8 @@ import LineChart from "./page/lineChart/LineChart";
 import Geography from "./page/geography/Geography";
 import NotFound from "./page/notFound/NotFound";
 import Incidents from "./page/incidents/Incidents";
+import Requests from "./page/requests/Requests";
+import Changes from "./page/chnages/Changes";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -29,11 +31,14 @@ const router = createBrowserRouter(
       <Route index element={<Dashboard />} />
       <Route path="team" element={<Team />} />
       <Route path="Incidents" element={<Incidents />} />
+      <Route path="Requests" element={<Requests />} />
+      <Route path="Changes" element={<Changes />} />
+
 
 
 
       <Route path="contacts" element={<Contacts />} />
-      <Route path="invoices" element={<Invoices />} />
+      
       <Route path="form" element={<Form />} />
       <Route path="calendar" element={<Calendar />} />
       <Route path="faq" element={<FAQ />} />

@@ -28,6 +28,9 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
 import { grey } from "@mui/material/colors";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
+import BuildCircleOutlinedIcon from "@mui/icons-material/BuildCircleOutlined";
 
 const drawerWidth = 240;
 const openedMixin = (theme) => ({
@@ -86,15 +89,20 @@ const Array1 = [
     icon: <ContactsOutlinedIcon />,
     path: "/contacts",
   },
-  {
-    text: "Invoices Balances",
-    icon: <ReceiptOutlinedIcon />,
-    path: "/invoices",
-  },
-    {
+   {
     text: "Incidents",
-    icon: <ReceiptOutlinedIcon />,
+    icon: <WarningAmberOutlinedIcon/>,
     path: "/incidents",
+  },
+   {
+    text: "Requests",
+    icon: <AssignmentTurnedInOutlinedIcon/>,
+    path: "/Requests",
+  },
+   {
+    text: "Changes",
+    icon: <BuildCircleOutlinedIcon />,
+    path: "/Changes",
   },
 ];
 
