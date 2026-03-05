@@ -21,12 +21,16 @@ import PieChart from "./page/pieChart/PieChart";
 import LineChart from "./page/lineChart/LineChart";
 import Geography from "./page/geography/Geography";
 import NotFound from "./page/notFound/NotFound";
+import Incidents from "./page/incidents/Incidents";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route index element={<Dashboard />} />
       <Route path="team" element={<Team />} />
+      <Route path="Incidents" element={<Incidents />} />
+
+
 
       <Route path="contacts" element={<Contacts />} />
       <Route path="invoices" element={<Invoices />} />

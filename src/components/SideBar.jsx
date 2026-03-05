@@ -91,6 +91,11 @@ const Array1 = [
     icon: <ReceiptOutlinedIcon />,
     path: "/invoices",
   },
+    {
+    text: "Incidents",
+    icon: <ReceiptOutlinedIcon />,
+    path: "/incidents",
+  },
 ];
 
 const Array2 = [
