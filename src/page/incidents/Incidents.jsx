@@ -87,7 +87,6 @@ export default function Incidents() {
         <DataGrid
           rows={rows}
           columns={columns}
-          checkboxSelection
           disableRowSelectionOnClick
           slots={{ toolbar: GridToolbar }}
           initialState={{

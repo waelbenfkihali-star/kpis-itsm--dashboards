@@ -98,7 +98,6 @@ export default function Changes() {
         <DataGrid
           rows={rows}
           columns={columns}
-          checkboxSelection
           disableRowSelectionOnClick
           slots={{ toolbar: GridToolbar }}
           initialState={{

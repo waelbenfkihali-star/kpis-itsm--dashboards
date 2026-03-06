@@ -80,7 +80,6 @@ export default function Requests() {
         <DataGrid
           rows={rows}
           columns={columns}
-          checkboxSelection
           disableRowSelectionOnClick
           slots={{ toolbar: GridToolbar }}
           initialState={{
