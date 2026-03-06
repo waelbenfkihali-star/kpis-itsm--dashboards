@@ -1,16 +1,14 @@
 import React from "react";
-import { ResponsiveBar } from "@nivo/bar";
-import { Box, useTheme } from "@mui/material";
-import Bar from "./bar";
+import { Box } from "@mui/material";
 import Header from "../../components/Header";
+import Bar from "./bar";
 
 const BarChart = () => {
-  const theme = useTheme();
   return (
     <Box>
       <Header
-        title="Bar Chart"
-        subTitle="The minimum wage in Germany, France and Spain (EUR/month)"
+        title="ITSM Bar Chart"
+        subTitle="Monthly volume: Incidents vs Requests vs Changes"
       />
       <Bar />
     </Box>
