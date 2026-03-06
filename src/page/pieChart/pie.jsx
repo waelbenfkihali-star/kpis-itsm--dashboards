@@ -1,47 +1,44 @@
 import React from "react";
 import { ResponsivePie } from "@nivo/pie";
-
 import { Box, useTheme } from "@mui/material";
 
+// ✅ Dummy data (replace later with API)
 const data = [
-  {
-    id: "React",
-    label: "React",
-    value: 272,
-    color: "hsl(107, 70%, 50%)",
-  },
-  {
-    id: "stylus",
-    label: "stylus",
-    value: 543,
-    color: "hsl(64, 70%, 50%)",
-  },
-  {
-    id: "sass",
-    label: "sass",
-    value: 401,
-    color: "hsl(41, 70%, 50%)",
-  },
-  {
-    id: "haskell",
-    label: "haskell",
-    value: 434,
-    color: "hsl(172, 70%, 50%)",
-  },
-  {
-    id: "nue",
-    label: "nue",
-    value: 333,
-    color: "hsl(219, 70%, 50%)",
-  },
+  { id: "P1", label: "P1 - Critical", value: 18 },
+  { id: "P2", label: "P2 - High", value: 42 },
+  { id: "P3", label: "P3 - Medium", value: 65 },
+  { id: "P4", label: "P4 - Low", value: 30 },
 ];
 
 const Pie = ({ isDashbord = false }) => {
   const theme = useTheme();
+
+  // ✅ total for percentage tooltip
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+
   return (
     <Box sx={{ height: isDashbord ? "200px" : "75vh" }}>
       <ResponsivePie
         data={data}
+        // ✅ tooltip: show percentage only (value already visible in chart)
+        tooltip={({ datum }) => {
+          const pct = total ? ((datum.value / total) * 100).toFixed(1) : "0.0";
+          return (
+            <div
+              style={{
+                background: theme.palette.background.default,
+                color: theme.palette.text.primary,
+                padding: "8px 10px",
+                borderRadius: 8,
+                border: `1px solid ${theme.palette.divider}`,
+                fontSize: 12,
+              }}
+            >
+              <div style={{ fontWeight: 600 }}>{datum.label}</div>
+              <div>{pct}%</div>
+            </div>
+          );
+        }}
         theme={{
           textColor: theme.palette.text.primary,
           fontSize: 11,
@@ -94,46 +91,12 @@ const Pie = ({ isDashbord = false }) => {
               },
             },
           },
-          annotations: {
-            text: {
-              fontSize: 13,
-              fill: theme.palette.text.primary,
-              outlineWidth: 2,
-              outlineColor: "#ffffff",
-              outlineOpacity: 1,
-            },
-            link: {
-              stroke: "#000000",
-              strokeWidth: 1,
-              outlineWidth: 2,
-              outlineColor: "#ffffff",
-              outlineOpacity: 1,
-            },
-            outline: {
-              stroke: "#000000",
-              strokeWidth: 2,
-              outlineWidth: 2,
-              outlineColor: "#ffffff",
-              outlineOpacity: 1,
-            },
-            symbol: {
-              fill: "#000000",
-              outlineWidth: 2,
-              outlineColor: "#ffffff",
-              outlineOpacity: 1,
-            },
-          },
           tooltip: {
             container: {
               background: theme.palette.background.default,
               color: theme.palette.text.primary,
               fontSize: 12,
             },
-            basic: {},
-            chip: {},
-            table: {},
-            tableCell: {},
-            tableCellValue: {},
           },
         }}
         margin={
@@ -184,51 +147,11 @@ const Pie = ({ isDashbord = false }) => {
         ]}
         fill={[
           {
-            match: {
-              id: "ruby",
-            },
+            match: { id: "P1" },
             id: "dots",
           },
           {
-            match: {
-              id: "c",
-            },
-            id: "dots",
-          },
-          {
-            match: {
-              id: "go",
-            },
-            id: "dots",
-          },
-          {
-            match: {
-              id: "python",
-            },
-            id: "dots",
-          },
-          {
-            match: {
-              id: "scala",
-            },
-            id: "lines",
-          },
-          {
-            match: {
-              id: "lisp",
-            },
-            id: "lines",
-          },
-          {
-            match: {
-              id: "elixir",
-            },
-            id: "lines",
-          },
-          {
-            match: {
-              id: "javascript",
-            },
+            match: { id: "P3" },
             id: "lines",
           },
         ]}
@@ -243,7 +166,7 @@ const Pie = ({ isDashbord = false }) => {
                   translateX: 0,
                   translateY: 56,
                   itemsSpacing: 0,
-                  itemWidth: 100,
+                  itemWidth: 120,
                   itemHeight: 18,
                   itemTextColor: theme.palette.text.primary,
                   itemDirection: "left-to-right",
