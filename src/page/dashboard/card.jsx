@@ -2,35 +2,58 @@ import React from "react";
 import { Box, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { ResponsivePie } from "@nivo/pie";
 
-const Card = ({ icon, title, subTitle, increase, data, scheme }) => {
-
+const Card = ({ icon, title, subTitle, value, increase, data, scheme }) => {
   const theme = useTheme();
+
   return (
     <Paper
+      elevation={3}
       sx={{
         flexGrow: 1,
-        minWidth: "333px",
-        p: 1.5,
+        minWidth: "260px",
+        p: 2,
         display: "flex",
         justifyContent: "space-between",
+        alignItems: "center",
+        borderRadius: "16px",
       }}
     >
       <Stack gap={1}>
-        {icon}
-        <Typography variant="body2" sx={{ fontSize: "13px" }}>
-          {title}
-        </Typography>
-        <Typography variant="body2" sx={{ fontSize: "13px" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {icon}
+          <Typography variant="body2" sx={{ fontSize: "15px", fontWeight: 700 }}>
+            {title}
+          </Typography>
+        </Box>
+
+        <Typography
+          variant="body2"
+          sx={{ fontSize: "13px", color: theme.palette.text.secondary }}
+        >
           {subTitle}
+        </Typography>
+
+        <Typography
+          variant="h4"
+          sx={{ fontWeight: 800, color: theme.palette.text.primary }}
+        >
+          {value}
+        </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{ fontSize: "13px", color: theme.palette.success.main, fontWeight: 600 }}
+        >
+          {increase}
         </Typography>
       </Stack>
 
       <Stack alignItems={"center"}>
-        <Box height={"70px"} width={"87px"}>
+        <Box height={"80px"} width={"90px"}>
           <ResponsivePie
             data={data}
             margin={{ top: 10, right: 0, bottom: 10, left: 0 }}
-            innerRadius={0.7}
+            innerRadius={0.72}
             theme={{
               textColor: theme.palette.text.primary,
               fontSize: 11,
@@ -130,7 +153,7 @@ const Card = ({ icon, title, subTitle, increase, data, scheme }) => {
             enableArcLinkLabels={false}
             padAngle={0.7}
             cornerRadius={3}
-            activeOuterRadiusOffset={8}
+            activeOuterRadiusOffset={6}
             borderWidth={1}
             borderColor={{
               from: "color",
@@ -158,7 +181,6 @@ const Card = ({ icon, title, subTitle, increase, data, scheme }) => {
             ]}
           />
         </Box>
-        <Typography variant="body2">{increase}</Typography>
       </Stack>
     </Paper>
   );
