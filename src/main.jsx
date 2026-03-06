@@ -24,6 +24,10 @@ import NotFound from "./page/notFound/NotFound";
 import Incidents from "./page/incidents/Incidents";
 import Requests from "./page/requests/Requests";
 import Changes from "./page/chnages/Changes";
+import KpiForm from "./page/Kpis/Kpiform";
+import MyKpis from "./page/Kpis/MyKpis";
+import EditKpi from "./page/Kpis/EditKpi";
+import ImportExcel from "./page/importExcel/ImportExcel";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -33,6 +37,11 @@ const router = createBrowserRouter(
       <Route path="Incidents" element={<Incidents />} />
       <Route path="Requests" element={<Requests />} />
       <Route path="Changes" element={<Changes />} />
+      <Route path="Kpiform" element={<KpiForm />} />
+      <Route path="MyKpis" element={<MyKpis />} />
+      <Route path="EditKpi/:id" element={<EditKpi />} />
+      <Route path="ImportExcel" element={<ImportExcel />} />
+
 
 
 

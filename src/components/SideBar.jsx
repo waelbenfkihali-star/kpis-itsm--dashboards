@@ -110,9 +110,24 @@ const Array2 = [
   { text: "Profile Form", icon: <PersonOutlinedIcon />, path: "/form" },
   { text: "Calendar", icon: <CalendarTodayOutlinedIcon />, path: "/calendar" },
   {
+   text: "MyKpis",
+   icon: <BarChartOutlinedIcon />,
+   path: "/MyKpis",
+  },
+  {
+    text: "Kpiform",
+    icon: <BarChartOutlinedIcon />,
+    path: "/Kpiform",
+  },
+  {
     text: "FAQ Page",
     icon: <HelpOutlineOutlinedIcon />,
     path: "/faq",
+  },
+  {
+    text: "ImportExcel",
+    icon: <HelpOutlineOutlinedIcon />,
+    path: "/ImportExcel",
   },
 ];
 
@@ -122,6 +137,7 @@ const Array3 = [
   { text: "Line Chart", icon: <TimelineOutlinedIcon />, path: "/line" },
   { text: "Geography Chart", icon: <MapOutlinedIcon />, path: "/geography" },
 ];
+
 
 const SideBar = ({ open, handleDrawerClose }) => {
   let location = useLocation();
