@@ -342,3 +342,20 @@ def change_detail(request, number):
     if not row:
         return Response({"detail": "Not found"}, status=404)
     return Response(ChangeSerializer(row).data)
+@api_view(["POST"])
+def delete_incidents(request):
+    ids = request.data.get("ids", [])
+    Incident.objects.filter(id__in=ids).delete()
+    return Response({"deleted": len(ids)})
+@api_view(["POST"])
+def delete_requests(request):
+    ids = request.data.get("ids", [])
+    Request.objects.filter(id__in=ids).delete()
+    return Response({"deleted": len(ids)})
+
+
+@api_view(["POST"])
+def delete_changes(request):
+    ids = request.data.get("ids", [])
+    Change.objects.filter(id__in=ids).delete()
+    return Response({"deleted": len(ids)})
