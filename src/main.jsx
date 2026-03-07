@@ -23,11 +23,14 @@ import Geography from "./page/geography/Geography";
 import NotFound from "./page/notFound/NotFound";
 import Incidents from "./page/incidents/Incidents";
 import Requests from "./page/requests/Requests";
-import Changes from "./page/chnages/Changes";
+import Changes from "./page/changes/Changes";
 import KpiForm from "./page/Kpis/Kpiform";
 import MyKpis from "./page/Kpis/MyKpis";
 import EditKpi from "./page/Kpis/EditKpi";
 import ImportExcel from "./page/importExcel/ImportExcel";
+import IncidentDetails from "./page/incidents/IncidentDetails";
+import RequestDetails from "./page/requests/RequestDetails";
+import ChangeDetails from "./page/changes/ChangeDetails";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -41,6 +44,9 @@ const router = createBrowserRouter(
       <Route path="MyKpis" element={<MyKpis />} />
       <Route path="EditKpi/:id" element={<EditKpi />} />
       <Route path="ImportExcel" element={<ImportExcel />} />
+      <Route path="/incidents/:number" element={<IncidentDetails />} />
+      <Route path="/requests/:number" element={<RequestDetails />} />
+      <Route path="/changes/:number" element={<ChangeDetails />} />
 
 
 

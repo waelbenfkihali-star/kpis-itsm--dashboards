@@ -6,14 +6,14 @@ import Header from "../../components/Header";
 
 const API_BASE = "http://localhost:8001/api";
 
-export default function Requests() {
+export default function Changes() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE}/requests/`)
+    fetch(`${API_BASE}/changes/`)
       .then(async (res) => {
         const data = await res.json().catch(() => []);
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
@@ -25,7 +25,7 @@ export default function Requests() {
 
   const columns = useMemo(
     () => [
-      { field: "number", headerName: "Request ID", flex: 1, minWidth: 140 },
+      { field: "number", headerName: "Change ID", flex: 1, minWidth: 140 },
       {
         field: "state",
         headerName: "Status",
@@ -34,18 +34,18 @@ export default function Requests() {
         renderCell: (params) => {
           const value = String(params.value || "");
           let color = "default";
-          if (value === "Open") color = "warning";
-          else if (value === "In Progress") color = "info";
-          else if (value === "Closed") color = "success";
+          if (value === "Closed") color = "success";
+          else if (value === "Scheduled") color = "warning";
+          else if (value === "Implementation") color = "info";
           // @ts-ignore
           return <Chip label={value || "-"} color={color} size="small" />;
         },
       },
-      { field: "item", headerName: "Item", flex: 1.2, minWidth: 170 },
-      { field: "it_service", headerName: "IT Service", flex: 1.1, minWidth: 150 },
+      { field: "type", headerName: "Type", flex: 0.9, minWidth: 110 },
+      { field: "priority", headerName: "Priority", flex: 0.8, minWidth: 100 },
+      { field: "affected_service", headerName: "Affected Service", flex: 1.2, minWidth: 170 },
       { field: "responsible_group", headerName: "Responsible Group", flex: 1.2, minWidth: 180 },
-      { field: "requested_for", headerName: "Requested For", flex: 1.1, minWidth: 160 },
-      { field: "opened", headerName: "Opened", flex: 1, minWidth: 150 },
+      { field: "planned_start_date", headerName: "Planned Start", flex: 1, minWidth: 160 },
       { field: "closed", headerName: "Closed", flex: 1, minWidth: 150 },
     ],
     []
@@ -53,7 +53,7 @@ export default function Requests() {
 
   return (
     <Box>
-      <Header title="REQUESTS" subTitle="Key service requests to focus on" />
+      <Header title="CHANGES" subTitle="Key change records to focus on" />
       {err ? <Alert severity="error" sx={{ mb: 2 }}>{err}</Alert> : null}
 
       <Box sx={{ height: 650, mx: "auto" }}>
@@ -64,7 +64,7 @@ export default function Requests() {
           getRowId={(row) => row.id}
           disableRowSelectionOnClick
           slots={{ toolbar: GridToolbar }}
-          onRowClick={(params) => navigate(`/requests/${params.row.number}`)}
+          onRowClick={(params) => navigate(`/changes/${params.row.number}`)}
           initialState={{
             pagination: {
               paginationModel: { pageSize: 10, page: 0 },
