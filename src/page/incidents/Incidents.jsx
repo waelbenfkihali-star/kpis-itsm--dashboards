@@ -6,10 +6,13 @@ import {
   Alert,
   Stack,
   TextField,
-  Autocomplete
+  Autocomplete,
+  Button
 } from "@mui/material";
+
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
+
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
 
@@ -31,72 +34,84 @@ export default function Incidents() {
     groups: []
   });
 
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
   useEffect(() => {
+
     fetch(`${API_BASE}/incidents/`)
       .then(async (res) => {
+
         const data = await res.json().catch(() => []);
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
+
         setRows(Array.isArray(data) ? data : []);
+
       })
       .catch((e) => setErr(String(e.message || e)))
       .finally(() => setLoading(false));
+
   }, []);
 
   const stateOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.state).filter(Boolean))],
     [rows]
   );
 
   const priorityOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.priority).filter(Boolean))],
     [rows]
   );
 
   const serviceOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.affected_service).filter(Boolean))],
     [rows]
   );
 
   const groupOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.responsible_group).filter(Boolean))],
     [rows]
   );
 
   const filteredRows = useMemo(() => {
+
     return rows.filter((r) => {
 
-      if (
-        filters.states.length &&
-        !filters.states.includes(r.state)
-      )
+      if (filters.states.length && !filters.states.includes(r.state))
         return false;
 
-      if (
-        filters.priorities.length &&
-        !filters.priorities.includes(r.priority)
-      )
+      if (filters.priorities.length && !filters.priorities.includes(r.priority))
         return false;
 
-      if (
-        filters.services.length &&
-        !filters.services.includes(r.affected_service)
-      )
+      if (filters.services.length && !filters.services.includes(r.affected_service))
         return false;
 
-      if (
-        filters.groups.length &&
-        !filters.groups.includes(r.responsible_group)
-      )
+      if (filters.groups.length && !filters.groups.includes(r.responsible_group))
+        return false;
+
+      if (dateFrom && new Date(r.opened) < new Date(dateFrom))
+        return false;
+
+      if (dateTo && new Date(r.opened) > new Date(dateTo))
         return false;
 
       return true;
 
     });
-  }, [rows, filters]);
+
+  }, [rows, filters, dateFrom, dateTo]);
+
+  function handleAnalyse() {
+
+    const selectedData = filteredRows.filter((r) =>
+      selectedIds.includes(r.id)
+    );
+
+    navigate("/incidents-analysis", {
+      state: { data: selectedData }
+    });
+
+  }
 
   const columns = useMemo(() => [
 
@@ -117,7 +132,6 @@ export default function Incidents() {
         else if (value === "Resolved") color = "success";
         else if (value === "Closed") color = "info";
 
-        // @ts-ignore
         return <Chip label={value || "-"} color={color} size="small" />;
 
       },
@@ -170,19 +184,44 @@ export default function Incidents() {
   ], []);
 
   return (
+
     <Box>
 
       <Header title="INCIDENTS" subTitle="Key incident records to focus on" />
 
       {err ? <Alert severity="error" sx={{ mb: 2 }}>{err}</Alert> : null}
 
-      <DeleteToolbar
-        selectedIds={selectedIds}
-        setSelectedIds={setSelectedIds}
-        rows={rows}
-        setRows={setRows}
-        api={`${API_BASE}/incidents/delete/`}
-      />
+      {/* Delete + Analyse bar */}
+
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2
+        }}
+      >
+
+        <DeleteToolbar
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+          rows={rows}
+          setRows={setRows}
+          api={`${API_BASE}/incidents/delete/`}
+        />
+
+        <Button
+          variant="contained"
+          color="success"
+          disabled={!selectedIds.length}
+          onClick={handleAnalyse}
+        >
+          Analyse
+        </Button>
+
+      </Box>
+
+      {/* Filters */}
 
       <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: "wrap" }}>
 
@@ -190,7 +229,6 @@ export default function Incidents() {
           multiple
           options={stateOptions}
           value={filters.states}
-          // @ts-ignore
           onChange={(e, v) => setFilters({ ...filters, states: v })}
           renderInput={(params) => (
             <TextField {...params} label="State" size="small" />
@@ -202,7 +240,6 @@ export default function Incidents() {
           multiple
           options={priorityOptions}
           value={filters.priorities}
-          // @ts-ignore
           onChange={(e, v) => setFilters({ ...filters, priorities: v })}
           renderInput={(params) => (
             <TextField {...params} label="Priority" size="small" />
@@ -214,7 +251,6 @@ export default function Incidents() {
           multiple
           options={serviceOptions}
           value={filters.services}
-          // @ts-ignore
           onChange={(e, v) => setFilters({ ...filters, services: v })}
           renderInput={(params) => (
             <TextField {...params} label="Service" size="small" />
@@ -226,12 +262,31 @@ export default function Incidents() {
           multiple
           options={groupOptions}
           value={filters.groups}
-          // @ts-ignore
           onChange={(e, v) => setFilters({ ...filters, groups: v })}
           renderInput={(params) => (
             <TextField {...params} label="Group" size="small" />
           )}
           sx={{ width: 260 }}
+        />
+
+        <TextField
+          type="date"
+          label="From"
+          size="small"
+          InputLabelProps={{ shrink: true }}
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
+          sx={{ width: 160 }}
+        />
+
+        <TextField
+          type="date"
+          label="To"
+          size="small"
+          InputLabelProps={{ shrink: true }}
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          sx={{ width: 160 }}
         />
 
       </Stack>
@@ -256,5 +311,7 @@ export default function Incidents() {
       </Box>
 
     </Box>
+
   );
+
 }

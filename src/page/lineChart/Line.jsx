@@ -1,185 +1,204 @@
-import React from "react";
-import { Box, useTheme } from "@mui/material";
+// @ts-nocheck
+import React, { useEffect, useState, useMemo } from "react";
+import { Box, useTheme, Stack, TextField } from "@mui/material";
 import { ResponsiveLine } from "@nivo/line";
+import dayjs from "dayjs";
 
-// ✅ Dummy ITSM monthly trend (replace later with API)
-const data = [
-  {
-    id: "Incidents",
-    color: "hsl(205, 70%, 50%)",
-    data: [
-      { x: "2025-10", y: 120 },
-      { x: "2025-11", y: 140 },
-      { x: "2025-12", y: 110 },
-      { x: "2026-01", y: 160 },
-      { x: "2026-02", y: 150 },
-      { x: "2026-03", y: 170 },
-    ],
-  },
-  {
-    id: "Requests",
-    color: "hsl(64, 70%, 50%)",
-    data: [
-      { x: "2025-10", y: 80 },
-      { x: "2025-11", y: 95 },
-      { x: "2025-12", y: 75 },
-      { x: "2026-01", y: 105 },
-      { x: "2026-02", y: 98 },
-      { x: "2026-03", y: 115 },
-    ],
-  },
-  {
-    id: "Changes",
-    color: "hsl(172, 70%, 50%)",
-    data: [
-      { x: "2025-10", y: 35 },
-      { x: "2025-11", y: 42 },
-      { x: "2025-12", y: 30 },
-      { x: "2026-01", y: 55 },
-      { x: "2026-02", y: 49 },
-      { x: "2026-03", y: 60 },
-    ],
-  },
-];
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
-// ✅ helper: get % change vs previous point for same serie
-function changeVsPrev(serieId, x) {
-  const serie = data.find((s) => String(s.id) === String(serieId));
-  if (!serie) return { prev: null, pct: null };
+const API_BASE = "http://localhost:8001/api";
 
-  const idx = serie.data.findIndex((p) => String(p.x) === String(x));
-  if (idx <= 0) return { prev: null, pct: null };
+const Line = ({ isDashbord = false }) => {
 
-  const prev = Number(serie.data[idx - 1].y ?? 0);
-  const cur = Number(serie.data[idx].y ?? 0);
-
-  if (prev === 0) return { prev, pct: null }; // avoid division by zero
-  const pct = ((cur - prev) / prev) * 100;
-
-  return { prev, pct };
-}
-
-const Line = ({ isDahboard = false }) => {
   const theme = useTheme();
 
-  return (
-    <Box sx={{ height: isDahboard ? "280px" : "75vh" }}>
-      <ResponsiveLine
-        data={data}
-        // ✅ Tooltip: show change vs previous month (same serie)
-        tooltip={({ point }) => {
-          const serieId = point.serieId;
-          const x = point.data.xFormatted ?? point.data.x;
-          const y = Number(point.data.yFormatted ?? point.data.y ?? 0);
+  const [rawData,setRawData] = useState([])
+  const [startDate,setStartDate] = useState(null)
+  const [endDate,setEndDate] = useState(null)
 
-          const { prev, pct } = changeVsPrev(serieId, x);
+  useEffect(()=>{
 
-          let changeText = "No previous month";
-          if (pct !== null) {
-            const sign = pct >= 0 ? "+" : "";
-            changeText = `${sign}${pct.toFixed(1)}% vs previous month`;
-          } else if (prev !== null) {
-            // prev exists but pct is null (prev=0)
-            changeText = `vs previous month: ${prev} (base=0)`;
-          }
+    fetch(`${API_BASE}/monthly-stats/`)
+      .then(res=>res.json())
+      .then(json=>setRawData(json))
+      .catch(()=>setRawData([]))
 
-          return (
-            <div
-              style={{
-                background: theme.palette.background.default,
-                color: theme.palette.text.primary,
-                padding: "8px 10px",
-                borderRadius: 8,
-                border: `1px solid ${theme.palette.divider}`,
-                fontSize: 12,
-                minWidth: 190,
-              }}
-            >
-              <div style={{ fontWeight: 700 }}>{serieId}</div>
-              <div style={{ opacity: 0.85 }}>{x}</div>
+  },[])
 
-              <div style={{ marginTop: 6, fontWeight: 600 }}>{y}</div>
+  const filtered = useMemo(()=>{
 
-              <div style={{ marginTop: 4, opacity: 0.9 }}>
-                {changeText}
+    if(!startDate && !endDate) return rawData
+
+    return rawData.filter(r=>{
+
+      const m = dayjs(r.month+"-01")
+
+      if(startDate && m.isBefore(startDate,"month")) return false
+      if(endDate && m.isAfter(endDate,"month")) return false
+
+      return true
+
+    })
+
+  },[rawData,startDate,endDate])
+
+
+  const chartData = useMemo(()=>{
+
+    const incidents = []
+    const requests = []
+    const changes = []
+
+    filtered.forEach(r=>{
+
+      incidents.push({x:r.month,y:r.Incidents})
+      requests.push({x:r.month,y:r.Requests})
+      changes.push({x:r.month,y:r.Changes})
+
+    })
+
+    return [
+
+      { id:"Incidents", data:incidents },
+
+      { id:"Requests", data:requests },
+
+      { id:"Changes", data:changes }
+
+    ]
+
+  },[filtered])
+
+
+  return(
+
+    <Box>
+
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+        <Stack direction="row" spacing={2} sx={{mb:2}}>
+
+          <DatePicker
+            label="From"
+            views={["year","month"]}
+            value={startDate}
+            onChange={(v)=>setStartDate(v)}
+            renderInput={(params)=><TextField {...params} size="small"/>}
+          />
+
+          <DatePicker
+            label="To"
+            views={["year","month"]}
+            value={endDate}
+            onChange={(v)=>setEndDate(v)}
+            renderInput={(params)=><TextField {...params} size="small"/>}
+          />
+
+        </Stack>
+
+      </LocalizationProvider>
+
+
+      <Box sx={{height:isDashbord ? "300px":"75vh"}}>
+
+        <ResponsiveLine
+
+          data={chartData}
+
+          margin={{top:50,right:120,bottom:70,left:60}}
+
+          xScale={{type:"point"}}
+
+          yScale={{
+            type:"linear",
+            min:"auto",
+            max:"auto",
+            stacked:false
+          }}
+
+          curve="catmullRom"
+
+          axisBottom={{
+            tickRotation:-35,
+            legend:"Month",
+            legendOffset:55
+          }}
+
+          axisLeft={{
+            legend:"Tickets",
+            legendOffset:-45
+          }}
+
+          enableArea={true}
+
+          areaOpacity={0.08}
+
+          pointSize={8}
+
+          pointBorderWidth={2}
+
+          pointBorderColor={{from:"serieColor"}}
+
+          useMesh={true}
+
+          colors={{scheme:"set2"}}
+
+          theme={{
+            textColor:theme.palette.text.primary
+          }}
+
+          tooltip={({point})=>{
+
+            const serie = point.serieId
+            const month = point.data.x
+            const value = point.data.y
+
+            return(
+
+              <div style={{
+                background:theme.palette.background.default,
+                padding:"8px 10px",
+                borderRadius:6,
+                border:`1px solid ${theme.palette.divider}`,
+                fontSize:12
+              }}>
+
+                <b>{serie}</b><br/>
+
+                {month}<br/>
+
+                <b>{value}</b>
+
               </div>
-            </div>
-          );
-        }}
-        theme={{
-          textColor: theme.palette.text.primary,
-          fontSize: 11,
-          axis: {
-            domain: { line: { stroke: theme.palette.divider, strokeWidth: 1 } },
-            legend: { text: { fontSize: 12, fill: theme.palette.text.primary } },
-            ticks: {
-              line: { stroke: theme.palette.divider, strokeWidth: 1 },
-              text: { fontSize: 11, fill: theme.palette.text.secondary },
-            },
-          },
-          grid: { line: { stroke: theme.palette.divider, strokeWidth: 0 } },
-          legends: { text: { fontSize: 11, fill: theme.palette.text.primary } },
-          tooltip: {
-            container: {
-              background: theme.palette.background.default,
-              color: theme.palette.text.primary,
-              fontSize: 12,
-            },
-          },
-        }}
-        curve="catmullRom"
-        margin={{ top: 50, right: 110, bottom: 60, left: 60 }}
-        xScale={{ type: "point" }}
-        yScale={{
-          type: "linear",
-          min: "auto",
-          max: "auto",
-          stacked: false,
-          reverse: false,
-        }}
-        axisTop={null}
-        axisRight={null}
-        axisBottom={{
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: isDahboard ? 0 : -30,
-          legend: isDahboard ? null : "Month",
-          legendOffset: 45,
-          legendPosition: "middle",
-        }}
-        axisLeft={{
-          tickSize: 5,
-          tickPadding: 5,
-          tickRotation: 0,
-          legend: isDahboard ? null : "Count",
-          legendOffset: -45,
-          legendPosition: "middle",
-        }}
-        pointSize={8}
-        pointColor={{ theme: "background" }}
-        pointBorderWidth={2}
-        pointBorderColor={{ from: "serieColor" }}
-        useMesh={true}
-        legends={[
-          {
-            anchor: "bottom-right",
-            direction: "column",
-            justify: false,
-            translateX: 100,
-            translateY: 0,
-            itemsSpacing: 4,
-            itemDirection: "left-to-right",
-            itemWidth: 90,
-            itemHeight: 18,
-            itemOpacity: 0.85,
-            symbolSize: 12,
-            symbolShape: "circle",
-            effects: [{ on: "hover", style: { itemOpacity: 1 } }],
-          },
-        ]}
-      />
-    </Box>
-  );
-};
 
-export default Line;
+            )
+
+          }}
+
+          legends={[
+
+            {
+              anchor:"bottom-right",
+              direction:"column",
+              translateX:100,
+              itemWidth:90,
+              itemHeight:20,
+              symbolSize:12,
+              itemOpacity:0.9
+            }
+
+          ]}
+
+        />
+
+      </Box>
+
+    </Box>
+
+  )
+
+}
+
+export default Line

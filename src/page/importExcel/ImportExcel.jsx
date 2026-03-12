@@ -8,9 +8,16 @@ import {
   Typography,
   Alert,
   Divider,
+  LinearProgress,
 } from "@mui/material";
+
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
+
+import * as XLSX from "xlsx";
 
 const API_URL = "http://localhost:8001/api/import/";
 
@@ -33,7 +40,7 @@ function fileInfo(file) {
   if (!file) return null;
   return {
     name: file.name,
-    size_bytes: file.size,
+    size_kb: Math.round(file.size / 1024),
     type: file.type || "",
     last_modified: file.lastModified
       ? new Date(file.lastModified).toISOString()
@@ -42,12 +49,16 @@ function fileInfo(file) {
 }
 
 export default function ImportExcel() {
+
   const navigate = useNavigate();
 
   const [mode, setMode] = useState("all");
+
   const [inc, setInc] = useState(null);
   const [req, setReq] = useState(null);
   const [chg, setChg] = useState(null);
+
+  const [preview, setPreview] = useState([]);
 
   const [sheet, setSheet] = useState("Sheet1");
   const [res, setRes] = useState(null);
@@ -61,48 +72,86 @@ export default function ImportExcel() {
     loading || (needInc && !inc) || (needReq && !req) || (needChg && !chg);
 
   const badExt = useMemo(() => {
+
     const issues = [];
-    if (needInc && inc && !fileExtOk(inc)) {
+
+    if (needInc && inc && !fileExtOk(inc))
       issues.push("Incidents file must be .xlsx");
-    }
-    if (needReq && req && !fileExtOk(req)) {
+
+    if (needReq && req && !fileExtOk(req))
       issues.push("Requests file must be .xlsx");
-    }
-    if (needChg && chg && !fileExtOk(chg)) {
+
+    if (needChg && chg && !fileExtOk(chg))
       issues.push("Changes file must be .xlsx");
-    }
+
     return issues;
+
   }, [needInc, needReq, needChg, inc, req, chg]);
 
+  function previewExcel(file) {
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+
+      // @ts-ignore
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+
+      const json = XLSX.utils.sheet_to_json(worksheet);
+
+      setPreview(json.slice(0, 5));
+
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+
   async function submit() {
+
     setLoading(true);
     setRes(null);
 
     try {
+
       if (badExt.length) {
+
         setRes({
           ok: false,
           error: "Invalid file extension",
           details: badExt,
         });
+
         return;
+
       }
 
       const checks = [];
+
       if (needInc && inc) checks.push({ kind: "incidents", file: inc });
       if (needReq && req) checks.push({ kind: "requests", file: req });
       if (needChg && chg) checks.push({ kind: "changes", file: chg });
 
       const pkResults = {};
+
       for (const c of checks) {
+
         const magic = await readMagicPK(c.file);
+
         pkResults[c.kind] = {
           magic2: magic,
           looks_like_xlsx_zip: magic === "PK",
         };
+
       }
 
       const formData = new FormData();
+
       formData.append("mode", mode);
       formData.append("sheet", sheet || "Sheet1");
 
@@ -133,169 +182,131 @@ export default function ImportExcel() {
           },
           quick_checks: pkResults,
           backend_response: json,
-          note: "Files uploaded successfully to backend.",
           imported_at: new Date().toISOString(),
         },
       });
+
     } catch (e) {
+
       setRes({
         ok: false,
         error: String(e?.message || e),
       });
+
     } finally {
+
       setLoading(false);
+
     }
   }
 
   function handleGoToModule() {
+
     if (mode === "incidents") navigate("/incidents");
     else if (mode === "requests") navigate("/requests");
     else if (mode === "changes") navigate("/changes");
     else navigate("/incidents");
+
+  }
+
+  function dropFile(e, setFile) {
+
+    e.preventDefault();
+
+    const f = e.dataTransfer.files[0];
+
+    setFile(f);
+    previewExcel(f);
+
   }
 
   return (
+
     <Box sx={{ p: 2 }}>
+
       <Header
         title="IMPORT EXCEL"
-        subTitle="Upload Excel files to backend and populate incidents, requests and changes"
+        subTitle="Upload Excel files and preview data before importing"
       />
 
-      <Paper sx={{ mt: 2, p: 2 }}>
-        <Typography variant="subtitle2" sx={{ mb: 1 }}>
+      <Paper sx={{ mt: 2, p: 3 }}>
+
+        <Typography variant="subtitle1" mb={2}>
           Mode
         </Typography>
 
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={1}
-          sx={{ mb: 2 }}
-        >
-          {[
-            { v: "all", t: "All" },
-            { v: "incidents", t: "Incidents" },
-            { v: "requests", t: "Requests" },
-            { v: "changes", t: "Changes" },
-          ].map((x) => (
+        <Stack direction="row" spacing={1} mb={3}>
+
+          {["all", "incidents", "requests", "changes"].map((v) => (
             <Button
-              key={x.v}
-              variant={mode === x.v ? "contained" : "outlined"}
-              onClick={() => setMode(x.v)}
-              sx={{ textTransform: "capitalize" }}
+              key={v}
+              variant={mode === v ? "contained" : "outlined"}
+              onClick={() => setMode(v)}
             >
-              {x.t}
+              {v}
             </Button>
           ))}
-        </Stack>
 
-        <Divider sx={{ my: 2 }} />
+        </Stack>
 
         <TextField
           label="Sheet name"
           value={sheet}
           onChange={(e) => setSheet(e.target.value)}
           fullWidth
-          placeholder="Sheet1"
-          helperText='Example: Sheet1 or Data, depending on your file.'
         />
 
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 3 }} />
 
         <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+
           {needInc && (
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Incidents (.xlsx)
-              </Typography>
-
-              <Button
-                variant="outlined"
-                component="label"
-                fullWidth
-                sx={{ textTransform: "capitalize" }}
-              >
-                Choose file
-                <input
-                  type="file"
-                  hidden
-                  accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  onChange={(e) => setInc(e.target.files?.[0] || null)}
-                />
-              </Button>
-
-              <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-                {inc ? `Selected: ${inc.name}` : "No file selected"}
-              </Typography>
-            </Box>
+            <FileCard
+              title="Incidents"
+              file={inc}
+              setFile={setInc}
+              drop={dropFile}
+              preview={previewExcel}
+            />
           )}
 
           {needReq && (
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Requests (.xlsx)
-              </Typography>
-
-              <Button
-                variant="outlined"
-                component="label"
-                fullWidth
-                sx={{ textTransform: "capitalize" }}
-              >
-                Choose file
-                <input
-                  type="file"
-                  hidden
-                  accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  onChange={(e) => setReq(e.target.files?.[0] || null)}
-                />
-              </Button>
-
-              <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-                {req ? `Selected: ${req.name}` : "No file selected"}
-              </Typography>
-            </Box>
+            <FileCard
+              title="Requests"
+              file={req}
+              setFile={setReq}
+              drop={dropFile}
+              preview={previewExcel}
+            />
           )}
 
           {needChg && (
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Changes (.xlsx)
-              </Typography>
-
-              <Button
-                variant="outlined"
-                component="label"
-                fullWidth
-                sx={{ textTransform: "capitalize" }}
-              >
-                Choose file
-                <input
-                  type="file"
-                  hidden
-                  accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  onChange={(e) => setChg(e.target.files?.[0] || null)}
-                />
-              </Button>
-
-              <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-                {chg ? `Selected: ${chg.name}` : "No file selected"}
-              </Typography>
-            </Box>
+            <FileCard
+              title="Changes"
+              file={chg}
+              setFile={setChg}
+              drop={dropFile}
+              preview={previewExcel}
+            />
           )}
+
         </Stack>
 
-        {badExt.length ? (
+        {badExt.length > 0 && (
           <Alert severity="warning" sx={{ mt: 2 }}>
             {badExt.join(" • ")}
           </Alert>
-        ) : null}
+        )}
 
-        <Stack direction="row" spacing={2} sx={{ mt: 2, flexWrap: "wrap" }}>
+        {loading && <LinearProgress sx={{ mt: 2 }} />}
+
+        <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+
           <Button
+            startIcon={<CloudUploadIcon />}
             variant="contained"
             onClick={submit}
-            disabled={disabled}
-            sx={{ textTransform: "capitalize" }}
+            disabled={disabled || badExt.length > 0}
           >
             {loading ? "Importing..." : "Import now"}
           </Button>
@@ -307,45 +318,111 @@ export default function ImportExcel() {
               setReq(null);
               setChg(null);
               setRes(null);
-              setSheet("Sheet1");
+              setPreview([]);
               setMode("all");
             }}
-            sx={{ textTransform: "capitalize" }}
           >
             Reset
           </Button>
 
-          {res?.ok ? (
+          {res?.ok && (
             <Button
               variant="contained"
               color="success"
               onClick={handleGoToModule}
-              sx={{ textTransform: "capitalize" }}
             >
               Open table
             </Button>
-          ) : null}
+          )}
+
         </Stack>
 
-        {res ? (
-          <Paper
-            variant="outlined"
-            sx={{
-              mt: 2,
-              p: 2,
-              bgcolor: "background.default",
-              overflow: "auto",
-            }}
-          >
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        {preview.length > 0 && (
+
+          <Paper sx={{ mt: 3, p: 2 }}>
+
+            <Typography variant="subtitle2">
+              Excel Preview
+            </Typography>
+
+            <pre style={{ fontSize: 12 }}>
+              {JSON.stringify(preview, null, 2)}
+            </pre>
+
+          </Paper>
+
+        )}
+
+        {res && (
+
+          <Paper sx={{ mt: 3, p: 2 }}>
+
+            <Typography variant="subtitle2">
               Result
             </Typography>
-            <pre style={{ margin: 0, fontSize: 12 }}>
+
+            <pre style={{ fontSize: 12 }}>
               {JSON.stringify(res, null, 2)}
             </pre>
+
           </Paper>
-        ) : null}
+
+        )}
+
       </Paper>
+
     </Box>
+
+  );
+}
+
+function FileCard({ title, file, setFile, drop, preview }) {
+
+  return (
+
+    <Paper
+      sx={{
+        p: 3,
+        flex: 1,
+        textAlign: "center",
+        border: "2px dashed #ccc",
+      }}
+      onDrop={(e) => drop(e, setFile)}
+      onDragOver={(e) => e.preventDefault()}
+    >
+
+      <UploadFileIcon sx={{ fontSize: 40 }} />
+
+      <Typography mt={1}>{title} file</Typography>
+
+      <Button
+        component="label"
+        variant="outlined"
+        sx={{ mt: 2 }}
+      >
+
+        Choose file
+
+        <input
+          hidden
+          type="file"
+          accept=".xlsx"
+          onChange={(e) => {
+            const f = e.target.files[0];
+            setFile(f);
+            preview(f);
+          }}
+        />
+
+      </Button>
+
+      <Typography variant="caption" display="block" mt={1}>
+
+        {file ? `${file.name} (${Math.round(file.size / 1024)} KB)` : "No file"}
+
+      </Typography>
+
+    </Paper>
+
   );
 }

@@ -4,7 +4,10 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
-
+from collections import defaultdict
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import Incident, Request, Change
 from .models import Incident, Request, Change
 from .serializers import IncidentSerializer, RequestSerializer, ChangeSerializer
 
@@ -359,3 +362,43 @@ def delete_changes(request):
     ids = request.data.get("ids", [])
     Change.objects.filter(id__in=ids).delete()
     return Response({"deleted": len(ids)})
+@api_view(["GET"])
+def monthly_stats(request):
+
+    data = defaultdict(lambda: {
+        "month": "",
+        "Incidents": 0,
+        "Requests": 0,
+        "Changes": 0
+    })
+
+    def get_month(date_str):
+        if not date_str:
+            return None
+        text = str(date_str)
+        return text[:7]  # YYYY-MM
+
+    for r in Incident.objects.all():
+        m = get_month(r.opened)
+        if not m:
+            continue
+        data[m]["month"] = m
+        data[m]["Incidents"] += 1
+
+    for r in Request.objects.all():
+        m = get_month(r.opened)
+        if not m:
+            continue
+        data[m]["month"] = m
+        data[m]["Requests"] += 1
+
+    for r in Change.objects.all():
+        m = get_month(r.opened)
+        if not m:
+            continue
+        data[m]["month"] = m
+        data[m]["Changes"] += 1
+
+    result = sorted(data.values(), key=lambda x: x["month"])
+
+    return Response(result)

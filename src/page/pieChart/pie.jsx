@@ -1,192 +1,171 @@
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { ResponsivePie } from "@nivo/pie";
-import { Box, useTheme } from "@mui/material";
+import { Box, useTheme, Stack, TextField } from "@mui/material";
+import dayjs from "dayjs";
 
-// ✅ Dummy data (replace later with API)
-const data = [
-  { id: "P1", label: "P1 - Critical", value: 18 },
-  { id: "P2", label: "P2 - High", value: 42 },
-  { id: "P3", label: "P3 - Medium", value: 65 },
-  { id: "P4", label: "P4 - Low", value: 30 },
-];
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+
+const API_BASE = "http://localhost:8001/api";
 
 const Pie = ({ isDashbord = false }) => {
+
   const theme = useTheme();
 
-  // ✅ total for percentage tooltip
-  const total = data.reduce((sum, d) => sum + d.value, 0);
+  const [incidents,setIncidents] = useState([])
+  const [startDate,setStartDate] = useState(null)
+  const [endDate,setEndDate] = useState(null)
 
-  return (
-    <Box sx={{ height: isDashbord ? "200px" : "75vh" }}>
-      <ResponsivePie
-        data={data}
-        // ✅ tooltip: show percentage only (value already visible in chart)
-        tooltip={({ datum }) => {
-          const pct = total ? ((datum.value / total) * 100).toFixed(1) : "0.0";
-          return (
-            <div
-              style={{
-                background: theme.palette.background.default,
-                color: theme.palette.text.primary,
-                padding: "8px 10px",
-                borderRadius: 8,
-                border: `1px solid ${theme.palette.divider}`,
-                fontSize: 12,
-              }}
-            >
-              <div style={{ fontWeight: 600 }}>{datum.label}</div>
-              <div>{pct}%</div>
-            </div>
-          );
-        }}
-        theme={{
-          textColor: theme.palette.text.primary,
-          fontSize: 11,
-          axis: {
-            domain: {
-              line: {
-                stroke: theme.palette.divider,
-                strokeWidth: 1,
-              },
-            },
-            legend: {
-              text: {
-                fontSize: 12,
-                fill: theme.palette.text.primary,
-              },
-            },
-            ticks: {
-              line: {
-                stroke: theme.palette.divider,
-                strokeWidth: 1,
-              },
-              text: {
-                fontSize: 11,
-                fill: theme.palette.text.secondary,
-              },
-            },
-          },
-          grid: {
-            line: {
-              stroke: theme.palette.divider,
-              strokeWidth: 1,
-            },
-          },
-          legends: {
-            title: {
-              text: {
-                fontSize: 11,
-                fill: theme.palette.text.primary,
-              },
-            },
-            text: {
-              fontSize: 11,
-              fill: theme.palette.text.primary,
-            },
-            ticks: {
-              line: {},
-              text: {
-                fontSize: 10,
-                fill: theme.palette.text.primary,
-              },
-            },
-          },
-          tooltip: {
-            container: {
-              background: theme.palette.background.default,
-              color: theme.palette.text.primary,
-              fontSize: 12,
-            },
-          },
-        }}
-        margin={
-          isDashbord
-            ? { top: 10, right: 0, bottom: 10, left: 0 }
-            : { top: 40, right: 80, bottom: 80, left: 80 }
-        }
-        innerRadius={isDashbord ? 0.8 : 0.5}
-        padAngle={0.7}
-        cornerRadius={3}
-        activeOuterRadiusOffset={8}
-        colors={{ scheme: "nivo" }}
-        borderWidth={1}
-        borderColor={{
-          from: "color",
-          modifiers: [["darker", 0.2]],
-        }}
-        arcLinkLabelsSkipAngle={10}
-        arcLinkLabelsTextColor={theme.palette.text.primary}
-        arcLinkLabelsThickness={2}
-        arcLinkLabelsColor={{ from: "color" }}
-        arcLabelsSkipAngle={10}
-        enableArcLabels={isDashbord ? false : true}
-        enableArcLinkLabels={isDashbord ? false : true}
-        arcLabelsTextColor={{
-          from: "color",
-          modifiers: [["darker", 2]],
-        }}
-        defs={[
-          {
-            id: "dots",
-            type: "patternDots",
-            background: "inherit",
-            color: theme.palette.text.primary,
-            size: 4,
-            padding: 1,
-            stagger: true,
-          },
-          {
-            id: "lines",
-            type: "patternLines",
-            background: "inherit",
-            color: theme.palette.text.primary,
-            rotation: -45,
-            lineWidth: 6,
-            spacing: 10,
-          },
-        ]}
-        fill={[
-          {
-            match: { id: "P1" },
-            id: "dots",
-          },
-          {
-            match: { id: "P3" },
-            id: "lines",
-          },
-        ]}
-        legends={
-          isDashbord
-            ? []
-            : [
-                {
-                  anchor: "bottom",
-                  direction: "row",
-                  justify: false,
-                  translateX: 0,
-                  translateY: 56,
-                  itemsSpacing: 0,
-                  itemWidth: 120,
-                  itemHeight: 18,
-                  itemTextColor: theme.palette.text.primary,
-                  itemDirection: "left-to-right",
-                  itemOpacity: 1,
-                  symbolSize: 18,
-                  symbolShape: "circle",
-                  effects: [
-                    {
-                      on: "hover",
-                      style: {
-                        itemTextColor: theme.palette.text.primary,
-                      },
-                    },
-                  ],
-                },
-              ]
-        }
-      />
+  useEffect(()=>{
+
+    fetch(`${API_BASE}/incidents/`)
+      .then(res=>res.json())
+      .then(json=>setIncidents(json))
+      .catch(()=>setIncidents([]))
+
+  },[])
+
+  const filtered = useMemo(()=>{
+
+    if(!startDate && !endDate) return incidents
+
+    return incidents.filter(i=>{
+
+      const m = dayjs(i.opened)
+
+      if(startDate && m.isBefore(startDate)) return false
+      if(endDate && m.isAfter(endDate)) return false
+
+      return true
+
+    })
+
+  },[incidents,startDate,endDate])
+
+  const pieData = useMemo(()=>{
+
+    const counter = {}
+
+    filtered.forEach(i=>{
+
+      const p = i.priority || "Unknown"
+
+      counter[p] = (counter[p] || 0) + 1
+
+    })
+
+    return Object.keys(counter).map(k=>({
+
+      id:k,
+      label:k,
+      value:counter[k]
+
+    }))
+
+  },[filtered])
+
+  const total = pieData.reduce((a,b)=>a+b.value,0)
+
+  return(
+
+    <Box>
+
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+        <Stack direction="row" spacing={2} sx={{mb:2}}>
+
+          <DatePicker
+            label="From"
+            views={["year","month"]}
+            value={startDate}
+            onChange={(v)=>setStartDate(v)}
+            renderInput={(params)=><TextField {...params} size="small"/>}
+          />
+
+          <DatePicker
+            label="To"
+            views={["year","month"]}
+            value={endDate}
+            onChange={(v)=>setEndDate(v)}
+            renderInput={(params)=><TextField {...params} size="small"/>}
+          />
+
+        </Stack>
+
+      </LocalizationProvider>
+
+
+      <Box sx={{height:isDashbord ? "260px":"75vh"}}>
+
+        <ResponsivePie
+
+          data={pieData}
+
+          margin={{top:40,right:80,bottom:80,left:80}}
+
+          innerRadius={0.55}
+
+          padAngle={0.7}
+
+          cornerRadius={3}
+
+          activeOuterRadiusOffset={8}
+
+          colors={{scheme:"set2"}}
+
+          theme={{
+            textColor:theme.palette.text.primary
+          }}
+
+          tooltip={({datum})=>{
+
+            const pct = total ? ((datum.value/total)*100).toFixed(1) : 0
+
+            return(
+
+              <div style={{
+                background:theme.palette.background.default,
+                padding:"8px 10px",
+                borderRadius:6,
+                border:`1px solid ${theme.palette.divider}`,
+                fontSize:12
+              }}>
+
+                <b>{datum.label}</b><br/>
+
+                {datum.value} incidents<br/>
+
+                {pct} %
+
+              </div>
+
+            )
+
+          }}
+
+          legends={[
+
+            {
+              anchor:"bottom",
+              direction:"row",
+              translateY:60,
+              itemWidth:120,
+              itemHeight:18,
+              symbolSize:14,
+              itemOpacity:0.9
+            }
+
+          ]}
+
+        />
+
+      </Box>
+
     </Box>
-  );
-};
 
-export default Pie;
+  )
+
+}
+
+export default Pie

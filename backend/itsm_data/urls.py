@@ -10,6 +10,7 @@ from .views import (
     delete_incidents,
     delete_changes,
     delete_requests,
+    monthly_stats,
 )
 
 urlpatterns = [
@@ -23,5 +24,6 @@ urlpatterns = [
     path("changes/", changes_list),
     path("changes/delete/", delete_changes),
     path("changes/<str:number>/", change_detail),
+    path("monthly-stats/", monthly_stats),
     
 ]

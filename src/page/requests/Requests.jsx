@@ -6,7 +6,8 @@ import {
   Alert,
   Stack,
   TextField,
-  Autocomplete
+  Autocomplete,
+  Button
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
@@ -26,8 +27,14 @@ export default function Requests() {
 
   const [filters, setFilters] = useState({
     states: [],
+    items: [],
     services: [],
-    groups: []
+    groups: [],
+    users: [],
+    openedFrom: "",
+    openedTo: "",
+    closedFrom: "",
+    closedTo: ""
   });
 
   useEffect(() => {
@@ -42,20 +49,27 @@ export default function Requests() {
   }, []);
 
   const stateOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.state).filter(Boolean))],
     [rows]
   );
 
+  const itemOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.item).filter(Boolean))],
+    [rows]
+  );
+
   const serviceOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.it_service).filter(Boolean))],
     [rows]
   );
 
   const groupOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.responsible_group).filter(Boolean))],
+    [rows]
+  );
+
+  const userOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.requested_for).filter(Boolean))],
     [rows]
   );
 
@@ -66,10 +80,28 @@ export default function Requests() {
       if (filters.states.length && !filters.states.includes(r.state))
         return false;
 
+      if (filters.items.length && !filters.items.includes(r.item))
+        return false;
+
       if (filters.services.length && !filters.services.includes(r.it_service))
         return false;
 
       if (filters.groups.length && !filters.groups.includes(r.responsible_group))
+        return false;
+
+      if (filters.users.length && !filters.users.includes(r.requested_for))
+        return false;
+
+      if (filters.openedFrom && new Date(r.opened) < new Date(filters.openedFrom))
+        return false;
+
+      if (filters.openedTo && new Date(r.opened) > new Date(filters.openedTo))
+        return false;
+
+      if (filters.closedFrom && new Date(r.closed) < new Date(filters.closedFrom))
+        return false;
+
+      if (filters.closedTo && new Date(r.closed) > new Date(filters.closedTo))
         return false;
 
       return true;
@@ -95,7 +127,6 @@ export default function Requests() {
         else if (value === "In Progress") color = "info";
         else if (value === "Closed") color = "success";
 
-        // @ts-ignore
         return <Chip label={value} color={color} size="small" />;
 
       }
@@ -120,63 +151,109 @@ export default function Requests() {
 
       <Header title="REQUESTS" subTitle="Key service requests to focus on" />
 
-      {err && <Alert severity="error">{err}</Alert>}
+      {err && <Alert severity="error" sx={{ mb:2 }}>{err}</Alert>}
 
-      <DeleteToolbar
-        selectedIds={selectedIds}
-        setSelectedIds={setSelectedIds}
-        rows={rows}
-        setRows={setRows}
-        api={`${API_BASE}/requests/delete/`}
-      />
+      <Stack direction="row" justifyContent="space-between" sx={{ mb:2 }}>
 
-      <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: "wrap" }}>
+        <DeleteToolbar
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+          rows={rows}
+          setRows={setRows}
+          api={`${API_BASE}/requests/delete/`}
+        />
+
+        <Button
+          variant="contained"
+          color="success"
+          disabled={!selectedIds.length}
+          onClick={()=>console.log("Analyse rows:",selectedIds)}
+        >
+          Analyse
+        </Button>
+
+      </Stack>
+
+      <Stack direction="row" spacing={2} sx={{ mb:2, flexWrap:"wrap" }}>
 
         <Autocomplete
           multiple
           options={stateOptions}
           value={filters.states}
-          // @ts-ignore
-          onChange={(e, v) => setFilters({ ...filters, states: v })}
-          renderInput={(p) => <TextField {...p} label="State" size="small" />}
-          sx={{ width: 220 }}
+          onChange={(e,v)=>setFilters({...filters,states:v})}
+          renderInput={(p)=><TextField {...p} label="Status" size="small"/>}
+          sx={{width:200}}
+        />
+
+        <Autocomplete
+          multiple
+          options={itemOptions}
+          value={filters.items}
+          onChange={(e,v)=>setFilters({...filters,items:v})}
+          renderInput={(p)=><TextField {...p} label="Item" size="small"/>}
+          sx={{width:200}}
         />
 
         <Autocomplete
           multiple
           options={serviceOptions}
           value={filters.services}
-          // @ts-ignore
-          onChange={(e, v) => setFilters({ ...filters, services: v })}
-          renderInput={(p) => <TextField {...p} label="Service" size="small" />}
-          sx={{ width: 220 }}
+          onChange={(e,v)=>setFilters({...filters,services:v})}
+          renderInput={(p)=><TextField {...p} label="IT Service" size="small"/>}
+          sx={{width:220}}
         />
 
         <Autocomplete
           multiple
           options={groupOptions}
           value={filters.groups}
-          // @ts-ignore
-          onChange={(e, v) => setFilters({ ...filters, groups: v })}
-          renderInput={(p) => <TextField {...p} label="Group" size="small" />}
-          sx={{ width: 220 }}
+          onChange={(e,v)=>setFilters({...filters,groups:v})}
+          renderInput={(p)=><TextField {...p} label="Group" size="small"/>}
+          sx={{width:220}}
+        />
+
+        <Autocomplete
+          multiple
+          options={userOptions}
+          value={filters.users}
+          onChange={(e,v)=>setFilters({...filters,users:v})}
+          renderInput={(p)=><TextField {...p} label="Requested For" size="small"/>}
+          sx={{width:220}}
+        />
+
+        <TextField
+          type="date"
+          label="Opened From"
+          size="small"
+          InputLabelProps={{shrink:true}}
+          value={filters.openedFrom}
+          onChange={(e)=>setFilters({...filters,openedFrom:e.target.value})}
+        />
+
+        <TextField
+          type="date"
+          label="Opened To"
+          size="small"
+          InputLabelProps={{shrink:true}}
+          value={filters.openedTo}
+          onChange={(e)=>setFilters({...filters,openedTo:e.target.value})}
         />
 
       </Stack>
 
-      <Box sx={{ height: 650 }}>
+      <Box sx={{height:650}}>
 
         <DataGrid
           rows={filteredRows}
           columns={columns}
           loading={loading}
           checkboxSelection
-          getRowId={(row) => row.id}
+          getRowId={(row)=>row.id}
           disableRowSelectionOnClick
-          slots={{ toolbar: GridToolbar }}
-          onRowSelectionModelChange={(ids) => setSelectedIds(ids)}
-          onRowClick={(p) => navigate(`/requests/${p.row.number}`)}
-          pageSizeOptions={[10, 25, 50]}
+          slots={{toolbar:GridToolbar}}
+          onRowSelectionModelChange={(ids)=>setSelectedIds(ids)}
+          onRowClick={(p)=>navigate(`/requests/${p.row.number}`)}
+          pageSizeOptions={[10,25,50]}
         />
 
       </Box>

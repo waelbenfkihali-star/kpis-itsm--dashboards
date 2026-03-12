@@ -1,12 +1,19 @@
 export const getDesignTokens = (mode) => ({
   palette: {
     mode,
+
     ...(mode === "light"
       ? {
-          // palette values for light mode
+          background: {
+            default: "#f6f6f6",
+            paper: "#ffffff",
+          },
         }
       : {
-          // palette values for dark mode
+          background: {
+            default: "#0f172a",
+            paper: "#111827",
+          },
         }),
   },
 });

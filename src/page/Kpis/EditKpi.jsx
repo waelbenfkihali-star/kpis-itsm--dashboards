@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
   TextField,
@@ -7,12 +7,15 @@ import {
   MenuItem,
   Stack,
   Alert,
+  Paper,
+  Typography,
 } from "@mui/material";
+
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../components/Header";
+
 import { getKpiById, upsertKpi, loadKpis, saveKpis } from "./kpiStorage";
 
-// ✅ نفس seed متاع MyKpis (باش Edit يخدم حتى إذا localStorage فارغ)
 const seed = [
   {
     id: 1,
@@ -45,8 +48,9 @@ const seed = [
 ];
 
 const EditKpi = () => {
+
   const navigate = useNavigate();
-  const { id } = useParams(); // Route: /EditKpi/:id
+  const { id } = useParams();
 
   const [notFound, setNotFound] = useState(false);
 
@@ -66,10 +70,9 @@ const EditKpi = () => {
   });
 
   useEffect(() => {
-    // 1) جرّب من localStorage
+
     let kpi = getKpiById(id);
 
-    // 2) إذا ما لقاهاش و localStorage فارغ → seed
     if (!kpi) {
       const list = loadKpis();
       if (!list.length) {
@@ -84,7 +87,7 @@ const EditKpi = () => {
     }
 
     setNotFound(false);
-    // تأكد id يبقى موجود
+
     setForm({
       id: kpi.id,
       kpi_id: kpi.kpi_id || "",
@@ -99,42 +102,95 @@ const EditKpi = () => {
       status: kpi.status || "Active",
       description: kpi.description || "",
     });
+
   }, [id]);
 
   function setField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  const isValid = useMemo(() => {
+    return (
+      form.name.trim() !== "" &&
+      form.owner.trim() !== ""
+    );
+  }, [form]);
+
+  function resetForm() {
+    setForm((prev) => ({
+      ...prev,
+      name: "",
+      owner: "",
+      dimension: "",
+      target: "",
+      frequency: "",
+      unit: "",
+      formula: "",
+      source: "",
+      description: "",
+    }));
+  }
+
   function submit() {
-    // ✅ Update localStorage
+
+    if (!isValid) return;
+
     upsertKpi(form);
+
     navigate("/MyKpis");
+
   }
 
   return (
+
     <Box>
-      <Header title="EDIT KPI" subTitle={`Editing KPI: ${form.kpi_id || id}`} />
+
+      <Header
+        title="EDIT KPI"
+        subTitle={`Editing KPI: ${form.kpi_id || id}`}
+      />
 
       {notFound ? (
-        <Box sx={{ mt: 2, maxWidth: 900 }}>
+
+        <Box sx={{ mt: 2,  width: "100%" }}>
+
           <Alert severity="warning">
-            KPI not found (id: {id}). Please go back and create it first.
+            KPI not found (id: {id})
           </Alert>
 
           <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
-            <Button variant="contained" onClick={() => navigate("/MyKpis")}>
+
+            <Button
+              variant="contained"
+              onClick={() => navigate("/MyKpis")}
+            >
               Back to My KPIs
             </Button>
-            <Button variant="outlined" onClick={() => navigate("/Kpiform")}>
+
+            <Button
+              variant="outlined"
+              onClick={() => navigate("/Kpiform")}
+            >
               Define KPI
             </Button>
+
           </Stack>
+
         </Box>
+
       ) : (
-        <Box sx={{ mt: 3, maxWidth: 900 }}>
+
+        <Paper sx={{ mt: 3, p: 3,  width: "100%" }}>
+
           <Grid container spacing={2}>
+
             <Grid item xs={12} md={6}>
-              <TextField label="KPI ID" fullWidth value={form.kpi_id} disabled />
+              <TextField
+                label="KPI ID"
+                fullWidth
+                value={form.kpi_id}
+                disabled
+              />
             </Grid>
 
             <Grid item xs={12} md={6}>
@@ -143,6 +199,7 @@ const EditKpi = () => {
                 fullWidth
                 value={form.name}
                 onChange={(e) => setField("name", e.target.value)}
+                helperText="KPI title"
               />
             </Grid>
 
@@ -176,10 +233,17 @@ const EditKpi = () => {
             <Grid item xs={12} md={6}>
               <TextField
                 label="Frequency"
+                select
                 fullWidth
                 value={form.frequency}
                 onChange={(e) => setField("frequency", e.target.value)}
-              />
+              >
+                <MenuItem value="Daily">Daily</MenuItem>
+                <MenuItem value="Weekly">Weekly</MenuItem>
+                <MenuItem value="Monthly">Monthly</MenuItem>
+                <MenuItem value="Quarterly">Quarterly</MenuItem>
+                <MenuItem value="Yearly">Yearly</MenuItem>
+              </TextField>
             </Grid>
 
             <Grid item xs={12} md={6}>
@@ -232,19 +296,39 @@ const EditKpi = () => {
                 onChange={(e) => setField("description", e.target.value)}
               />
             </Grid>
+
           </Grid>
 
           <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
-            <Button variant="contained" onClick={submit}>
+
+            <Button
+              variant="contained"
+              onClick={submit}
+              disabled={!isValid}
+            >
               Save Changes
             </Button>
 
-            <Button variant="outlined" onClick={() => navigate("/MyKpis")}>
+            <Button
+              variant="outlined"
+              onClick={resetForm}
+            >
+              Reset
+            </Button>
+
+            <Button
+              variant="text"
+              onClick={() => navigate("/MyKpis")}
+            >
               Cancel
             </Button>
+
           </Stack>
-        </Box>
+
+        </Paper>
+
       )}
+
     </Box>
   );
 };

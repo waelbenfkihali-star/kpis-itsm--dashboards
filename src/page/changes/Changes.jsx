@@ -6,7 +6,8 @@ import {
   Alert,
   Stack,
   TextField,
-  Autocomplete
+  Autocomplete,
+  Button
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
@@ -26,8 +27,11 @@ export default function Changes() {
 
   const [filters, setFilters] = useState({
     states: [],
+    types: [],
     priorities: [],
-    groups: []
+    groups: [],
+    dateFrom: "",
+    dateTo: ""
   });
 
   useEffect(() => {
@@ -42,19 +46,21 @@ export default function Changes() {
   }, []);
 
   const stateOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.state).filter(Boolean))],
     [rows]
   );
 
+  const typeOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.type).filter(Boolean))],
+    [rows]
+  );
+
   const priorityOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.priority).filter(Boolean))],
     [rows]
   );
 
   const groupOptions = useMemo(
-    // @ts-ignore
     () => [...new Set(rows.map((r) => r.responsible_group).filter(Boolean))],
     [rows]
   );
@@ -66,10 +72,19 @@ export default function Changes() {
       if (filters.states.length && !filters.states.includes(r.state))
         return false;
 
+      if (filters.types.length && !filters.types.includes(r.type))
+        return false;
+
       if (filters.priorities.length && !filters.priorities.includes(r.priority))
         return false;
 
       if (filters.groups.length && !filters.groups.includes(r.responsible_group))
+        return false;
+
+      if (filters.dateFrom && new Date(r.planned_start_date) < new Date(filters.dateFrom))
+        return false;
+
+      if (filters.dateTo && new Date(r.planned_start_date) > new Date(filters.dateTo))
         return false;
 
       return true;
@@ -95,7 +110,6 @@ export default function Changes() {
         else if (value === "Scheduled") color = "warning";
         else if (value === "Implementation") color = "info";
 
-        // @ts-ignore
         return <Chip label={value} color={color} size="small" />;
 
       }
@@ -120,63 +134,100 @@ export default function Changes() {
 
       <Header title="CHANGES" subTitle="Key change records to focus on" />
 
-      {err && <Alert severity="error">{err}</Alert>}
+      {err && <Alert severity="error" sx={{ mb:2 }}>{err}</Alert>}
 
-      <DeleteToolbar
-        selectedIds={selectedIds}
-        setSelectedIds={setSelectedIds}
-        rows={rows}
-        setRows={setRows}
-        api={`${API_BASE}/changes/delete/`}
-      />
+      <Stack direction="row" justifyContent="space-between" sx={{ mb:2 }}>
 
-      <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: "wrap" }}>
+        <DeleteToolbar
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+          rows={rows}
+          setRows={setRows}
+          api={`${API_BASE}/changes/delete/`}
+        />
+
+        <Button
+          variant="contained"
+          color="success"
+          disabled={!selectedIds.length}
+          onClick={()=>console.log("Analyse rows:",selectedIds)}
+        >
+          Analyse
+        </Button>
+
+      </Stack>
+
+      <Stack direction="row" spacing={2} sx={{ mb:2, flexWrap:"wrap" }}>
 
         <Autocomplete
           multiple
           options={stateOptions}
           value={filters.states}
-          // @ts-ignore
-          onChange={(e, v) => setFilters({ ...filters, states: v })}
-          renderInput={(p) => <TextField {...p} label="State" size="small" />}
-          sx={{ width: 220 }}
+          onChange={(e,v)=>setFilters({...filters,states:v})}
+          renderInput={(p)=><TextField {...p} label="Status" size="small"/>}
+          sx={{width:200}}
+        />
+
+        <Autocomplete
+          multiple
+          options={typeOptions}
+          value={filters.types}
+          onChange={(e,v)=>setFilters({...filters,types:v})}
+          renderInput={(p)=><TextField {...p} label="Type" size="small"/>}
+          sx={{width:200}}
         />
 
         <Autocomplete
           multiple
           options={priorityOptions}
           value={filters.priorities}
-          // @ts-ignore
-          onChange={(e, v) => setFilters({ ...filters, priorities: v })}
-          renderInput={(p) => <TextField {...p} label="Priority" size="small" />}
-          sx={{ width: 220 }}
+          onChange={(e,v)=>setFilters({...filters,priorities:v})}
+          renderInput={(p)=><TextField {...p} label="Priority" size="small"/>}
+          sx={{width:200}}
         />
 
         <Autocomplete
           multiple
           options={groupOptions}
           value={filters.groups}
-          // @ts-ignore
-          onChange={(e, v) => setFilters({ ...filters, groups: v })}
-          renderInput={(p) => <TextField {...p} label="Group" size="small" />}
-          sx={{ width: 220 }}
+          onChange={(e,v)=>setFilters({...filters,groups:v})}
+          renderInput={(p)=><TextField {...p} label="Group" size="small"/>}
+          sx={{width:200}}
+        />
+
+        <TextField
+          type="date"
+          label="From"
+          size="small"
+          InputLabelProps={{shrink:true}}
+          value={filters.dateFrom}
+          onChange={(e)=>setFilters({...filters,dateFrom:e.target.value})}
+        />
+
+        <TextField
+          type="date"
+          label="To"
+          size="small"
+          InputLabelProps={{shrink:true}}
+          value={filters.dateTo}
+          onChange={(e)=>setFilters({...filters,dateTo:e.target.value})}
         />
 
       </Stack>
 
-      <Box sx={{ height: 650 }}>
+      <Box sx={{height:650}}>
 
         <DataGrid
           rows={filteredRows}
           columns={columns}
           loading={loading}
           checkboxSelection
-          getRowId={(row) => row.id}
+          getRowId={(row)=>row.id}
           disableRowSelectionOnClick
-          slots={{ toolbar: GridToolbar }}
-          onRowSelectionModelChange={(ids) => setSelectedIds(ids)}
-          onRowClick={(p) => navigate(`/changes/${p.row.number}`)}
-          pageSizeOptions={[10, 25, 50]}
+          slots={{toolbar:GridToolbar}}
+          onRowSelectionModelChange={(ids)=>setSelectedIds(ids)}
+          onRowClick={(p)=>navigate(`/changes/${p.row.number}`)}
+          pageSizeOptions={[10,25,50]}
         />
 
       </Box>

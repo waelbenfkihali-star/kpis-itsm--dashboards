@@ -31,6 +31,9 @@ import { grey } from "@mui/material/colors";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import BuildCircleOutlinedIcon from "@mui/icons-material/BuildCircleOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+// @ts-ignore
+import myPhoto from "../assets/wael.jpg";
 
 const drawerWidth = 240;
 const openedMixin = (theme) => ({
@@ -143,6 +146,12 @@ const SideBar = ({ open, handleDrawerClose }) => {
   let location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
+  const logout = () => {
+  localStorage.removeItem("access");
+  localStorage.removeItem("refresh");
+  navigate("/login", { replace: true });
+};
+  
   return (
     <Drawer variant="permanent" open={open}>
       <DrawerHeader>
@@ -164,14 +173,14 @@ const SideBar = ({ open, handleDrawerClose }) => {
           border: "2px solid grey",
           transition: "0.25s",
         }}
-        alt="Remy Sharp"
-        src="https://media.allure.com/photos/5a26c1d8753d0c2eea9df033/3:4/w_1262,h_1683,c_limit/mostbeautiful.jpg"
+        alt="wael"
+        src={myPhoto}
       />
       <Typography
         align="center"
         sx={{ fontSize: open ? 17 : 0, transition: "0.25s" }}
-      >
-        Layla Ali
+      > 
+        Wael Ben Fekih Ali
       </Typography>
       <Typography
         align="center"
@@ -306,6 +315,38 @@ const SideBar = ({ open, handleDrawerClose }) => {
           </ListItem>
         ))}
       </List>
+      <Divider />
+
+<List>
+  <ListItem disablePadding sx={{ display: "block" }}>
+    <Tooltip title={open ? null : "Logout"} placement="left">
+      <ListItemButton
+        onClick={logout}
+        sx={{
+          minHeight: 48,
+          justifyContent: open ? "initial" : "center",
+          px: 2.5,
+        }}
+      >
+        <ListItemIcon
+          sx={{
+            minWidth: 0,
+            mr: open ? 3 : "auto",
+            justifyContent: "center",
+            color: "error.main",
+          }}
+        >
+          <LogoutOutlinedIcon />
+        </ListItemIcon>
+
+        <ListItemText
+          primary="Logout"
+          sx={{ opacity: open ? 1 : 0, color: "error.main" }}
+        />
+      </ListItemButton>
+    </Tooltip>
+  </ListItem>
+</List>
     </Drawer>
   );
 };
