@@ -22,6 +22,7 @@ const KpiForm = () => {
     kpi_id: "",
     name: "",
     owner: "",
+    module: "",
     dimension: "",
     target: "",
     frequency: "",
@@ -40,7 +41,8 @@ const KpiForm = () => {
     return (
       form.kpi_id.trim() !== "" &&
       form.name.trim() !== "" &&
-      form.owner.trim() !== ""
+      form.owner.trim() !== "" &&
+      form.module.trim() !== ""
     );
   }, [form]);
 
@@ -49,6 +51,7 @@ const KpiForm = () => {
       kpi_id: "",
       name: "",
       owner: "",
+      module: "",
       dimension: "",
       target: "",
       frequency: "",
@@ -115,6 +118,21 @@ const KpiForm = () => {
               value={form.owner}
               onChange={(e) => setField("owner", e.target.value)}
             />
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <TextField
+              label="Module"
+              select
+              fullWidth
+              value={form.module}
+              onChange={(e) => setField("module", e.target.value)}
+              helperText="Choose which ITSM module this KPI belongs to"
+            >
+              <MenuItem value="Incidents">Incidents</MenuItem>
+              <MenuItem value="Requests">Requests</MenuItem>
+              <MenuItem value="Changes">Changes</MenuItem>
+            </TextField>
           </Grid>
 
           <Grid item xs={12} md={6}>

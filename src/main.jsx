@@ -33,6 +33,7 @@ import Changes from "./page/changes/Changes";
 import KpiForm from "./page/Kpis/Kpiform";
 import MyKpis from "./page/Kpis/MyKpis";
 import EditKpi from "./page/Kpis/EditKpi";
+import KpiDetails from "./page/Kpis/KpiDetails";
 
 import ImportExcel from "./page/importExcel/ImportExcel";
 
@@ -72,6 +73,7 @@ const router = createBrowserRouter(
 
         <Route path="kpiform" element={<KpiForm />} />
         <Route path="mykpis" element={<MyKpis />} />
+        <Route path="mykpis/:id" element={<KpiDetails />} />
         <Route path="editkpi/:id" element={<EditKpi />} />
 
         <Route path="importexcel" element={<ImportExcel />} />

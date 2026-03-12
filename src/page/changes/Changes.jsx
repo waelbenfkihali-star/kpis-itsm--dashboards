@@ -13,6 +13,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
+import PageFilters from "../../components/PageFilters";
 
 const API_BASE = "http://localhost:8001/api";
 
@@ -26,6 +27,7 @@ export default function Changes() {
   const [selectedIds, setSelectedIds] = useState([]);
 
   const [filters, setFilters] = useState({
+    search: "",
     states: [],
     types: [],
     priorities: [],
@@ -68,6 +70,13 @@ export default function Changes() {
   const filteredRows = useMemo(() => {
 
     return rows.filter((r) => {
+      if (
+        filters.search &&
+        !Object.values(r).some((value) =>
+          String(value || "").toLowerCase().includes(filters.search.toLowerCase())
+        )
+      )
+        return false;
 
       if (filters.states.length && !filters.states.includes(r.state))
         return false;
@@ -92,6 +101,32 @@ export default function Changes() {
     });
 
   }, [rows, filters]);
+
+  const activeFilterCount = useMemo(
+    () =>
+      [
+        filters.search,
+        filters.states.length,
+        filters.types.length,
+        filters.priorities.length,
+        filters.groups.length,
+        filters.dateFrom,
+        filters.dateTo,
+      ].filter(Boolean).length,
+    [filters]
+  );
+
+  function resetFilters() {
+    setFilters({
+      search: "",
+      states: [],
+      types: [],
+      priorities: [],
+      groups: [],
+      dateFrom: "",
+      dateTo: ""
+    });
+  }
 
   const columns = [
 
@@ -157,7 +192,18 @@ export default function Changes() {
 
       </Stack>
 
-      <Stack direction="row" spacing={2} sx={{ mb:2, flexWrap:"wrap" }}>
+      <PageFilters
+        title="Change Filters"
+        activeCount={activeFilterCount}
+        onReset={resetFilters}
+      >
+        <TextField
+          label="Global Search"
+          size="small"
+          value={filters.search}
+          onChange={(e)=>setFilters({...filters,search:e.target.value})}
+          sx={{width:220}}
+        />
 
         <Autocomplete
           multiple
@@ -212,8 +258,7 @@ export default function Changes() {
           value={filters.dateTo}
           onChange={(e)=>setFilters({...filters,dateTo:e.target.value})}
         />
-
-      </Stack>
+      </PageFilters>
 
       <Box sx={{height:650}}>
 

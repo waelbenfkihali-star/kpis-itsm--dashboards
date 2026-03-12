@@ -22,6 +22,7 @@ const seed = [
     kpi_id: "5.8.01",
     name: "SLA Compliance",
     owner: "Service Desk",
+    module: "Incidents",
     dimension: "",
     target: "",
     frequency: "Monthly",
@@ -36,6 +37,7 @@ const seed = [
     kpi_id: "5.8.02",
     name: "Incident Resolution Time",
     owner: "IT Support",
+    module: "Incidents",
     dimension: "",
     target: "",
     frequency: "Weekly",
@@ -59,6 +61,7 @@ const EditKpi = () => {
     kpi_id: "",
     name: "",
     owner: "",
+    module: "",
     dimension: "",
     target: "",
     frequency: "",
@@ -93,6 +96,7 @@ const EditKpi = () => {
       kpi_id: kpi.kpi_id || "",
       name: kpi.name || "",
       owner: kpi.owner || "",
+      module: kpi.module || "",
       dimension: kpi.dimension || "",
       target: kpi.target || "",
       frequency: kpi.frequency || "",
@@ -112,7 +116,8 @@ const EditKpi = () => {
   const isValid = useMemo(() => {
     return (
       form.name.trim() !== "" &&
-      form.owner.trim() !== ""
+      form.owner.trim() !== "" &&
+      form.module.trim() !== ""
     );
   }, [form]);
 
@@ -121,6 +126,7 @@ const EditKpi = () => {
       ...prev,
       name: "",
       owner: "",
+      module: "",
       dimension: "",
       target: "",
       frequency: "",
@@ -210,6 +216,21 @@ const EditKpi = () => {
                 value={form.owner}
                 onChange={(e) => setField("owner", e.target.value)}
               />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Module"
+                select
+                fullWidth
+                value={form.module}
+                onChange={(e) => setField("module", e.target.value)}
+                helperText="Choose which ITSM module this KPI belongs to"
+              >
+                <MenuItem value="Incidents">Incidents</MenuItem>
+                <MenuItem value="Requests">Requests</MenuItem>
+                <MenuItem value="Changes">Changes</MenuItem>
+              </TextField>
             </Grid>
 
             <Grid item xs={12} md={6}>

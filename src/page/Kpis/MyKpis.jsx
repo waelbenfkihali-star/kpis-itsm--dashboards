@@ -11,10 +11,13 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Stack,
+  Autocomplete,
 } from "@mui/material";
 
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Header from "../../components/Header";
+import PageFilters from "../../components/PageFilters";
 import { useNavigate } from "react-router-dom";
 
 import EditIcon from "@mui/icons-material/Edit";
@@ -29,6 +32,7 @@ const seed = [
     kpi_id: "5.8.01",
     name: "SLA Compliance",
     owner: "Service Desk",
+    module: "Incidents",
     frequency: "Monthly",
     unit: "%",
     status: "Active",
@@ -38,6 +42,7 @@ const seed = [
     kpi_id: "5.8.02",
     name: "Incident Resolution Time",
     owner: "IT Support",
+    module: "Incidents",
     frequency: "Weekly",
     unit: "minutes",
     status: "Active",
@@ -49,7 +54,16 @@ const MyKpis = () => {
   const navigate = useNavigate();
 
   const [rows, setRows] = useState([]);
-  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState({
+    search: "",
+    kpiIds: [],
+    names: [],
+    owners: [],
+    modules: [],
+    frequencies: [],
+    units: [],
+    statuses: [],
+  });
 
   const [deleteId, setDeleteId] = useState(null);
 
@@ -74,17 +88,101 @@ const MyKpis = () => {
 
   }
 
+  const kpiIdOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.kpi_id).filter(Boolean))],
+    [rows]
+  );
+
+  const nameOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.name).filter(Boolean))],
+    [rows]
+  );
+
+  const ownerOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.owner).filter(Boolean))],
+    [rows]
+  );
+
+  const moduleOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.module).filter(Boolean))],
+    [rows]
+  );
+
+  const frequencyOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.frequency).filter(Boolean))],
+    [rows]
+  );
+
+  const unitOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.unit).filter(Boolean))],
+    [rows]
+  );
+
+  const statusOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.status).filter(Boolean))],
+    [rows]
+  );
+
   const filteredRows = useMemo(() => {
-
-    if (!search) return rows;
-
-    return rows.filter((r) =>
-      Object.values(r).some((v) =>
-        String(v).toLowerCase().includes(search.toLowerCase())
+    return rows.filter((r) => {
+      if (
+        filters.search &&
+        !Object.values(r).some((value) =>
+          String(value || "").toLowerCase().includes(filters.search.toLowerCase())
+        )
       )
-    );
+        return false;
 
-  }, [rows, search]);
+      if (filters.kpiIds.length && !filters.kpiIds.includes(r.kpi_id))
+        return false;
+
+      if (filters.names.length && !filters.names.includes(r.name))
+        return false;
+
+      if (filters.owners.length && !filters.owners.includes(r.owner))
+        return false;
+
+      if (filters.modules.length && !filters.modules.includes(r.module))
+        return false;
+
+      if (filters.frequencies.length && !filters.frequencies.includes(r.frequency))
+        return false;
+
+      if (filters.units.length && !filters.units.includes(r.unit))
+        return false;
+
+      if (filters.statuses.length && !filters.statuses.includes(r.status))
+        return false;
+
+      return true;
+    });
+  }, [rows, filters]);
+
+  const activeFilterCount = useMemo(() => {
+    return [
+      filters.search,
+      filters.kpiIds.length,
+      filters.names.length,
+      filters.owners.length,
+      filters.modules.length,
+      filters.frequencies.length,
+      filters.units.length,
+      filters.statuses.length,
+    ].filter(Boolean).length;
+  }, [filters]);
+
+  function resetFilters() {
+    setFilters({
+      search: "",
+      kpiIds: [],
+      names: [],
+      owners: [],
+      modules: [],
+      frequencies: [],
+      units: [],
+      statuses: [],
+    });
+  }
 
   const columns = useMemo(
     () => [
@@ -94,6 +192,8 @@ const MyKpis = () => {
       { field: "name", headerName: "Name", flex: 2, minWidth: 220 },
 
       { field: "owner", headerName: "Owner", flex: 1, minWidth: 140 },
+
+      { field: "module", headerName: "Module", flex: 1, minWidth: 130 },
 
       { field: "frequency", headerName: "Frequency", flex: 1, minWidth: 120 },
 
@@ -182,16 +282,9 @@ const MyKpis = () => {
 
           <Typography variant="body2">
 
-            {rows.length} KPI{rows.length !== 1 && "s"}
+            {filteredRows.length} KPI{filteredRows.length !== 1 && "s"}
 
           </Typography>
-
-          <TextField
-            size="small"
-            placeholder="Search KPI..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
 
           <Button
             variant="contained"
@@ -206,16 +299,108 @@ const MyKpis = () => {
 
         {/* Table */}
 
+        <PageFilters
+          title="KPI Filters"
+          activeCount={activeFilterCount}
+          onReset={resetFilters}
+        >
+              <TextField
+                size="small"
+                label="Global Search"
+                value={filters.search}
+                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                sx={{ width: 220 }}
+              />
+
+              <Autocomplete
+                multiple
+                options={kpiIdOptions}
+                value={filters.kpiIds}
+                onChange={(e, v) => setFilters({ ...filters, kpiIds: v })}
+                renderInput={(params) => (
+                  <TextField {...params} label="KPI ID" size="small" />
+                )}
+                sx={{ width: 190 }}
+              />
+
+              <Autocomplete
+                multiple
+                options={nameOptions}
+                value={filters.names}
+                onChange={(e, v) => setFilters({ ...filters, names: v })}
+                renderInput={(params) => (
+                  <TextField {...params} label="Name" size="small" />
+                )}
+                sx={{ width: 220 }}
+              />
+
+              <Autocomplete
+                multiple
+                options={ownerOptions}
+                value={filters.owners}
+                onChange={(e, v) => setFilters({ ...filters, owners: v })}
+                renderInput={(params) => (
+                  <TextField {...params} label="Owner" size="small" />
+                )}
+                sx={{ width: 200 }}
+              />
+
+              <Autocomplete
+                multiple
+                options={moduleOptions}
+                value={filters.modules}
+                onChange={(e, v) => setFilters({ ...filters, modules: v })}
+                renderInput={(params) => (
+                  <TextField {...params} label="Module" size="small" />
+                )}
+                sx={{ width: 180 }}
+              />
+
+              <Autocomplete
+                multiple
+                options={frequencyOptions}
+                value={filters.frequencies}
+                onChange={(e, v) => setFilters({ ...filters, frequencies: v })}
+                renderInput={(params) => (
+                  <TextField {...params} label="Frequency" size="small" />
+                )}
+                sx={{ width: 180 }}
+              />
+
+              <Autocomplete
+                multiple
+                options={unitOptions}
+                value={filters.units}
+                onChange={(e, v) => setFilters({ ...filters, units: v })}
+                renderInput={(params) => (
+                  <TextField {...params} label="Unit" size="small" />
+                )}
+                sx={{ width: 160 }}
+              />
+
+              <Autocomplete
+                multiple
+                options={statusOptions}
+                value={filters.statuses}
+                onChange={(e, v) => setFilters({ ...filters, statuses: v })}
+                renderInput={(params) => (
+                  <TextField {...params} label="Status" size="small" />
+                )}
+                sx={{ width: 170 }}
+              />
+        </PageFilters>
+
         <Paper sx={{ height: 600 }}>
 
           <DataGrid
-            rows={filteredRows}
-            columns={columns}
+          rows={filteredRows}
+          columns={columns}
 
-            checkboxSelection
-            disableRowSelectionOnClick
+          checkboxSelection
+          disableRowSelectionOnClick
+          onRowClick={(params) => navigate(`/mykpis/${params.row.id}`)}
 
-            slots={{ toolbar: GridToolbar }}
+          slots={{ toolbar: GridToolbar }}
 
             pageSizeOptions={[5, 10, 20]}
 

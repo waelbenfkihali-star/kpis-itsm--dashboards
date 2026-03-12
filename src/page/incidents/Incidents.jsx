@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
+import PageFilters from "../../components/PageFilters";
 
 const API_BASE = "http://localhost:8001/api";
 
@@ -28,6 +29,7 @@ export default function Incidents() {
   const [selectedIds, setSelectedIds] = useState([]);
 
   const [filters, setFilters] = useState({
+    search: "",
     states: [],
     priorities: [],
     services: [],
@@ -76,6 +78,13 @@ export default function Incidents() {
   const filteredRows = useMemo(() => {
 
     return rows.filter((r) => {
+      if (
+        filters.search &&
+        !Object.values(r).some((value) =>
+          String(value || "").toLowerCase().includes(filters.search.toLowerCase())
+        )
+      )
+        return false;
 
       if (filters.states.length && !filters.states.includes(r.state))
         return false;
@@ -101,9 +110,23 @@ export default function Incidents() {
 
   }, [rows, filters, dateFrom, dateTo]);
 
+  const activeFilterCount = useMemo(
+    () =>
+      [
+        filters.search,
+        filters.states.length,
+        filters.priorities.length,
+        filters.services.length,
+        filters.groups.length,
+        dateFrom,
+        dateTo,
+      ].filter(Boolean).length,
+    [filters, dateFrom, dateTo]
+  );
+
   function handleAnalyse() {
 
-    const selectedData = filteredRows.filter((r) =>
+      const selectedData = filteredRows.filter((r) =>
       selectedIds.includes(r.id)
     );
 
@@ -111,6 +134,18 @@ export default function Incidents() {
       state: { data: selectedData }
     });
 
+  }
+
+  function resetFilters() {
+    setFilters({
+      search: "",
+      states: [],
+      priorities: [],
+      services: [],
+      groups: []
+    });
+    setDateFrom("");
+    setDateTo("");
   }
 
   const columns = useMemo(() => [
@@ -223,7 +258,18 @@ export default function Incidents() {
 
       {/* Filters */}
 
-      <Stack direction="row" spacing={2} sx={{ mb: 2, flexWrap: "wrap" }}>
+      <PageFilters
+        title="Incident Filters"
+        activeCount={activeFilterCount}
+        onReset={resetFilters}
+      >
+        <TextField
+          label="Global Search"
+          size="small"
+          value={filters.search}
+          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+          sx={{ width: 220 }}
+        />
 
         <Autocomplete
           multiple
@@ -288,8 +334,7 @@ export default function Incidents() {
           onChange={(e) => setDateTo(e.target.value)}
           sx={{ width: 160 }}
         />
-
-      </Stack>
+      </PageFilters>
 
       <Box sx={{ height: 650 }}>
 

@@ -13,6 +13,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
+import PageFilters from "../../components/PageFilters";
 
 const API_BASE = "http://localhost:8001/api";
 
@@ -26,6 +27,7 @@ export default function Requests() {
   const [selectedIds, setSelectedIds] = useState([]);
 
   const [filters, setFilters] = useState({
+    search: "",
     states: [],
     items: [],
     services: [],
@@ -76,6 +78,13 @@ export default function Requests() {
   const filteredRows = useMemo(() => {
 
     return rows.filter((r) => {
+      if (
+        filters.search &&
+        !Object.values(r).some((value) =>
+          String(value || "").toLowerCase().includes(filters.search.toLowerCase())
+        )
+      )
+        return false;
 
       if (filters.states.length && !filters.states.includes(r.state))
         return false;
@@ -109,6 +118,38 @@ export default function Requests() {
     });
 
   }, [rows, filters]);
+
+  const activeFilterCount = useMemo(
+    () =>
+      [
+        filters.search,
+        filters.states.length,
+        filters.items.length,
+        filters.services.length,
+        filters.groups.length,
+        filters.users.length,
+        filters.openedFrom,
+        filters.openedTo,
+        filters.closedFrom,
+        filters.closedTo,
+      ].filter(Boolean).length,
+    [filters]
+  );
+
+  function resetFilters() {
+    setFilters({
+      search: "",
+      states: [],
+      items: [],
+      services: [],
+      groups: [],
+      users: [],
+      openedFrom: "",
+      openedTo: "",
+      closedFrom: "",
+      closedTo: ""
+    });
+  }
 
   const columns = [
 
@@ -174,7 +215,18 @@ export default function Requests() {
 
       </Stack>
 
-      <Stack direction="row" spacing={2} sx={{ mb:2, flexWrap:"wrap" }}>
+      <PageFilters
+        title="Request Filters"
+        activeCount={activeFilterCount}
+        onReset={resetFilters}
+      >
+        <TextField
+          label="Global Search"
+          size="small"
+          value={filters.search}
+          onChange={(e)=>setFilters({...filters,search:e.target.value})}
+          sx={{width:220}}
+        />
 
         <Autocomplete
           multiple
@@ -239,7 +291,24 @@ export default function Requests() {
           onChange={(e)=>setFilters({...filters,openedTo:e.target.value})}
         />
 
-      </Stack>
+        <TextField
+          type="date"
+          label="Closed From"
+          size="small"
+          InputLabelProps={{shrink:true}}
+          value={filters.closedFrom}
+          onChange={(e)=>setFilters({...filters,closedFrom:e.target.value})}
+        />
+
+        <TextField
+          type="date"
+          label="Closed To"
+          size="small"
+          InputLabelProps={{shrink:true}}
+          value={filters.closedTo}
+          onChange={(e)=>setFilters({...filters,closedTo:e.target.value})}
+        />
+      </PageFilters>
 
       <Box sx={{height:650}}>
 
