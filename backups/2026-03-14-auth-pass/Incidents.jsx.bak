@@ -16,7 +16,8 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
 import PageFilters from "../../components/PageFilters";
-import { apiFetch } from "../../utils/api";
+
+const API_BASE = "http://localhost:8001/api";
 
 export default function Incidents() {
 
@@ -40,7 +41,7 @@ export default function Incidents() {
 
   useEffect(() => {
 
-    apiFetch("/incidents/")
+    fetch(`${API_BASE}/incidents/`)
       .then(async (res) => {
 
         const data = await res.json().catch(() => []);
@@ -241,7 +242,7 @@ export default function Incidents() {
           setSelectedIds={setSelectedIds}
           rows={rows}
           setRows={setRows}
-          api="/incidents/delete/"
+          api={`${API_BASE}/incidents/delete/`}
         />
 
         <Button

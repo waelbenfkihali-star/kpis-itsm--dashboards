@@ -14,8 +14,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
 import PageFilters from "../../components/PageFilters";
-
-const API_BASE = "http://localhost:8001/api";
+import { apiFetch } from "../../utils/api";
 
 export default function Requests() {
 
@@ -40,7 +39,7 @@ export default function Requests() {
   });
 
   useEffect(() => {
-    fetch(`${API_BASE}/requests/`)
+    apiFetch("/requests/")
       .then(async (res) => {
         const data = await res.json().catch(() => []);
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
@@ -201,7 +200,7 @@ export default function Requests() {
           setSelectedIds={setSelectedIds}
           rows={rows}
           setRows={setRows}
-          api={`${API_BASE}/requests/delete/`}
+          api="/requests/delete/"
         />
 
         <Button

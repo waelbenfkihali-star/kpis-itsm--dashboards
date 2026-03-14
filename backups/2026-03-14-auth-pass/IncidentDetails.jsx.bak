@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Grid, Paper, Typography, Alert } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../components/Header";
-import { apiFetch } from "../../utils/api";
+
+const API_BASE = "http://localhost:8001/api";
 
 const DetailItem = ({ label, value }) => (
   <Paper elevation={1} sx={{ p: 2, borderRadius: "14px", height: "100%" }}>
@@ -22,7 +23,7 @@ export default function IncidentDetails() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    apiFetch(`/incidents/${encodeURIComponent(number)}/`)
+    fetch(`${API_BASE}/incidents/${encodeURIComponent(number)}/`)
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);

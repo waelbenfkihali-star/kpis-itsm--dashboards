@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Button, Grid, Paper, Typography, Alert } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../components/Header";
-
-const API_BASE = "http://localhost:8001/api";
+import { apiFetch } from "../../utils/api";
 
 const DetailItem = ({ label, value }) => (
   <Paper elevation={1} sx={{ p: 2, borderRadius: "14px", height: "100%" }}>
@@ -23,7 +22,7 @@ export default function ChangeDetails() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    fetch(`${API_BASE}/changes/${encodeURIComponent(number)}/`)
+    apiFetch(`/changes/${encodeURIComponent(number)}/`)
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);

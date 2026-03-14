@@ -18,7 +18,8 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 
 import * as XLSX from "xlsx";
-import { apiFetch } from "../../utils/api";
+
+const API_URL = "http://localhost:8001/api/import/";
 
 function fileExtOk(file) {
   if (!file) return false;
@@ -158,7 +159,7 @@ export default function ImportExcel() {
       if (needReq && req) formData.append("requests", req);
       if (needChg && chg) formData.append("changes", chg);
 
-      const response = await apiFetch("/import/", {
+      const response = await fetch(API_URL, {
         method: "POST",
         body: formData,
       });

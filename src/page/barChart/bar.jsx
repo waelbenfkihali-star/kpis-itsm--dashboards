@@ -7,8 +7,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import dayjs from "dayjs";
-
-const API_BASE = "http://localhost:8001/api";
+import { apiFetch } from "../../utils/api";
 
 const Bar = ({ isDashbord = false }) => {
 
@@ -20,7 +19,7 @@ const Bar = ({ isDashbord = false }) => {
 
   useEffect(() => {
 
-    fetch(`${API_BASE}/monthly-stats/`)
+    apiFetch("/monthly-stats/")
       .then((res) => res.json())
       .then((json) => setAllData(json))
       .catch(() => setAllData([]));

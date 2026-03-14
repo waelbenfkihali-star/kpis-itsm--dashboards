@@ -40,7 +40,6 @@ import ImportExcel from "./page/importExcel/ImportExcel";
 import IncidentDetails from "./page/incidents/IncidentDetails";
 import RequestDetails from "./page/requests/RequestDetails";
 import ChangeDetails from "./page/changes/ChangeDetails";
-import IncidentsAnalysis from "./page/incidents/IncidentsAnalysis";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -69,7 +68,6 @@ const router = createBrowserRouter(
         <Route path="changes" element={<Changes />} />
 
         <Route path="incidents/:number" element={<IncidentDetails />} />
-        <Route path="incidents-analysis" element={<IncidentsAnalysis />} />
         <Route path="requests/:number" element={<RequestDetails />} />
         <Route path="changes/:number" element={<ChangeDetails />} />
 

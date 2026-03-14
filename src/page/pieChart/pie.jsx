@@ -6,8 +6,7 @@ import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-
-const API_BASE = "http://localhost:8001/api";
+import { apiFetch } from "../../utils/api";
 
 const Pie = ({ isDashbord = false }) => {
 
@@ -19,7 +18,7 @@ const Pie = ({ isDashbord = false }) => {
 
   useEffect(()=>{
 
-    fetch(`${API_BASE}/incidents/`)
+    apiFetch("/incidents/")
       .then(res=>res.json())
       .then(json=>setIncidents(json))
       .catch(()=>setIncidents([]))

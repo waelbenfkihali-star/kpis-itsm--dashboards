@@ -9,7 +9,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { apiFetch } from "../utils/api";
 
 export default function DeleteToolbar({
   selectedIds,
@@ -25,7 +24,7 @@ export default function DeleteToolbar({
     setLoading(true);
 
     try {
-      const res = await apiFetch(api, {
+      const res = await fetch(api, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +51,7 @@ export default function DeleteToolbar({
     try {
       const ids = rows.map((r) => r.id);
 
-      const res = await apiFetch(api, {
+      const res = await fetch(api, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

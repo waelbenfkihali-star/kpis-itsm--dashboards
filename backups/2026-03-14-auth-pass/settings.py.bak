@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,18 +25,7 @@ SECRET_KEY = 'django-insecure-4(s4qryi-@lq)(1z=6k2eqi0m!fxl6(^^2&#s0#b(ncvj_68qf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "0.0.0.0",
-    "backend",
-]
-
-extra_hosts = os.getenv("DJANGO_ALLOWED_HOSTS", "")
-if extra_hosts:
-    ALLOWED_HOSTS.extend(
-        [host.strip() for host in extra_hosts.split(",") if host.strip()]
-    )
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -53,15 +41,6 @@ INSTALLED_APPS = [
     "corsheaders",
     "itsm_data",
 ]
-
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
-    ),
-}
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

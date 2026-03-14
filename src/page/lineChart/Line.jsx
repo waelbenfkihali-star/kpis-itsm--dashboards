@@ -7,8 +7,7 @@ import dayjs from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-
-const API_BASE = "http://localhost:8001/api";
+import { apiFetch } from "../../utils/api";
 
 const Line = ({ isDashbord = false }) => {
 
@@ -20,7 +19,7 @@ const Line = ({ isDashbord = false }) => {
 
   useEffect(()=>{
 
-    fetch(`${API_BASE}/monthly-stats/`)
+    apiFetch("/monthly-stats/")
       .then(res=>res.json())
       .then(json=>setRawData(json))
       .catch(()=>setRawData([]))
