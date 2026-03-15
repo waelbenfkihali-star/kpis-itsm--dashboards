@@ -6,13 +6,20 @@ import { ResponsiveLine } from "@nivo/line";
 import { ResponsivePie } from "@nivo/pie";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
+import ChartLegend from "../analysis/ChartLegend";
 import {
   agingByState,
   countBy,
   countWhere,
+  getChartColor,
+  makeLegendItems,
+  monthlyBreakdown,
   monthlyDualSeries,
   monthlySeries,
   ratio,
+  renderBarTooltip,
+  renderLineTooltip,
+  renderPieTooltip,
   topLabel,
 } from "../analysis/analysisUtils";
 
@@ -32,7 +39,7 @@ function KpiCard({ title, value, note }) {
   );
 }
 
-function ChartCard({ title, note, children, height = 320 }) {
+function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   return (
     <Paper sx={{ p: 2, flex: 1, minWidth: 320 }}>
       <Typography variant="h6">{title}</Typography>
@@ -44,6 +51,7 @@ function ChartCard({ title, note, children, height = 320 }) {
         <Box mb={1.5} />
       )}
       <Box sx={{ height }}>{children}</Box>
+      <ChartLegend items={legendItems} />
     </Paper>
   );
 }
@@ -53,6 +61,7 @@ export default function RequestsAnalysis() {
   const location = useLocation();
   const theme = useTheme();
   const rows = Array.isArray(location.state?.data) ? location.state.data : [];
+  const selectedKpi = location.state?.selectedKpi || null;
 
   const openRows = useMemo(
     () => rows.filter((row) => !["Closed", "Resolved", "Completed"].includes(row.state)),
@@ -73,6 +82,9 @@ export default function RequestsAnalysis() {
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
   const requestedFor = useMemo(() => countBy(rows, "requested_for"), [rows]);
   const items = useMemo(() => countBy(rows, "item"), [rows]);
+  const serviceMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "it_service", 5), [rows]);
+  const groupMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "responsible_group", 5), [rows]);
+  const itemMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "item", 5), [rows]);
 
   const columns = [
     { field: "number", headerName: "Request ID", flex: 1, minWidth: 140 },
@@ -109,19 +121,313 @@ export default function RequestsAnalysis() {
     closedRows,
     (row) => String(row.it_service || "").toLowerCase().includes("modern workplace")
   );
+  const focusedView = useMemo(() => {
+    if (!selectedKpi) return null;
+
+    const base = {
+      title: `${selectedKpi.kpi_id} - ${selectedKpi.name}`,
+      note: selectedKpi.description || "Focused KPI dashboard built from your selected request rows.",
+    };
+
+    switch (selectedKpi.kpi_id) {
+      case "REQ-01":
+        return {
+          ...base,
+          cards: [
+            { title: "Open Request Backlog", value: backlog, note: `${ratio(backlog, total)}% of scope is still open` },
+            { title: "> 60 Days Backlog", value: olderThan60, note: "Old requests requiring attention" },
+            { title: "Top Group", value: groups[0]?.label || "-", note: "Group carrying the biggest backlog" },
+          ],
+          chart: { title: "Backlog Aging by State", type: "stacked", data: agingStateData },
+          extras: [
+            {
+              title: "Backlog by Group per Month",
+              note: "Monthly comparison of top groups inside the request backlog.",
+              type: "stacked",
+              ...monthlyBreakdown(openRows, "opened", "responsible_group", 5),
+            },
+            {
+              title: "Backlog by Service",
+              note: "Business service view of the selected backlog scope.",
+              type: "bar",
+              data: services,
+            },
+          ],
+        };
+      case "REQ-02":
+        return {
+          ...base,
+          cards: [
+            { title: "Closed Requests", value: closed, note: `${ratio(closed, total)}% of selected requests are closed` },
+            { title: "Top Service", value: services[0]?.label || "-", note: "Service with highest closure volume" },
+            { title: "Top Request Item", value: items[0]?.label || "-", note: "Most requested item in selected scope" },
+          ],
+          chart: { title: "Closed Request Contributors", type: "bar", data: services },
+          extras: [
+            {
+              title: "Closed Requests by Service per Month",
+              note: "Monthly closure comparison for the top services.",
+              type: "stacked",
+              ...monthlyBreakdown(closedRows, "closed", "it_service", 5),
+            },
+            {
+              title: "Closed Requests by Item",
+              note: "Which request items contributed most to closure volume.",
+              type: "bar",
+              data: items,
+            },
+          ],
+        };
+      case "REQ-03":
+        return {
+          ...base,
+          cards: [
+            { title: "Requests Created", value: total, note: "Selected request volume used as control KPI" },
+            { title: "Closed Requests", value: closed, note: "Requests already completed or closed" },
+            { title: "Backlog", value: backlog, note: "Requests still pending" },
+          ],
+          line: { title: "Requests Created Trend", data: openedMonthly, label: "Created Requests" },
+          extras: [
+            {
+              title: "Request Volume by Service per Month",
+              note: "Monthly service comparison for created requests.",
+              type: "stacked",
+              ...serviceMonthly,
+            },
+            {
+              title: "Request Volume by Group per Month",
+              note: "Shows which groups received the highest monthly request load.",
+              type: "stacked",
+              ...groupMonthly,
+            },
+          ],
+        };
+      case "REQ-04":
+        return {
+          ...base,
+          cards: [
+            { title: "> 60 Days Backlog", value: olderThan60, note: "Aging backlog over 60 days" },
+            { title: "Open Requests", value: backlog, note: "Current open scope" },
+            { title: "Top Group", value: groups[0]?.label || "-", note: "Group most impacted by old requests" },
+          ],
+          chart: { title: "Aging by Responsible Group", type: "bar", data: groups },
+          extras: [
+            {
+              title: "Old Backlog by Group per Month",
+              note: "Month over month view of the groups driving older backlog.",
+              type: "stacked",
+              ...monthlyBreakdown(openRows.filter((row) => row.opened && row.state), "opened", "responsible_group", 5),
+            },
+            {
+              title: "Old Backlog by Item",
+              note: "Shows which request items stay open the longest.",
+              type: "bar",
+              data: items,
+            },
+          ],
+        };
+      case "REQ-05":
+        return {
+          ...base,
+          cards: [
+            { title: "Closure Rate", value: `${ratio(closed, total)}%`, note: "Calculated from selected requests" },
+            { title: "Closed Requests", value: closed, note: "Closed or completed rows in scope" },
+            { title: "Open Requests", value: backlog, note: "Remaining backlog rows" },
+          ],
+          chart: { title: "Closure Contributors by Service", type: "bar", data: services },
+          extras: [
+            {
+              title: "Closure Rate Support View by Service per Month",
+              note: "Monthly closure comparison for top business services.",
+              type: "stacked",
+              ...monthlyBreakdown(closedRows, "closed", "it_service", 5),
+            },
+            {
+              title: "Closure Contributors by Group",
+              note: "Operational ownership perspective behind closure performance.",
+              type: "bar",
+              data: groups,
+            },
+          ],
+        };
+      case "REQ-06":
+        return {
+          ...base,
+          cards: [
+            { title: "Top Business Service", value: services[0]?.label || "-", note: "Largest request demand in selected scope" },
+            { title: "Requests in Scope", value: total, note: "Rows selected for KPI analysis" },
+            { title: "Top Requested For", value: requestedFor[0]?.label || "-", note: "Most represented requester" },
+          ],
+          chart: { title: "Requests by Business Service", type: "bar", data: services },
+          extras: [
+            {
+              title: "Business Service Demand per Month",
+              note: "Monthly comparison between top services from the selected scope.",
+              type: "stacked",
+              ...serviceMonthly,
+            },
+            {
+              title: "Request Item Demand per Month",
+              note: "Additional explanation by top request items.",
+              type: "stacked",
+              ...itemMonthly,
+            },
+          ],
+        };
+      default:
+        return null;
+    }
+  }, [selectedKpi, backlog, total, olderThan60, groups, closed, services, items, openedMonthly, requestedFor, agingStateData]);
 
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Header
-          title="SERVICE REQUEST FULFILLMENT DASHBOARD"
-          subTitle={`${total} selected requests - KPI and aging view aligned to the monthly report`}
+          title={focusedView ? focusedView.title : "SERVICE REQUEST FULFILLMENT DASHBOARD"}
+          subTitle={
+            focusedView
+              ? `${focusedView.note} ${total} selected requests in scope.`
+              : `${total} selected requests - KPI and aging view aligned to the monthly report`
+          }
         />
         <Button variant="outlined" onClick={() => navigate("/requests")}>
           Back
         </Button>
       </Stack>
 
+      {focusedView ? (
+        <>
+          <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
+            {focusedView.cards.map((card) => (
+              <KpiCard key={card.title} title={card.title} value={card.value} note={card.note} />
+            ))}
+          </Stack>
+
+          {focusedView.line ? (
+            <ChartCard title={focusedView.line.title} note={focusedView.note}>
+              <ResponsiveLine
+                data={[
+                  {
+                    id: focusedView.line.label,
+                    data: focusedView.line.data.map((item) => ({ x: item.month, y: item.value })),
+                  },
+                ]}
+                margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
+                xScale={{ type: "point" }}
+                yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
+                axisBottom={{ tickRotation: -35 }}
+                axisLeft={{ legend: "Count", legendOffset: -40 }}
+                pointSize={8}
+                pointBorderWidth={2}
+                pointBorderColor={{ from: "serieColor" }}
+                useMesh
+                colors={{ scheme: "category10" }}
+                enableArea
+                areaOpacity={0.08}
+                tooltip={renderLineTooltip}
+                theme={{ textColor: theme.palette.text.primary }}
+              />
+            </ChartCard>
+          ) : focusedView.chart?.type === "stacked" ? (
+            <ChartCard
+              title={focusedView.chart.title}
+              note={focusedView.note}
+              height={300}
+              legendItems={makeLegendItems([...new Set(openRows.map((row) => row.state).filter(Boolean))])}
+            >
+              <ResponsiveBar
+                data={focusedView.chart.data}
+                keys={[...new Set(openRows.map((row) => row.state).filter(Boolean))]}
+                indexBy="aging"
+                groupMode="stacked"
+                margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
+                padding={0.28}
+                colors={({ id }) =>
+                  getChartColor([...new Set(openRows.map((row) => row.state).filter(Boolean))].indexOf(id))
+                }
+                axisLeft={{ legend: "Request Count", legendOffset: -40 }}
+                tooltip={renderBarTooltip}
+                theme={{ textColor: theme.palette.text.primary }}
+              />
+            </ChartCard>
+          ) : (
+            <ChartCard title={focusedView.chart.title} note={focusedView.note}>
+              <ResponsiveBar
+                data={focusedView.chart.data.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
+                keys={["value"]}
+                indexBy="label"
+                margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
+                padding={0.3}
+                colors={({ index }) => getChartColor(index)}
+                axisBottom={{ tickRotation: -35 }}
+                axisLeft={{ legend: "Count", legendOffset: -40 }}
+                tooltip={renderBarTooltip}
+                theme={{ textColor: theme.palette.text.primary }}
+              />
+            </ChartCard>
+          )}
+
+          {focusedView.extras?.length ? (
+            <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mt={2}>
+              {focusedView.extras.map((extra) => (
+                <ChartCard
+                  key={extra.title}
+                  title={extra.title}
+                  note={extra.note}
+                  height={320}
+                  legendItems={extra.type === "stacked" ? makeLegendItems(extra.keys) : []}
+                >
+                  {extra.type === "stacked" ? (
+                    <ResponsiveBar
+                      data={extra.data}
+                      keys={extra.keys}
+                      indexBy="month"
+                      groupMode="grouped"
+                      margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
+                      padding={0.28}
+                      colors={({ id }) => getChartColor(extra.keys.indexOf(id))}
+                      axisBottom={{ tickRotation: -35 }}
+                      axisLeft={{ legend: "Count", legendOffset: -40 }}
+                      tooltip={renderBarTooltip}
+                      theme={{ textColor: theme.palette.text.primary }}
+                    />
+                  ) : (
+                    <ResponsiveBar
+                      data={extra.data.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
+                      keys={["value"]}
+                      indexBy="label"
+                      margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
+                      padding={0.3}
+                      colors={({ index }) => getChartColor(index)}
+                      axisBottom={{ tickRotation: -35 }}
+                      axisLeft={{ legend: "Count", legendOffset: -40 }}
+                      tooltip={renderBarTooltip}
+                      theme={{ textColor: theme.palette.text.primary }}
+                    />
+                  )}
+                </ChartCard>
+              ))}
+            </Stack>
+          ) : null}
+
+          <Paper sx={{ p: 2, mt: 2 }}>
+            <Typography variant="h6" mb={1.5}>
+              Selected Request Scope
+            </Typography>
+            <Box sx={{ height: 520 }}>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                disableRowSelectionOnClick
+                getRowId={(row) => row.id}
+                onRowClick={(params) => navigate(`/requests/${params.row.number}`)}
+                pageSizeOptions={[10, 25, 50]}
+              />
+            </Box>
+          </Paper>
+        </>
+      ) : (
+        <>
       <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
         <KpiCard
           title="Closed Requests"
@@ -169,6 +475,7 @@ export default function RequestsAnalysis() {
             colors={{ scheme: "category10" }}
             enableArea
             areaOpacity={0.08}
+            tooltip={renderLineTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -176,6 +483,7 @@ export default function RequestsAnalysis() {
         <ChartCard
           title="Backlog vs Closed Trend"
           note="Shows the selected scope trend between newly opened and closed requests."
+          legendItems={makeLegendItems(["Opened", "Closed"])}
         >
           <ResponsiveBar
             data={openedVsClosed}
@@ -184,9 +492,10 @@ export default function RequestsAnalysis() {
             groupMode="grouped"
             margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
             padding={0.28}
-            colors={{ scheme: "set2" }}
+            colors={({ id }) => getChartColor(["Opened", "Closed"].indexOf(id))}
             axisBottom={{ tickRotation: -35 }}
             axisLeft={{ legend: "Count", legendOffset: -40 }}
+            tooltip={renderBarTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -221,8 +530,11 @@ export default function RequestsAnalysis() {
             groupMode="stacked"
             margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
             padding={0.28}
-            colors={{ scheme: "paired" }}
+            colors={({ id }) =>
+              getChartColor([...new Set(openRows.map((row) => row.state).filter(Boolean))].indexOf(id))
+            }
             axisLeft={{ legend: "Request Count", legendOffset: -40 }}
+            tooltip={renderBarTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -231,15 +543,22 @@ export default function RequestsAnalysis() {
           title="Aging by Group Level"
           note="Distribution of backlog volume by responsible group."
           height={300}
+          legendItems={makeLegendItems(groups.slice(0, 6).map((item) => item.label))}
         >
           <ResponsivePie
-            data={groups.slice(0, 6).map((item) => ({ id: item.label, label: item.label, value: item.value }))}
+            data={groups.slice(0, 6).map((item, index) => ({
+              id: item.label,
+              label: item.label,
+              value: item.value,
+              color: getChartColor(index),
+            }))}
             margin={{ top: 20, right: 80, bottom: 50, left: 80 }}
             innerRadius={0.55}
             padAngle={0.7}
             cornerRadius={3}
             activeOuterRadiusOffset={8}
-            colors={{ scheme: "set2" }}
+            colors={{ datum: "data.color" }}
+            tooltip={renderPieTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -256,9 +575,10 @@ export default function RequestsAnalysis() {
             indexBy="label"
             margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
             padding={0.3}
-            colors={{ scheme: "nivo" }}
+            colors={({ index }) => getChartColor(index)}
             axisBottom={{ tickRotation: -35 }}
             axisLeft={{ legend: "Count", legendOffset: -40 }}
+            tooltip={renderBarTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -273,9 +593,10 @@ export default function RequestsAnalysis() {
             indexBy="label"
             margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
             padding={0.3}
-            colors={{ scheme: "paired" }}
+            colors={({ index }) => getChartColor(index)}
             axisBottom={{ tickRotation: -35 }}
             axisLeft={{ legend: "Count", legendOffset: -40 }}
+            tooltip={renderBarTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -296,6 +617,8 @@ export default function RequestsAnalysis() {
           />
         </Box>
       </Paper>
+        </>
+      )}
     </Box>
   );
 }

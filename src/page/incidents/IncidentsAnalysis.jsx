@@ -5,13 +5,19 @@ import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
+import ChartLegend from "../analysis/ChartLegend";
 import {
   average,
   countBy,
   countWhere,
+  getChartColor,
+  makeLegendItems,
+  monthlyBreakdown,
   monthlyDualSeries,
   monthlySeries,
   ratio,
+  renderBarTooltip,
+  renderLineTooltip,
   topLabel,
 } from "../analysis/analysisUtils";
 
@@ -31,7 +37,7 @@ function KpiCard({ title, value, note }) {
   );
 }
 
-function ChartCard({ title, note, children, height = 320 }) {
+function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   return (
     <Paper sx={{ p: 2, flex: 1, minWidth: 320 }}>
       <Typography variant="h6">{title}</Typography>
@@ -43,6 +49,7 @@ function ChartCard({ title, note, children, height = 320 }) {
         <Box mb={1.5} />
       )}
       <Box sx={{ height }}>{children}</Box>
+      <ChartLegend items={legendItems} />
     </Paper>
   );
 }
@@ -52,6 +59,7 @@ export default function IncidentsAnalysis() {
   const location = useLocation();
   const theme = useTheme();
   const rows = Array.isArray(location.state?.data) ? location.state.data : [];
+  const selectedKpi = location.state?.selectedKpi || null;
 
   const openBacklogRows = useMemo(
     () => rows.filter((row) => ["Open", "In Progress", "Pending"].includes(row.state)),
@@ -111,19 +119,328 @@ export default function IncidentsAnalysis() {
   const avgHandle = average(rows, "duration");
   const avgBusiness = average(rows, "business_duration");
   const avgMajorResolution = average(rows, "duration", (row) => row.is_major);
+  const focusedServices = useMemo(() => countBy(majorRows, "affected_service"), [majorRows]);
+  const serviceMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "affected_service", 5), [rows]);
+  const groupMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "responsible_group", 5), [rows]);
+  const siteMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "location", 5), [rows]);
+
+  const focusedView = useMemo(() => {
+    if (!selectedKpi) return null;
+
+    const kpiId = selectedKpi.kpi_id;
+    const base = {
+      title: `${selectedKpi.kpi_id} - ${selectedKpi.name}`,
+      note: selectedKpi.description || "Focused KPI dashboard built from your selected incident rows.",
+    };
+
+    switch (kpiId) {
+      case "INC-01":
+        return {
+          ...base,
+          cards: [
+            { title: "Major Incidents", value: major, note: `${ratio(major, total)}% of selected incidents are major` },
+            { title: "Total Selection", value: total, note: "Incident scope used for KPI analysis" },
+            { title: "Top Service", value: focusedServices[0]?.label || "-", note: "Most impacted service among major incidents" },
+          ],
+          chart: { title: "Major Incidents by IT Service", data: focusedServices },
+          extras: [
+            {
+              title: "Major Incidents by Service per Month",
+              note: "Compares top impacted services month by month inside the selected scope.",
+              type: "stacked",
+              ...monthlyBreakdown(majorRows, "opened", "affected_service", 5),
+            },
+            {
+              title: "Major Incident Sites",
+              note: "Additional view by impacted sites.",
+              type: "bar",
+              data: sites,
+            },
+          ],
+        };
+      case "INC-03":
+        return {
+          ...base,
+          cards: [
+            { title: "Open Incident Backlog", value: backlog, note: `${ratio(backlog, total)}% of selected incidents are open` },
+            { title: "Unassigned Backlog", value: unassignedBacklog, note: "Backlog without responsible user" },
+            { title: "Top Service", value: services[0]?.label || "-", note: "Service carrying the largest backlog" },
+          ],
+          chart: { title: "Current Backlog by IT Service", data: services },
+          extras: [
+            {
+              title: "Backlog by Service per Month",
+              note: "Shows how top services contribute to backlog over time.",
+              type: "stacked",
+              ...monthlyBreakdown(openBacklogRows, "opened", "affected_service", 5),
+            },
+            {
+              title: "Backlog by Responsible Group",
+              note: "Operational ownership view for the selected backlog scope.",
+              type: "bar",
+              data: groups,
+            },
+          ],
+        };
+      case "INC-06":
+        return {
+          ...base,
+          cards: [
+            { title: "Incidents Created", value: total, note: "Selected incident volume used as control KPI" },
+            { title: "Resolved or Closed", value: resolved, note: `${ratio(resolved, total)}% already resolved` },
+            { title: "SLA Breached", value: slaBreached, note: "Selected incidents breaching SLA" },
+          ],
+          line: { title: "Incidents Created Trend", data: monthlySeries(rows, "opened"), label: "Created Incidents" },
+          extras: [
+            {
+              title: "Incident Volume by Service per Month",
+              note: "Compares the top services contributing to incident creation month by month.",
+              type: "stacked",
+              ...serviceMonthly,
+            },
+            {
+              title: "Incident Volume by Group per Month",
+              note: "Shows which groups received the biggest monthly incident volume.",
+              type: "stacked",
+              ...groupMonthly,
+            },
+          ],
+        };
+      case "INC-07":
+      case "INC-08":
+        return {
+          ...base,
+          cards: [
+            { title: "Top Service", value: services[0]?.label || "-", note: "Service most impacted in the selected scope" },
+            { title: "Incidents in Scope", value: total, note: "Rows selected for this KPI" },
+            { title: "Major Incidents", value: major, note: "Major count within selected scope" },
+          ],
+          chart: { title: "Service Breakdown", data: services },
+          extras: [
+            {
+              title: "Service Comparison per Month",
+              note: "Monthly comparison between the top impacted services.",
+              type: "stacked",
+              ...serviceMonthly,
+            },
+            {
+              title: "Site Comparison per Month",
+              note: "Shows which sites are repeatedly impacted across months.",
+              type: "stacked",
+              ...siteMonthly,
+            },
+          ],
+        };
+      case "INC-09":
+      case "INC-15":
+        return {
+          ...base,
+          cards: [
+            { title: "SLA Breached Incidents", value: slaBreached, note: `${ratio(slaBreached, total)}% of scope breached SLA` },
+            { title: "Compliance Rate", value: `${100 - ratio(slaBreached, total)}%`, note: "Calculated from selected rows" },
+            { title: "Open Backlog", value: backlog, note: "Open incidents still under monitoring" },
+          ],
+          chart: { title: "Breached Incidents by Group", data: groups },
+          extras: [
+            {
+              title: "Breached Incidents by Group per Month",
+              note: "Monthly comparison of groups most exposed to SLA breaches.",
+              type: "stacked",
+              ...monthlyBreakdown(rows.filter((row) => row.sla_breached), "opened", "responsible_group", 5),
+            },
+            {
+              title: "Breached Incidents by Service",
+              note: "Shows where the SLA issue is concentrated by service.",
+              type: "bar",
+              data: countBy(rows.filter((row) => row.sla_breached), "affected_service"),
+            },
+          ],
+        };
+      case "INC-12":
+      case "INC-13":
+        return {
+          ...base,
+          cards: [
+            { title: "Compliance Rate", value: `${100 - ratio(slaBreached, total)}%`, note: "KPI compliance from selected scope" },
+            { title: "Breached Incidents", value: slaBreached, note: "Incidents outside SLA target" },
+            { title: "Resolved", value: resolved, note: "Resolved incidents in selected scope" },
+          ],
+          chart: { title: "SLA Impact by Responsible Group", data: groups },
+          extras: [
+            {
+              title: "Compliance Pressure by Group per Month",
+              note: "Month over month SLA pressure on the top responsible groups.",
+              type: "stacked",
+              ...groupMonthly,
+            },
+            {
+              title: "Compliance Pressure by Service",
+              note: "Additional business-facing view by impacted services.",
+              type: "bar",
+              data: services,
+            },
+          ],
+        };
+      default:
+        return {
+          ...base,
+          cards: [
+            { title: "Selected Incidents", value: total, note: "Scope selected from incidents table" },
+            { title: "Open Backlog", value: backlog, note: "Open or in-progress incidents" },
+            { title: "Major Incidents", value: major, note: "Major incidents within the scope" },
+          ],
+          chart: { title: "Incident Breakdown by Service", data: services },
+          extras: [
+            {
+              title: "Incident Service Comparison per Month",
+              note: "Monthly comparison across the top services.",
+              type: "stacked",
+              ...serviceMonthly,
+            },
+          ],
+        };
+    }
+  }, [
+    selectedKpi,
+    major,
+    total,
+    focusedServices,
+    backlog,
+    unassignedBacklog,
+    services,
+    resolved,
+    slaBreached,
+    groups,
+    rows,
+  ]);
 
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Header
-          title="INCIDENT MANAGEMENT KPI DASHBOARD"
-          subTitle={`${total} selected incidents - KPI view aligned to the monthly report style`}
+          title={focusedView ? focusedView.title : "INCIDENT MANAGEMENT KPI DASHBOARD"}
+          subTitle={
+            focusedView
+              ? `${focusedView.note} ${total} selected incidents in scope.`
+              : `${total} selected incidents - KPI view aligned to the monthly report style`
+          }
         />
         <Button variant="outlined" onClick={() => navigate("/incidents")}>
           Back
         </Button>
       </Stack>
 
+      {focusedView ? (
+        <>
+          <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
+            {focusedView.cards.map((card) => (
+              <KpiCard key={card.title} title={card.title} value={card.value} note={card.note} />
+            ))}
+          </Stack>
+
+          {focusedView.line ? (
+            <ChartCard title={focusedView.line.title} note={focusedView.note}>
+              <ResponsiveLine
+                data={[
+                  {
+                    id: focusedView.line.label,
+                    data: focusedView.line.data.map((item) => ({ x: item.month, y: item.value })),
+                  },
+                ]}
+                margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
+                xScale={{ type: "point" }}
+                yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
+                axisBottom={{ tickRotation: -35 }}
+                axisLeft={{ legend: "Count", legendOffset: -40 }}
+                pointSize={8}
+                pointBorderWidth={2}
+                pointBorderColor={{ from: "serieColor" }}
+                useMesh
+                colors={{ scheme: "category10" }}
+                enableArea
+                areaOpacity={0.08}
+                tooltip={renderLineTooltip}
+                theme={{ textColor: theme.palette.text.primary }}
+              />
+            </ChartCard>
+          ) : (
+            <ChartCard title={focusedView.chart.title} note={focusedView.note}>
+              <ResponsiveBar
+                data={focusedView.chart.data.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
+                keys={["value"]}
+                indexBy="label"
+                margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
+                padding={0.3}
+                colors={{ scheme: "set2" }}
+                axisBottom={{ tickRotation: -35 }}
+                axisLeft={{ legend: "Count", legendOffset: -40 }}
+                tooltip={renderBarTooltip}
+                theme={{ textColor: theme.palette.text.primary }}
+              />
+            </ChartCard>
+          )}
+
+          {focusedView.extras?.length ? (
+            <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mt={2}>
+              {focusedView.extras.map((extra) => (
+                <ChartCard
+                  key={extra.title}
+                  title={extra.title}
+                  note={extra.note}
+                  height={320}
+                  legendItems={extra.type === "stacked" ? makeLegendItems(extra.keys) : []}
+                >
+                  {extra.type === "stacked" ? (
+                    <ResponsiveBar
+                      data={extra.data}
+                      keys={extra.keys}
+                      indexBy="month"
+                      groupMode="grouped"
+                      margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
+                      padding={0.28}
+                      colors={({ id }) => getChartColor(extra.keys.indexOf(id))}
+                      axisBottom={{ tickRotation: -35 }}
+                      axisLeft={{ legend: "Count", legendOffset: -40 }}
+                      tooltip={renderBarTooltip}
+                      theme={{ textColor: theme.palette.text.primary }}
+                    />
+                  ) : (
+                    <ResponsiveBar
+                      data={extra.data.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
+                      keys={["value"]}
+                      indexBy="label"
+                      margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
+                      padding={0.3}
+                      colors={({ index }) => getChartColor(index)}
+                      axisBottom={{ tickRotation: -35 }}
+                      axisLeft={{ legend: "Count", legendOffset: -40 }}
+                      tooltip={renderBarTooltip}
+                      theme={{ textColor: theme.palette.text.primary }}
+                    />
+                  )}
+                </ChartCard>
+              ))}
+            </Stack>
+          ) : null}
+
+          <Paper sx={{ p: 2, mt: 2 }}>
+            <Typography variant="h6" mb={1.5}>
+              Selected Incident Scope
+            </Typography>
+            <Box sx={{ height: 520 }}>
+              <DataGrid
+                rows={rows}
+                columns={columns}
+                disableRowSelectionOnClick
+                getRowId={(row) => row.id}
+                onRowClick={(params) => navigate(`/incidents/${params.row.number}`)}
+                pageSizeOptions={[10, 25, 50]}
+              />
+            </Box>
+          </Paper>
+        </>
+      ) : (
+        <>
       <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
         <KpiCard
           title="Incident Backlog"
@@ -171,6 +488,7 @@ export default function IncidentsAnalysis() {
             colors={{ scheme: "category10" }}
             enableArea
             areaOpacity={0.08}
+            tooltip={renderLineTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -178,6 +496,7 @@ export default function IncidentsAnalysis() {
         <ChartCard
           title="Open vs Resolved Trend"
           note="Shows the selected scope trend between opened and resolved incidents."
+          legendItems={makeLegendItems(["Opened", "Resolved"])}
         >
           <ResponsiveBar
             data={openVsClosedMonthly}
@@ -186,9 +505,10 @@ export default function IncidentsAnalysis() {
             groupMode="grouped"
             margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
             padding={0.28}
-            colors={{ scheme: "set2" }}
+            colors={({ id }) => getChartColor(["Opened", "Resolved"].indexOf(id))}
             axisBottom={{ tickRotation: -35 }}
             axisLeft={{ legend: "Count", legendOffset: -40 }}
+            tooltip={renderBarTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -240,9 +560,10 @@ export default function IncidentsAnalysis() {
             indexBy="label"
             margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
             padding={0.3}
-            colors={{ scheme: "paired" }}
+            colors={({ index }) => getChartColor(index)}
             axisBottom={{ tickRotation: -35 }}
             axisLeft={{ legend: "Count", legendOffset: -40 }}
+            tooltip={renderBarTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -257,9 +578,10 @@ export default function IncidentsAnalysis() {
             indexBy="label"
             margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
             padding={0.3}
-            colors={{ scheme: "nivo" }}
+            colors={({ index }) => getChartColor(index)}
             axisBottom={{ tickRotation: -35 }}
             axisLeft={{ legend: "Count", legendOffset: -40 }}
+            tooltip={renderBarTooltip}
             theme={{ textColor: theme.palette.text.primary }}
           />
         </ChartCard>
@@ -276,9 +598,10 @@ export default function IncidentsAnalysis() {
           indexBy="label"
           margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
           padding={0.3}
-          colors={{ scheme: "set2" }}
+          colors={({ index }) => getChartColor(index)}
           axisBottom={{ tickRotation: -35 }}
           axisLeft={{ legend: "Count", legendOffset: -40 }}
+          tooltip={renderBarTooltip}
           theme={{ textColor: theme.palette.text.primary }}
         />
       </ChartCard>
@@ -298,6 +621,8 @@ export default function IncidentsAnalysis() {
           />
         </Box>
       </Paper>
+        </>
+      )}
     </Box>
   );
 }

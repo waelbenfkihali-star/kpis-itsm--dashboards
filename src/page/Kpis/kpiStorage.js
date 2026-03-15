@@ -1,6 +1,9 @@
+import { defaultKpis, mergeWithDefaultKpis } from "./kpiCatalog";
+
 const KEY = "kpis";
 const DELETED_KEY = "kpis_deleted";
-import { defaultKpis, mergeWithDefaultKpis } from "./kpiCatalog";
+const CATALOG_VERSION_KEY = "kpis_catalog_version";
+const CATALOG_VERSION = "2026-03-15-inc-req-chg";
 
 function loadDeletedIds() {
   try {
@@ -14,7 +17,18 @@ function saveDeletedIds(ids) {
   localStorage.setItem(DELETED_KEY, JSON.stringify(ids));
 }
 
+function syncCatalogVersion() {
+  const savedVersion = localStorage.getItem(CATALOG_VERSION_KEY);
+
+  if (savedVersion !== CATALOG_VERSION) {
+    localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
+    saveDeletedIds([]);
+  }
+}
+
 export function loadKpis() {
+  syncCatalogVersion();
+
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || "[]");
     const deletedIds = new Set(loadDeletedIds());

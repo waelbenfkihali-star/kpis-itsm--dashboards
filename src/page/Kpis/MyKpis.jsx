@@ -23,8 +23,10 @@ import { useNavigate } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 
 import { deleteKpiById, loadKpis } from "./kpiStorage";
+import { getModulePath } from "../analysis/kpiNavigation";
 
 const MyKpis = () => {
 
@@ -157,7 +159,37 @@ const MyKpis = () => {
 
       { field: "kpi_id", headerName: "KPI ID", flex: 1, minWidth: 120 },
 
-      { field: "name", headerName: "Name", flex: 2, minWidth: 220 },
+      {
+        field: "name",
+        headerName: "Name",
+        flex: 2,
+        minWidth: 220,
+        renderCell: (params) => (
+          <Typography
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(getModulePath(params.row.module), {
+                state: { selectedKpi: params.row },
+              });
+            }}
+            sx={{
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.18s ease",
+              "&:hover": {
+                color: "primary.main",
+                textShadow: (theme) =>
+                  theme.palette.mode === "dark"
+                    ? "0 0 10px rgba(144, 202, 249, 0.45)"
+                    : "0 0 8px rgba(25, 118, 210, 0.22)",
+                transform: "translateY(-1px)",
+              },
+            }}
+          >
+            {params.value}
+          </Typography>
+        ),
+      },
 
       { field: "owner", headerName: "Owner", flex: 1, minWidth: 140 },
 
@@ -187,13 +219,24 @@ const MyKpis = () => {
       {
         field: "actions",
         headerName: "Actions",
-        minWidth: 140,
+        minWidth: 180,
         sortable: false,
         filterable: false,
 
         renderCell: (params) => (
 
           <Box>
+
+            <IconButton
+              color="info"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/mykpis/${params.id}`);
+              }}
+            >
+              <VisibilityOutlinedIcon fontSize="small" />
+            </IconButton>
 
             <IconButton
               color="primary"
@@ -366,7 +409,6 @@ const MyKpis = () => {
 
           checkboxSelection
           disableRowSelectionOnClick
-          onRowClick={(params) => navigate(`/mykpis/${params.row.id}`)}
 
           slots={{ toolbar: GridToolbar }}
 
@@ -384,9 +426,6 @@ const MyKpis = () => {
               border: 0,
               "& .MuiDataGrid-columnHeaders": {
                 fontWeight: "bold",
-              },
-              "& .MuiDataGrid-row": {
-                cursor: "pointer",
               },
               "& .MuiDataGrid-row:hover": {
                 backgroundColor: "action.hover",

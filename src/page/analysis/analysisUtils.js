@@ -73,6 +73,32 @@ export function monthlyDualSeries(rows, firstKey, secondKey, firstLabel, secondL
   return Object.values(counts).sort((a, b) => a.month.localeCompare(b.month));
 }
 
+export function monthlyBreakdown(rows, dateKey, groupKey, limit = 5, fallback = "Unknown") {
+  const topGroups = countBy(rows, groupKey, fallback)
+    .slice(0, limit)
+    .map((item) => item.label);
+  const counts = {};
+
+  rows.forEach((row) => {
+    const month = parseDate(row[dateKey]);
+    if (!month) return;
+
+    const group = row[groupKey] || fallback;
+    if (!topGroups.includes(group)) return;
+
+    counts[month] = counts[month] || { month };
+    topGroups.forEach((label) => {
+      if (counts[month][label] === undefined) counts[month][label] = 0;
+    });
+    counts[month][group] += 1;
+  });
+
+  return {
+    keys: topGroups,
+    data: Object.values(counts).sort((a, b) => a.month.localeCompare(b.month)),
+  };
+}
+
 export function average(rows, key, filterFn = null) {
   const scopedRows = typeof filterFn === "function" ? rows.filter(filterFn) : rows;
   const values = scopedRows
@@ -148,4 +174,48 @@ export function makeLineData(points, label) {
       })),
     },
   ];
+}
+
+export const CHART_COLORS = [
+  "#4e79a7",
+  "#f28e2b",
+  "#e15759",
+  "#76b7b2",
+  "#59a14f",
+  "#edc948",
+  "#b07aa1",
+  "#ff9da7",
+];
+
+export function getChartColor(index = 0) {
+  return CHART_COLORS[index % CHART_COLORS.length];
+}
+
+export function makeLegendItems(labels = []) {
+  return labels.filter(Boolean).map((label, index) => ({
+    label,
+    color: getChartColor(index),
+  }));
+}
+
+export function renderBarTooltip({ id, value, indexValue, color }) {
+  return `
+${id}: ${indexValue}
+Value: ${value}
+`;
+}
+
+export function renderLineTooltip(point) {
+  return `
+${point.serieId}
+Month: ${point.data.xFormatted}
+Value: ${point.data.yFormatted}
+`;
+}
+
+export function renderPieTooltip({ datum }) {
+  return `
+${datum.id}
+Value: ${datum.value}
+`;
 }

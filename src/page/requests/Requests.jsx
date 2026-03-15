@@ -7,10 +7,12 @@ import {
   Stack,
   TextField,
   Autocomplete,
-  Button
+  Button,
+  Paper,
+  Typography
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
 import PageFilters from "../../components/PageFilters";
@@ -19,6 +21,8 @@ import { apiFetch } from "../../utils/api";
 export default function Requests() {
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const selectedKpi = location.state?.selectedKpi || null;
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -152,7 +156,7 @@ export default function Requests() {
 
   function handleAnalyse() {
     const selectedData = filteredRows.filter((row) => selectedIds.includes(row.id));
-    navigate("/requests-analysis", { state: { data: selectedData } });
+    navigate("/requests-analysis", { state: { data: selectedData, selectedKpi } });
   }
 
   const columns = [
@@ -196,6 +200,30 @@ export default function Requests() {
 
       <Header title="REQUESTS" subTitle="Key service requests to focus on" />
 
+      {selectedKpi ? (
+        <Paper sx={{ p: 2, mb: 2 }}>
+          <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" gap={2}>
+            <Box>
+              <Typography variant="overline" color="primary.main">
+                Selected KPI
+              </Typography>
+              <Typography variant="h6">
+                {selectedKpi.kpi_id} - {selectedKpi.name}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Filter and select the request rows you need, then click Analyse to open the KPI-focused dashboard.
+              </Typography>
+            </Box>
+            <Button
+              variant="text"
+              onClick={() => navigate("/requests", { replace: true })}
+            >
+              Clear KPI
+            </Button>
+          </Stack>
+        </Paper>
+      ) : null}
+
       {err && <Alert severity="error" sx={{ mb:2 }}>{err}</Alert>}
 
       <Stack direction="row" justifyContent="space-between" sx={{ mb:2 }}>
@@ -214,7 +242,7 @@ export default function Requests() {
           disabled={!selectedIds.length}
           onClick={handleAnalyse}
         >
-          Analyse
+          {selectedKpi ? `Analyse ${selectedKpi.kpi_id}` : "Analyse"}
         </Button>
 
       </Stack>
