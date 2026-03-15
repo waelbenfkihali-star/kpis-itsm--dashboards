@@ -127,6 +127,11 @@ export default function Changes() {
     });
   }
 
+  function handleAnalyse() {
+    const selectedData = filteredRows.filter((row) => selectedIds.includes(row.id));
+    navigate("/changes-analysis", { state: { data: selectedData } });
+  }
+
   const columns = [
 
     { field: "number", headerName: "Change ID", flex: 1 },
@@ -184,7 +189,7 @@ export default function Changes() {
           variant="contained"
           color="success"
           disabled={!selectedIds.length}
-          onClick={()=>console.log("Analyse rows:",selectedIds)}
+          onClick={handleAnalyse}
         >
           Analyse
         </Button>

@@ -6,9 +6,9 @@ import { ResponsiveLine } from "@nivo/line";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import {
-  average,
   countBy,
   countWhere,
+  diffInDays,
   monthlyDualSeries,
   monthlySeries,
   ratio,
@@ -47,52 +47,44 @@ function ChartCard({ title, note, children, height = 320 }) {
   );
 }
 
-export default function IncidentsAnalysis() {
+export default function ChangesAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const rows = Array.isArray(location.state?.data) ? location.state.data : [];
 
-  const openBacklogRows = useMemo(
-    () => rows.filter((row) => ["Open", "In Progress", "Pending"].includes(row.state)),
+  const openedMonthly = useMemo(() => monthlySeries(rows, "opened"), [rows]);
+  const openedVsClosed = useMemo(
+    () => monthlyDualSeries(rows, "opened", "closed", "Opened", "Closed"),
     [rows]
   );
-  const majorRows = useMemo(() => rows.filter((row) => row.is_major), [rows]);
-  const closedRows = useMemo(
-    () => rows.filter((row) => ["Closed", "Resolved"].includes(row.state)),
-    [rows]
-  );
-
-  const backlogMonthly = useMemo(() => monthlySeries(openBacklogRows, "opened"), [openBacklogRows]);
-  const openVsClosedMonthly = useMemo(
-    () => monthlyDualSeries(rows, "opened", "resolved", "Opened", "Resolved"),
-    [rows]
-  );
-
   const services = useMemo(() => countBy(rows, "affected_service"), [rows]);
-  const sites = useMemo(() => countBy(rows, "location"), [rows]);
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
+  const states = useMemo(() => countBy(rows, "state"), [rows]);
+  const types = useMemo(() => countBy(rows, "type"), [rows]);
 
   const columns = [
-    { field: "number", headerName: "Incident ID", flex: 1, minWidth: 140 },
-    { field: "state", headerName: "Status", flex: 1, minWidth: 130 },
+    { field: "number", headerName: "Change ID", flex: 1, minWidth: 140 },
+    { field: "state", headerName: "Status", flex: 1, minWidth: 120 },
+    { field: "type", headerName: "Type", flex: 1, minWidth: 120 },
     { field: "priority", headerName: "Priority", flex: 0.8, minWidth: 100 },
     { field: "affected_service", headerName: "Service", flex: 1.2, minWidth: 180 },
-    { field: "responsible_group", headerName: "Group", flex: 1.2, minWidth: 180 },
-    { field: "location", headerName: "Site", flex: 1.1, minWidth: 170 },
-    { field: "opened", headerName: "Opened", flex: 1, minWidth: 150 },
+    { field: "responsible_group", headerName: "Group", flex: 1.2, minWidth: 170 },
+    { field: "planned_start_date", headerName: "Planned Start", flex: 1, minWidth: 150 },
+    { field: "planned_end_date", headerName: "Planned End", flex: 1, minWidth: 150 },
+    { field: "closed", headerName: "Closed", flex: 1, minWidth: 150 },
   ];
 
   if (!rows.length) {
     return (
       <Box>
-        <Header title="INCIDENTS DASHBOARD" subTitle="No incidents selected" />
+        <Header title="CHANGES DASHBOARD" subTitle="No changes selected" />
         <Paper sx={{ p: 2.5 }}>
           <Typography mb={2}>
-            Select one or more incidents from the incidents table, then click Analyse again.
+            Select one or more changes from the changes table, then click Analyse again.
           </Typography>
-          <Button variant="outlined" onClick={() => navigate("/incidents")}>
-            Back to incidents
+          <Button variant="outlined" onClick={() => navigate("/changes")}>
+            Back to changes
           </Button>
         </Paper>
       </Box>
@@ -100,40 +92,49 @@ export default function IncidentsAnalysis() {
   }
 
   const total = rows.length;
-  const backlog = openBacklogRows.length;
-  const major = majorRows.length;
-  const resolved = closedRows.length;
-  const unassignedBacklog = countWhere(
-    openBacklogRows,
-    (row) => !String(row.responsible_user || "").trim()
+  const critical = countWhere(rows, (row) => row.priority === "P1");
+  const open = countWhere(
+    rows,
+    (row) => !["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)
   );
-  const slaBreached = countWhere(rows, (row) => row.sla_breached);
-  const avgHandle = average(rows, "duration");
-  const avgBusiness = average(rows, "business_duration");
-  const avgMajorResolution = average(rows, "duration", (row) => row.is_major);
+  const closed = countWhere(
+    rows,
+    (row) => ["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)
+  );
+  const emergency = countWhere(
+    rows,
+    (row) => String(row.type || "").toLowerCase().includes("emergency")
+  );
+  const pastDue = countWhere(
+    rows,
+    (row) =>
+      !row.closed &&
+      diffInDays(row.planned_end_date, new Date()) !== null &&
+      diffInDays(row.planned_end_date, new Date()) > 0
+  );
 
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
         <Header
-          title="INCIDENT MANAGEMENT KPI DASHBOARD"
-          subTitle={`${total} selected incidents - KPI view aligned to the monthly report style`}
+          title="CHANGE MANAGEMENT DASHBOARD"
+          subTitle={`${total} selected changes - KPI report aligned to the monthly change slides`}
         />
-        <Button variant="outlined" onClick={() => navigate("/incidents")}>
+        <Button variant="outlined" onClick={() => navigate("/changes")}>
           Back
         </Button>
       </Stack>
 
       <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
         <KpiCard
-          title="Incident Backlog"
-          value={backlog}
-          note={`${ratio(backlog, total)}% of selected rows are still open or in progress`}
+          title="Critical Changes"
+          value={critical}
+          note={`${ratio(critical, total)}% of selected changes are priority P1`}
         />
         <KpiCard
-          title="Major Incidents"
-          value={major}
-          note={`${ratio(major, total)}% of the selection is flagged as major`}
+          title="Past Due Changes"
+          value={pastDue}
+          note="Changes not implemented according to planned end date"
         />
         <KpiCard
           title="Control KPI"
@@ -141,29 +142,29 @@ export default function IncidentsAnalysis() {
           note={`Top service: ${topLabel(rows, "affected_service")}`}
         />
         <KpiCard
-          title="Unassigned Backlog"
-          value={unassignedBacklog}
-          note={`${ratio(unassignedBacklog, backlog || 1)}% of backlog has no responsible user`}
+          title="Emergency Changes"
+          value={emergency}
+          note={`${ratio(emergency, total)}% of selected changes are emergency type`}
         />
       </Stack>
 
       <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mb={2}>
         <ChartCard
-          title="Incident Management KPI Results - Past 6 Months"
-          note="Selected incidents opened by month, similar to the report's control trend."
+          title="Change Management KPI Results - Past 6 Months"
+          note="Selected changes opened by month, acting as the control KPI trend."
         >
           <ResponsiveLine
             data={[
               {
-                id: "Backlog Volume",
-                data: backlogMonthly.map((item) => ({ x: item.month, y: item.value })),
+                id: "Change Volume",
+                data: openedMonthly.map((item) => ({ x: item.month, y: item.value })),
               },
             ]}
             margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
             xScale={{ type: "point" }}
             yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
             axisBottom={{ tickRotation: -35, legend: "Month", legendOffset: 48 }}
-            axisLeft={{ legend: "Incidents", legendOffset: -40 }}
+            axisLeft={{ legend: "Changes", legendOffset: -40 }}
             pointSize={8}
             pointBorderWidth={2}
             pointBorderColor={{ from: "serieColor" }}
@@ -176,12 +177,12 @@ export default function IncidentsAnalysis() {
         </ChartCard>
 
         <ChartCard
-          title="Open vs Resolved Trend"
-          note="Shows the selected scope trend between opened and resolved incidents."
+          title="Open vs Closed Trend"
+          note="Selected scope trend between change creation and closure."
         >
           <ResponsiveBar
-            data={openVsClosedMonthly}
-            keys={["Opened", "Resolved"]}
+            data={openedVsClosed}
+            keys={["Opened", "Closed"]}
             indexBy="month"
             groupMode="grouped"
             margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
@@ -196,24 +197,24 @@ export default function IncidentsAnalysis() {
 
       <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
         <KpiCard
-          title="Avg. Time To Handle"
-          value={avgHandle || "-"}
-          note="Average duration from the selected incidents"
+          title="Open Changes"
+          value={open}
+          note={`${ratio(open, total)}% of selected changes are still open`}
         />
         <KpiCard
-          title="Avg. Business Duration"
-          value={avgBusiness || "-"}
-          note="Business duration average across selected incidents"
+          title="Closed Changes %"
+          value={`${ratio(closed, total)}%`}
+          note={`${closed} selected changes are already closed`}
         />
         <KpiCard
-          title="Major Resolution Duration"
-          value={avgMajorResolution || "-"}
-          note="Average duration only for selected major incidents"
+          title="Top Change Type"
+          value={topLabel(rows, "type")}
+          note="Most represented type in selected scope"
         />
         <KpiCard
-          title="SLA Resolution Compliance"
-          value={`${100 - ratio(slaBreached, total)}%`}
-          note={`${slaBreached} incidents in the selection breached the SLA`}
+          title="Top Responsible Group"
+          value={topLabel(rows, "responsible_group")}
+          note="Group carrying the biggest change volume"
         />
       </Stack>
 
@@ -222,17 +223,17 @@ export default function IncidentsAnalysis() {
           KPI Highlights
         </Typography>
         <Stack direction="row" flexWrap="wrap" gap={1}>
-          <Chip label={`Top impacted service: ${services[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
-          <Chip label={`Top site: ${sites[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
-          <Chip label={`Top responsible group: ${groups[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
-          <Chip label={`${resolved} incidents already resolved or closed`} color="secondary" variant="outlined" />
+          <Chip label={`Top state: ${states[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
+          <Chip label={`Top type: ${types[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
+          <Chip label={`Top service: ${services[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
+          <Chip label={`${emergency} emergency changes in selected scope`} color="secondary" variant="outlined" />
         </Stack>
       </Paper>
 
       <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mb={2}>
         <ChartCard
-          title="Top 10 Impacted Services"
-          note="Deep dive by affected services from the selected incidents."
+          title="Top 10 Affected Services"
+          note="Deep dive on services most impacted by selected changes."
         >
           <ResponsiveBar
             data={services.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
@@ -248,11 +249,11 @@ export default function IncidentsAnalysis() {
         </ChartCard>
 
         <ChartCard
-          title="Top 10 Sites"
-          note="Deep dive by site / location based on the selected incidents."
+          title="Top 10 Responsible Groups"
+          note="Groups carrying the highest selected change volume."
         >
           <ResponsiveBar
-            data={sites.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
+            data={groups.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
             keys={["value"]}
             indexBy="label"
             margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
@@ -266,12 +267,12 @@ export default function IncidentsAnalysis() {
       </Stack>
 
       <ChartCard
-        title="Top 10 Responsible Groups"
-        note="Deep dive by the groups carrying most of the selected incidents."
-        height={340}
+        title="Change Type Distribution"
+        note="Overall spread of change types in the selected scope."
+        height={320}
       >
         <ResponsiveBar
-          data={groups.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
+          data={types.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
           keys={["value"]}
           indexBy="label"
           margin={{ top: 20, right: 20, bottom: 90, left: 50 }}
@@ -285,7 +286,7 @@ export default function IncidentsAnalysis() {
 
       <Paper sx={{ p: 2, mt: 2 }}>
         <Typography variant="h6" mb={1.5}>
-          Selected Incident Scope
+          Selected Change Scope
         </Typography>
         <Box sx={{ height: 520 }}>
           <DataGrid
@@ -293,7 +294,7 @@ export default function IncidentsAnalysis() {
             columns={columns}
             disableRowSelectionOnClick
             getRowId={(row) => row.id}
-            onRowClick={(params) => navigate(`/incidents/${params.row.number}`)}
+            onRowClick={(params) => navigate(`/changes/${params.row.number}`)}
             pageSizeOptions={[10, 25, 50]}
           />
         </Box>

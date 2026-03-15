@@ -14,40 +14,7 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../components/Header";
 
-import { getKpiById, upsertKpi, loadKpis, saveKpis } from "./kpiStorage";
-
-const seed = [
-  {
-    id: 1,
-    kpi_id: "5.8.01",
-    name: "SLA Compliance",
-    owner: "Service Desk",
-    module: "Incidents",
-    dimension: "",
-    target: "",
-    frequency: "Monthly",
-    unit: "%",
-    formula: "",
-    source: "",
-    status: "Active",
-    description: "",
-  },
-  {
-    id: 2,
-    kpi_id: "5.8.02",
-    name: "Incident Resolution Time",
-    owner: "IT Support",
-    module: "Incidents",
-    dimension: "",
-    target: "",
-    frequency: "Weekly",
-    unit: "minutes",
-    formula: "",
-    source: "",
-    status: "Active",
-    description: "",
-  },
-];
+import { getKpiById, loadKpis, upsertKpi } from "./kpiStorage";
 
 const EditKpi = () => {
 
@@ -73,15 +40,11 @@ const EditKpi = () => {
   });
 
   useEffect(() => {
-
     let kpi = getKpiById(id);
 
     if (!kpi) {
       const list = loadKpis();
-      if (!list.length) {
-        saveKpis(seed);
-        kpi = seed.find((x) => String(x.id) === String(id)) || null;
-      }
+      kpi = list.find((x) => String(x.id) === String(id)) || null;
     }
 
     if (!kpi) {

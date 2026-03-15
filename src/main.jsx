@@ -1,5 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { CssBaseline } from "@mui/material";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 import "./index.css";
 
@@ -41,65 +43,92 @@ import IncidentDetails from "./page/incidents/IncidentDetails";
 import RequestDetails from "./page/requests/RequestDetails";
 import ChangeDetails from "./page/changes/ChangeDetails";
 import IncidentsAnalysis from "./page/incidents/IncidentsAnalysis";
+import RequestsAnalysis from "./page/requests/RequestsAnalysis";
+import ChangesAnalysis from "./page/changes/ChangesAnalysis";
+import { getDesignTokens } from "./theme";
 
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <>
+function RootRouter() {
+  const [mode, setMode] = React.useState(
+    localStorage.getItem("currentMode") || "light"
+  );
 
-      {/* LOGIN */}
+  const theme = React.useMemo(
+    () => createTheme(getDesignTokens(mode)),
+    [mode]
+  );
 
-      <Route path="/login" element={<Login />} />
+  const router = React.useMemo(
+    () =>
+      createBrowserRouter(
+        createRoutesFromElements(
+          <>
 
-      {/* APP */}
+            {/* LOGIN */}
 
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <App />
-          </ProtectedRoute>
-        }
-      >
+            <Route path="/login" element={<Login setMode={setMode} />} />
 
-        <Route index element={<Dashboard />} />
+            {/* APP */}
 
-        <Route path="team" element={<Team />} />
-        <Route path="incidents" element={<Incidents />} />
-        <Route path="requests" element={<Requests />} />
-        <Route path="changes" element={<Changes />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <App mode={mode} setMode={setMode} />
+                </ProtectedRoute>
+              }
+            >
 
-        <Route path="incidents/:number" element={<IncidentDetails />} />
-        <Route path="incidents-analysis" element={<IncidentsAnalysis />} />
-        <Route path="requests/:number" element={<RequestDetails />} />
-        <Route path="changes/:number" element={<ChangeDetails />} />
+              <Route index element={<Dashboard />} />
 
-        <Route path="kpiform" element={<KpiForm />} />
-        <Route path="mykpis" element={<MyKpis />} />
-        <Route path="mykpis/:id" element={<KpiDetails />} />
-        <Route path="editkpi/:id" element={<EditKpi />} />
+              <Route path="team" element={<Team />} />
+              <Route path="incidents" element={<Incidents />} />
+              <Route path="requests" element={<Requests />} />
+              <Route path="changes" element={<Changes />} />
 
-        <Route path="importexcel" element={<ImportExcel />} />
+              <Route path="incidents/:number" element={<IncidentDetails />} />
+              <Route path="incidents-analysis" element={<IncidentsAnalysis />} />
+              <Route path="requests/:number" element={<RequestDetails />} />
+              <Route path="requests-analysis" element={<RequestsAnalysis />} />
+              <Route path="changes/:number" element={<ChangeDetails />} />
+              <Route path="changes-analysis" element={<ChangesAnalysis />} />
 
-        <Route path="contacts" element={<Contacts />} />
-        <Route path="form" element={<Form />} />
-        <Route path="calendar" element={<Calendar />} />
-        <Route path="faq" element={<FAQ />} />
+              <Route path="kpiform" element={<KpiForm />} />
+              <Route path="mykpis" element={<MyKpis />} />
+              <Route path="mykpis/:id" element={<KpiDetails />} />
+              <Route path="editkpi/:id" element={<EditKpi />} />
 
-        <Route path="bar" element={<BarChart />} />
-        <Route path="pie" element={<PieChart />} />
-        <Route path="line" element={<LineChart />} />
-        <Route path="geography" element={<Geography />} />
+              <Route path="importexcel" element={<ImportExcel />} />
 
-        <Route path="*" element={<NotFound />} />
+              <Route path="contacts" element={<Contacts />} />
+              <Route path="form" element={<Form />} />
+              <Route path="calendar" element={<Calendar />} />
+              <Route path="faq" element={<FAQ />} />
 
-      </Route>
+              <Route path="bar" element={<BarChart />} />
+              <Route path="pie" element={<PieChart />} />
+              <Route path="line" element={<LineChart />} />
+              <Route path="geography" element={<Geography />} />
 
-    </>
-  )
-);
+              <Route path="*" element={<NotFound />} />
+
+            </Route>
+
+          </>
+        )
+      ),
+    [mode]
+  );
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <RootRouter />
   </React.StrictMode>
 );

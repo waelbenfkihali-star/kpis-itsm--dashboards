@@ -1,5 +1,4 @@
-import { Stack, IconButton } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { IconButton, Stack, useTheme } from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -8,31 +7,28 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { getApiUrl } from "../../utils/api";
 
-export default function Login({ setMode })  {
+export default function Login({ setMode }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const API_URL = useMemo(() => getApiUrl("/auth/token/"), []);
+  const isLight = theme.palette.mode === "light";
 
   const [username, setUsername] = useState(localStorage.getItem("saved_user") || "");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(Boolean(localStorage.getItem("saved_user")));
   const [showPass, setShowPass] = useState(false);
-
   const [capsOn, setCapsOn] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-
-  // entry animation
   const [mounted, setMounted] = useState(false);
+  const cardRef = useRef(null);
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0, sx: 1 });
+
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 20);
     return () => clearTimeout(t);
   }, []);
-
-  // 3D tilt
-  const cardRef = useRef(null);
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0, sx: 1 });
 
   useEffect(() => {
     const el = cardRef.current;
@@ -45,10 +41,13 @@ export default function Login({ setMode })  {
       const dx = (e.clientX - cx) / (r.width / 2);
       const dy = (e.clientY - cy) / (r.height / 2);
 
-      const rx = clamp(-10, 10, -dy * 8);
-      const ry = clamp(-10, 10, dx * 8);
-      setTilt({ rx, ry, sx: 1.01 });
+      setTilt({
+        rx: clamp(-10, 10, -dy * 8),
+        ry: clamp(-10, 10, dx * 8),
+        sx: 1.01,
+      });
     }
+
     function onLeave() {
       setTilt({ rx: 0, ry: 0, sx: 1 });
     }
@@ -92,8 +91,6 @@ export default function Login({ setMode })  {
       else localStorage.removeItem("saved_user");
 
       setSuccess(true);
-
-      // fancy delay then redirect
       setTimeout(() => navigate("/", { replace: true }), 900);
     } catch (e) {
       setError(String(e?.message || e));
@@ -103,51 +100,52 @@ export default function Login({ setMode })  {
   }
 
   const disabled = !username || !password || loading || success;
+  const pageStyle = {
+    background: isLight
+      ? "linear-gradient(180deg, #f8fafc 0%, #dbeafe 100%)"
+      : "#040816",
+    color: isLight ? "#0f172a" : "#ffffff",
+  };
+  const panelStyle = {
+    border: isLight ? "1px solid rgba(15,23,42,0.10)" : "1px solid rgba(255,255,255,0.10)",
+    background: isLight ? "rgba(255,255,255,0.76)" : "rgba(255,255,255,0.05)",
+  };
+  const cardStyle = {
+    border: isLight ? "1px solid rgba(15,23,42,0.10)" : "1px solid rgba(255,255,255,0.10)",
+    background: isLight ? "rgba(255,255,255,0.84)" : "rgba(255,255,255,0.07)",
+    boxShadow: isLight
+      ? "0 45px 110px rgba(148,163,184,0.30)"
+      : "0 45px 110px rgba(0,0,0,0.65)",
+  };
+  const mutedText = { color: isLight ? "#475569" : "#d1d5db" };
+  const subtleText = { color: isLight ? "#64748b" : "#9ca3af" };
+  const inputStyle = {
+    border: isLight ? "1px solid rgba(15,23,42,0.12)" : "1px solid rgba(255,255,255,0.12)",
+    background: isLight ? "rgba(248,250,252,0.92)" : "rgba(255,255,255,0.06)",
+    color: isLight ? "#0f172a" : "#ffffff",
+    boxShadow: isLight ? "inset 0 1px 0 rgba(255,255,255,0.70)" : "none",
+  };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#040816] text-white">
+    <div className="min-h-screen relative overflow-hidden" style={pageStyle}>
       <Stack
-  direction="row"
-  sx={{
-    position: "absolute",
-    top: 20,
-    right: 20,
-    zIndex: 1000,
-  }}
->
-  {theme.palette.mode === "light" ? (
-    <IconButton
-      onClick={() => {
-        localStorage.setItem(
-          "currentMode",
-          theme.palette.mode === "dark" ? "light" : "dark"
-        );
-        setMode?.((prevMode) =>
-          prevMode === "light" ? "dark" : "light"
-        );
-      }}
-      color="inherit"
-    >
-      <LightModeOutlinedIcon />
-    </IconButton>
-  ) : (
-    <IconButton
-      onClick={() => {
-        localStorage.setItem(
-          "currentMode",
-          theme.palette.mode === "dark" ? "light" : "dark"
-        );
-        setMode?.((prevMode) =>
-          prevMode === "light" ? "dark" : "light"
-        );
-      }}
-      color="inherit"
-    >
-      <DarkModeOutlinedIcon />
-    </IconButton>
-  )}
-</Stack>
-      {/* Background: aurora */}
+        direction="row"
+        sx={{ position: "absolute", top: 20, right: 20, zIndex: 1000 }}
+      >
+        <IconButton
+          onClick={() => {
+            localStorage.setItem(
+              "currentMode",
+              theme.palette.mode === "dark" ? "light" : "dark"
+            );
+            setMode?.((prevMode) => (prevMode === "light" ? "dark" : "light"));
+          }}
+          color="inherit"
+        >
+          {isLight ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
+        </IconButton>
+      </Stack>
+
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-72 -left-72 h-[980px] w-[980px] rounded-full blur-3xl bg-cyan-500/18 animate-[pulse_7s_ease-in-out_infinite]" />
         <div className="absolute -bottom-80 -right-80 h-[980px] w-[980px] rounded-full blur-3xl bg-indigo-600/16 animate-[pulse_8s_ease-in-out_infinite]" />
@@ -155,16 +153,25 @@ export default function Login({ setMode })  {
         <div className="absolute bottom-1/4 -left-56 h-[680px] w-[680px] rounded-full blur-3xl bg-sky-500/14 animate-[pulse_10s_ease-in-out_infinite]" />
       </div>
 
-      {/* Grid */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.10] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:56px_56px]" />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.10] bg-[size:56px_56px]"
+        style={{
+          backgroundImage: isLight
+            ? "linear-gradient(to right, rgba(15,23,42,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,23,42,0.12) 1px, transparent 1px)"
+            : "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+        }}
+      />
 
-      {/* Noise */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay [background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22><filter id=%22n%22 x=%220%22 y=%220%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/></filter><rect width=%22300%22 height=%22300%22 filter=%22url(%23n)%22 opacity=%220.35%22/></svg>')]" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: isLight
+            ? "radial-gradient(ellipse at center, transparent 0%, rgba(248,250,252,0.16) 55%, rgba(226,232,240,0.78) 100%)"
+            : "radial-gradient(ellipse at center, transparent 0%, rgba(4,8,22,0.35) 55%, rgba(4,8,22,0.95) 100%)",
+        }}
+      />
 
-      {/* Vignette */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(4,8,22,0.35)_55%,rgba(4,8,22,0.95)_100%)]" />
-
-      {/* Floating orbs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[10%] top-[15%] h-28 w-28 rounded-full bg-cyan-400/10 blur-xl animate-[floaty_10s_ease-in-out_infinite]" />
         <div className="absolute right-[12%] top-[55%] h-36 w-36 rounded-full bg-indigo-400/10 blur-xl animate-[floaty_12s_ease-in-out_infinite]" />
@@ -179,12 +186,11 @@ export default function Login({ setMode })  {
           ].join(" ")}
           style={{ transition: "all 600ms cubic-bezier(.2,.8,.2,1)" }}
         >
-          {/* LEFT HERO */}
           <div className="hidden lg:block">
             <div className="max-w-xl">
-              <div className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-xl">
+              <div className="inline-flex items-center gap-3 rounded-2xl px-4 py-2 backdrop-blur-xl" style={panelStyle}>
                 <span className="inline-block h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_22px_rgba(34,211,238,0.85)]" />
-                <span className="text-xs tracking-widest text-gray-200 uppercase">
+                <span className="text-xs tracking-widest uppercase" style={mutedText}>
                   ServoXis • LEONI IT Performance
                 </span>
               </div>
@@ -196,8 +202,8 @@ export default function Login({ setMode })  {
                 </span>
               </h1>
 
-              <p className="mt-4 text-sm text-gray-300 leading-relaxed max-w-lg">
-                Track incidents, requests, changes, and KPIs in one place — built for speed,
+              <p className="mt-4 text-sm leading-relaxed max-w-lg" style={mutedText}>
+                Track incidents, requests, changes, and KPIs in one place, built for speed,
                 clarity, and enterprise-level polish.
               </p>
 
@@ -208,16 +214,17 @@ export default function Login({ setMode })  {
                 <Stat label="Ops" value="ITSM aligned" />
               </div>
 
-              <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-[0_25px_70px_rgba(0,0,0,0.55)]">
-                <div className="text-xs tracking-widest text-gray-300 uppercase">Pro tip</div>
-                <div className="mt-2 text-sm text-gray-200">
-                  Use a strong password. We never store it — only JWT tokens are saved.
+              <div className="mt-10 rounded-3xl backdrop-blur-xl p-6 shadow-[0_25px_70px_rgba(0,0,0,0.18)]" style={panelStyle}>
+                <div className="text-xs tracking-widest uppercase" style={subtleText}>
+                  Pro tip
+                </div>
+                <div className="mt-2 text-sm" style={mutedText}>
+                  Use a strong password. We never store it, only JWT tokens are saved.
                 </div>
               </div>
             </div>
           </div>
 
-          {/* RIGHT LOGIN */}
           <div className="flex justify-center">
             <div
               ref={cardRef}
@@ -227,19 +234,14 @@ export default function Login({ setMode })  {
                 transition: "transform 140ms ease-out",
               }}
             >
-              {/* Outer glow frame */}
               <div className="absolute -inset-[2px] rounded-[30px] blur-2xl bg-gradient-to-r from-cyan-500/30 via-blue-600/25 to-indigo-600/30" />
 
-              <div className="relative rounded-[30px] border border-white/10 bg-white/7 backdrop-blur-2xl shadow-[0_45px_110px_rgba(0,0,0,0.65)] overflow-hidden">
-                {/* Top gradient line */}
+              <div className="relative rounded-[30px] backdrop-blur-2xl overflow-hidden" style={cardStyle}>
                 <div className="h-[6px] bg-gradient-to-r from-cyan-400 via-blue-600 to-indigo-600" />
-
-                {/* Shine */}
                 <div className="pointer-events-none absolute -top-24 -left-24 h-56 w-56 rotate-12 bg-white/10 blur-2xl" />
                 <div className="pointer-events-none absolute -bottom-28 -right-28 h-72 w-72 rotate-12 bg-cyan-400/10 blur-3xl" />
 
                 <div className="p-7 sm:p-8">
-                  {/* Brand */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="relative">
@@ -247,12 +249,13 @@ export default function Login({ setMode })  {
                         <img
                           src={logo}
                           alt="SERVOXIS"
-                          className="relative h-12 w-12 rounded-2xl object-cover border border-white/10 bg-white/5"
+                          className="relative h-12 w-12 rounded-2xl object-cover"
+                          style={panelStyle}
                         />
                       </div>
                       <div className="leading-tight">
                         <div className="text-lg font-semibold tracking-wide">SERVOXIS</div>
-                        <div className="text-[11px] text-gray-300 tracking-widest uppercase">
+                        <div className="text-[11px] tracking-widest uppercase" style={mutedText}>
                           LEONI IT PERFORMANCE
                         </div>
                       </div>
@@ -263,12 +266,11 @@ export default function Login({ setMode })  {
 
                   <div className="mt-6">
                     <div className="text-2xl font-semibold">Sign in</div>
-                    <div className="text-sm text-gray-300 mt-1">
-                      Welcome back — continue to your workspace
+                    <div className="text-sm mt-1" style={mutedText}>
+                      Welcome back, continue to your workspace
                     </div>
                   </div>
 
-                  {/* Error toast */}
                   {error && (
                     <div className="mt-5 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3">
                       <div className="flex items-start justify-between gap-3">
@@ -281,32 +283,33 @@ export default function Login({ setMode })  {
                           className="text-red-200/80 hover:text-red-100 text-sm"
                           title="Dismiss"
                         >
-                          ✕
+                          x
                         </button>
                       </div>
                     </div>
                   )}
 
                   <div className="mt-6 space-y-4">
-                    <Field label="Username">
+                    <Field label="Username" isLight={isLight}>
                       <input
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="e.g. wael.benali"
                         autoComplete="username"
-                        className="w-full rounded-2xl px-4 py-3 outline-none border border-white/12 bg-white/6 text-white placeholder-gray-400
-                                   focus:border-cyan-300/40 focus:ring-2 focus:ring-cyan-400/30 transition
-                                   hover:border-white/20"
+                        className="w-full rounded-2xl px-4 py-3 outline-none transition"
+                        style={inputStyle}
                       />
                     </Field>
 
                     <Field
                       label="Password"
+                      isLight={isLight}
                       right={
                         <button
                           type="button"
                           onClick={() => setShowPass((s) => !s)}
-                          className="text-xs text-gray-300 hover:text-white transition"
+                          className="text-xs transition"
+                          style={mutedText}
                         >
                           {showPass ? "Hide" : "Show"}
                         </button>
@@ -323,9 +326,8 @@ export default function Login({ setMode })  {
                           if (e.key === "Enter" && !disabled) login();
                         }}
                         onKeyUp={(e) => setCapsOn(e.getModifierState && e.getModifierState("CapsLock"))}
-                        className="w-full rounded-2xl px-4 py-3 outline-none border border-white/12 bg-white/6 text-white placeholder-gray-400
-                                   focus:border-cyan-300/40 focus:ring-2 focus:ring-cyan-400/30 transition
-                                   hover:border-white/20"
+                        className="w-full rounded-2xl px-4 py-3 outline-none transition"
+                        style={inputStyle}
                       />
                     </Field>
 
@@ -336,20 +338,21 @@ export default function Login({ setMode })  {
                     )}
 
                     <div className="flex items-center justify-between">
-                      <label className="flex items-center gap-2 text-sm text-gray-300 select-none">
+                      <label className="flex items-center gap-2 text-sm select-none" style={mutedText}>
                         <input
                           type="checkbox"
                           checked={remember}
                           onChange={(e) => setRemember(e.target.checked)}
-                          className="h-4 w-4 rounded border-white/20 bg-white/10"
+                          className="h-4 w-4 rounded"
                         />
                         Remember me
                       </label>
 
                       <button
                         type="button"
-                        onClick={() => alert("Forgot password flow: later 😉")}
-                        className="text-sm text-cyan-300 hover:text-cyan-200 transition"
+                        onClick={() => alert("Forgot password flow: later")}
+                        className="text-sm transition"
+                        style={{ color: isLight ? "#0284c7" : "#67e8f9" }}
                       >
                         Forgot password?
                       </button>
@@ -376,26 +379,38 @@ export default function Login({ setMode })  {
                       )}
                     </button>
 
-                    <div className="text-[11px] text-center text-gray-400 leading-relaxed">
+                    <div className="text-[11px] text-center leading-relaxed" style={subtleText}>
                       Internal system • password is never stored • actions can be audited
                     </div>
                   </div>
                 </div>
 
-                <div className="px-7 py-4 border-t border-white/10 text-xs text-gray-400 flex items-center justify-between">
+                <div
+                  className="px-7 py-4 text-xs flex items-center justify-between"
+                  style={{
+                    borderTop: isLight ? "1px solid rgba(15,23,42,0.10)" : "1px solid rgba(255,255,255,0.10)",
+                    color: isLight ? "#64748b" : "#9ca3af",
+                  }}
+                >
                   <span>© {new Date().getFullYear()} SERVOXIS</span>
-                  <span className="text-gray-300">LEONI • Internal</span>
+                  <span style={mutedText}>LEONI • Internal</span>
                 </div>
 
-                {/* SUCCESS OVERLAY */}
                 {success && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-[#040816]/40 backdrop-blur-xl">
+                  <div
+                    className="absolute inset-0 flex items-center justify-center backdrop-blur-xl"
+                    style={{
+                      background: isLight ? "rgba(248,250,252,0.62)" : "rgba(4,8,22,0.40)",
+                    }}
+                  >
                     <div className="text-center px-8">
                       <div className="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center shadow-[0_30px_90px_rgba(37,99,235,0.45)]">
                         <CheckIcon />
                       </div>
                       <div className="mt-5 text-xl font-semibold">Welcome back</div>
-                      <div className="mt-1 text-sm text-gray-300">Redirecting to dashboard…</div>
+                      <div className="mt-1 text-sm" style={mutedText}>
+                        Redirecting to dashboard...
+                      </div>
                     </div>
                   </div>
                 )}
@@ -418,11 +433,16 @@ function clamp(min, max, v) {
   return Math.max(min, Math.min(max, v));
 }
 
-function Field({ label, right, children }) {
+function Field({ label, right, children, isLight }) {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <label className="text-xs uppercase tracking-wider text-gray-300">{label}</label>
+        <label
+          className="text-xs uppercase tracking-wider"
+          style={{ color: isLight ? "#64748b" : "#d1d5db" }}
+        >
+          {label}
+        </label>
         {right}
       </div>
       <div className="mt-1">{children}</div>
@@ -431,17 +451,43 @@ function Field({ label, right, children }) {
 }
 
 function Stat({ label, value }) {
+  const theme = useTheme();
+  const isLight = theme.palette.mode === "light";
+
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4">
-      <div className="text-xs text-gray-300 uppercase tracking-wider">{label}</div>
-      <div className="mt-1 text-sm font-semibold text-white">{value}</div>
+    <div
+      className="rounded-2xl backdrop-blur-xl p-4"
+      style={{
+        border: isLight ? "1px solid rgba(15,23,42,0.10)" : "1px solid rgba(255,255,255,0.10)",
+        background: isLight ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.05)",
+      }}
+    >
+      <div
+        className="text-xs uppercase tracking-wider"
+        style={{ color: isLight ? "#64748b" : "#d1d5db" }}
+      >
+        {label}
+      </div>
+      <div className="mt-1 text-sm font-semibold" style={{ color: isLight ? "#0f172a" : "#ffffff" }}>
+        {value}
+      </div>
     </div>
   );
 }
 
 function Badge({ text }) {
+  const theme = useTheme();
+  const isLight = theme.palette.mode === "light";
+
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-gray-200 tracking-widest uppercase">
+    <div
+      className="rounded-2xl px-3 py-1 text-[11px] tracking-widest uppercase"
+      style={{
+        border: isLight ? "1px solid rgba(15,23,42,0.10)" : "1px solid rgba(255,255,255,0.10)",
+        background: isLight ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.05)",
+        color: isLight ? "#334155" : "#e5e7eb",
+      }}
+    >
       {text}
     </div>
   );

@@ -24,30 +24,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 
-import { deleteKpiById, loadKpis, saveKpis } from "./kpiStorage";
-
-const seed = [
-  {
-    id: 1,
-    kpi_id: "5.8.01",
-    name: "SLA Compliance",
-    owner: "Service Desk",
-    module: "Incidents",
-    frequency: "Monthly",
-    unit: "%",
-    status: "Active",
-  },
-  {
-    id: 2,
-    kpi_id: "5.8.02",
-    name: "Incident Resolution Time",
-    owner: "IT Support",
-    module: "Incidents",
-    frequency: "Weekly",
-    unit: "minutes",
-    status: "Active",
-  },
-];
+import { deleteKpiById, loadKpis } from "./kpiStorage";
 
 const MyKpis = () => {
 
@@ -68,16 +45,7 @@ const MyKpis = () => {
   const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
-
-    const list = loadKpis();
-
-    if (!list.length) {
-      saveKpis(seed);
-      setRows(seed);
-    } else {
-      setRows(list);
-    }
-
+    setRows(loadKpis());
   }, []);
 
   function confirmDelete() {
@@ -416,6 +384,12 @@ const MyKpis = () => {
               border: 0,
               "& .MuiDataGrid-columnHeaders": {
                 fontWeight: "bold",
+              },
+              "& .MuiDataGrid-row": {
+                cursor: "pointer",
+              },
+              "& .MuiDataGrid-row:hover": {
+                backgroundColor: "action.hover",
               },
             }}
 

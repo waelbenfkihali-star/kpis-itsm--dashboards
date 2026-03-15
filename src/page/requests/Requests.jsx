@@ -150,6 +150,11 @@ export default function Requests() {
     });
   }
 
+  function handleAnalyse() {
+    const selectedData = filteredRows.filter((row) => selectedIds.includes(row.id));
+    navigate("/requests-analysis", { state: { data: selectedData } });
+  }
+
   const columns = [
 
     { field: "number", headerName: "Request ID", flex: 1 },
@@ -207,7 +212,7 @@ export default function Requests() {
           variant="contained"
           color="success"
           disabled={!selectedIds.length}
-          onClick={()=>console.log("Analyse rows:",selectedIds)}
+          onClick={handleAnalyse}
         >
           Analyse
         </Button>

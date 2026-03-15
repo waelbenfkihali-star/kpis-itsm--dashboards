@@ -113,14 +113,14 @@ const Array2 = [
   { text: "Profile Form", icon: <PersonOutlinedIcon />, path: "/form" },
   { text: "Calendar", icon: <CalendarTodayOutlinedIcon />, path: "/calendar" },
   {
-   text: "MyKpis",
+   text: "My KPIs",
    icon: <BarChartOutlinedIcon />,
-   path: "/MyKpis",
+   path: "/mykpis",
   },
   {
-    text: "Kpiform",
+    text: "Define KPI",
     icon: <BarChartOutlinedIcon />,
-    path: "/Kpiform",
+    path: "/kpiform",
   },
   {
     text: "FAQ Page",
@@ -128,9 +128,9 @@ const Array2 = [
     path: "/faq",
   },
   {
-    text: "ImportExcel",
+    text: "Import Excel",
     icon: <HelpOutlineOutlinedIcon />,
-    path: "/ImportExcel",
+    path: "/importexcel",
   },
 ];
 
