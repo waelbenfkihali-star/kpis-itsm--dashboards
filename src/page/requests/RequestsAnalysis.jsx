@@ -56,6 +56,10 @@ function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   );
 }
 
+function hasKeyword(text, keywords) {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
 export default function RequestsAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -275,9 +279,120 @@ export default function RequestsAnalysis() {
           ],
         };
       default:
-        return null;
+        {
+          const descriptor = [
+            selectedKpi.name,
+            selectedKpi.dimension,
+            selectedKpi.formula,
+            selectedKpi.description,
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          if (hasKeyword(descriptor, ["aging", "60 days", "backlog", "open"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Open Backlog", value: backlog, note: `${ratio(backlog, total)}% of scope remains open` },
+                { title: "> 60 Days Backlog", value: olderThan60, note: "Older requests still pending" },
+                { title: "Top Group", value: groups[0]?.label || "-", note: "Group most represented in backlog" },
+              ],
+              chart: { title: "Backlog Aging by State", type: "stacked", data: agingStateData },
+              extras: [
+                {
+                  title: "Backlog by Group per Month",
+                  note: "Monthly comparison of top groups inside the selected backlog.",
+                  type: "stacked",
+                  ...monthlyBreakdown(openRows, "opened", "responsible_group", 5),
+                },
+                {
+                  title: "Backlog by Service",
+                  note: "Service view of the same selected request backlog.",
+                  type: "bar",
+                  data: services,
+                },
+              ],
+            };
+          }
+
+          if (hasKeyword(descriptor, ["close", "closure", "completed"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Closed Requests", value: closed, note: `${ratio(closed, total)}% of scope is closed` },
+                { title: "Closure Rate", value: `${ratio(closed, total)}%`, note: "Calculated from selected rows" },
+                { title: "Top Service", value: services[0]?.label || "-", note: "Service with the highest closure volume" },
+              ],
+              chart: { title: "Closed Requests by Service", type: "bar", data: services },
+              extras: [
+                {
+                  title: "Closed Requests by Service per Month",
+                  note: "Monthly closure comparison across the top services.",
+                  type: "stacked",
+                  ...monthlyBreakdown(closedRows, "closed", "it_service", 5),
+                },
+                {
+                  title: "Closed Requests by Group",
+                  note: "Operational ownership view for the closure scope.",
+                  type: "bar",
+                  data: groups,
+                },
+              ],
+            };
+          }
+
+          if (hasKeyword(descriptor, ["service", "business service", "grouped"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Requests in Scope", value: total, note: "Rows selected for KPI analysis" },
+                { title: "Top Service", value: services[0]?.label || "-", note: "Most represented service in scope" },
+                { title: "Top Request Item", value: items[0]?.label || "-", note: "Most represented item in scope" },
+              ],
+              chart: { title: "Requests by Service", type: "bar", data: services },
+              extras: [
+                {
+                  title: "Requests by Service per Month",
+                  note: "Monthly comparison between the top services.",
+                  type: "stacked",
+                  ...serviceMonthly,
+                },
+                {
+                  title: "Requests by Item per Month",
+                  note: "Additional item-level explanation for the selected scope.",
+                  type: "stacked",
+                  ...itemMonthly,
+                },
+              ],
+            };
+          }
+
+          return {
+            ...base,
+            cards: [
+              { title: "Requests in Scope", value: total, note: "Rows selected for this KPI" },
+              { title: "Open Backlog", value: backlog, note: "Requests still pending attention" },
+              { title: "Closed Requests", value: closed, note: "Requests already completed or closed" },
+            ],
+            line: { title: "Request Volume Trend", data: openedMonthly, label: "Requests" },
+            extras: [
+              {
+                title: "Request Volume by Service per Month",
+                note: "Monthly comparison for the top services in the selected scope.",
+                type: "stacked",
+                ...serviceMonthly,
+              },
+              {
+                title: "Request Volume by Group per Month",
+                note: "Shows which groups handled the selected request scope.",
+                type: "stacked",
+                ...groupMonthly,
+              },
+            ],
+          };
+        }
     }
-  }, [selectedKpi, backlog, total, olderThan60, groups, closed, services, items, openedMonthly, requestedFor, agingStateData]);
+  }, [selectedKpi, backlog, total, olderThan60, groups, closed, services, items, openedMonthly, requestedFor, agingStateData, openRows, closedRows, serviceMonthly, groupMonthly, itemMonthly]);
 
   return (
     <Box>

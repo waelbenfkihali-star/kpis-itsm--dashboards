@@ -54,6 +54,10 @@ function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   );
 }
 
+function hasKeyword(text, keywords) {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
 export default function ChangesAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -277,9 +281,146 @@ export default function ChangesAnalysis() {
           ],
         };
       default:
-        return null;
+        {
+          const descriptor = [
+            selectedKpi.name,
+            selectedKpi.dimension,
+            selectedKpi.formula,
+            selectedKpi.description,
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          if (hasKeyword(descriptor, ["past due", "planned", "schedule"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Past Due Changes", value: pastDue, note: "Changes exceeding planned end date" },
+                { title: "Open Changes", value: open, note: "Open changes still under execution" },
+                { title: "Top Group", value: groups[0]?.label || "-", note: "Group most represented in delayed scope" },
+              ],
+              chart: { title: "Past Due Changes by Group", data: groups },
+              extras: [
+                {
+                  title: "Past Due Pressure by Group per Month",
+                  note: "Monthly comparison of groups carrying the delayed workload.",
+                  type: "stacked",
+                  ...groupMonthly,
+                },
+                {
+                  title: "Past Due Changes by Service",
+                  note: "Service view of delayed change concentration.",
+                  type: "bar",
+                  data: services,
+                },
+              ],
+            };
+          }
+
+          if (hasKeyword(descriptor, ["critical", "priority"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Critical Changes", value: critical, note: `${ratio(critical, total)}% of scope is priority P1` },
+                { title: "Open Changes", value: open, note: "Open pressure inside the selected scope" },
+                { title: "Top Service", value: services[0]?.label || "-", note: "Most impacted service in scope" },
+              ],
+              chart: { title: "Critical Changes by Service", data: services },
+              extras: [
+                {
+                  title: "Critical Changes by Service per Month",
+                  note: "Monthly service comparison for critical work.",
+                  type: "stacked",
+                  ...monthlyBreakdown(rows.filter((row) => row.priority === "P1"), "opened", "affected_service", 5),
+                },
+                {
+                  title: "Critical Changes by Group",
+                  note: "Operational ownership view for critical changes.",
+                  type: "bar",
+                  data: groups,
+                },
+              ],
+            };
+          }
+
+          if (hasKeyword(descriptor, ["emergency"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Emergency Changes", value: emergency, note: `${ratio(emergency, total)}% of selected scope is emergency` },
+                { title: "Open Changes", value: open, note: "Open pressure inside the selected change scope" },
+                { title: "Top Group", value: groups[0]?.label || "-", note: "Group most exposed to emergency work" },
+              ],
+              chart: { title: "Emergency Changes by Group", data: groups },
+              extras: [
+                {
+                  title: "Emergency Changes by Group per Month",
+                  note: "Monthly comparison of emergency workload by group.",
+                  type: "stacked",
+                  ...monthlyBreakdown(rows.filter((row) => String(row.type || "").toLowerCase().includes("emergency")), "opened", "responsible_group", 5),
+                },
+                {
+                  title: "Emergency Changes by Service",
+                  note: "Service concentration for emergency changes.",
+                  type: "bar",
+                  data: services,
+                },
+              ],
+            };
+          }
+
+          if (hasKeyword(descriptor, ["close", "closure", "implemented"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Closed Changes", value: closed, note: `${ratio(closed, total)}% already closed or implemented` },
+                { title: "Closure Rate", value: `${ratio(closed, total)}%`, note: "Calculated from the selected rows" },
+                { title: "Open Changes", value: open, note: "Remaining selected backlog" },
+              ],
+              chart: { title: "Closed Changes by Service", data: services },
+              extras: [
+                {
+                  title: "Closed Changes by Service per Month",
+                  note: "Monthly comparison of closure volume across services.",
+                  type: "stacked",
+                  ...monthlyBreakdown(rows.filter((row) => ["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)), "closed", "affected_service", 5),
+                },
+                {
+                  title: "Closed Changes by Group",
+                  note: "Operational ownership behind the closure scope.",
+                  type: "bar",
+                  data: groups,
+                },
+              ],
+            };
+          }
+
+          return {
+            ...base,
+            cards: [
+              { title: "Changes in Scope", value: total, note: "Rows selected for this KPI" },
+              { title: "Open Changes", value: open, note: "Changes still active in selected scope" },
+              { title: "Emergency Changes", value: emergency, note: "Emergency load inside this selection" },
+            ],
+            line: { title: "Change Volume Trend", data: openedMonthly, label: "Changes" },
+            extras: [
+              {
+                title: "Change Volume by Service per Month",
+                note: "Monthly comparison of the top services in the selected scope.",
+                type: "stacked",
+                ...serviceMonthly,
+              },
+              {
+                title: "Change Volume by Type per Month",
+                note: "Shows how the top change types evolve month by month.",
+                type: "stacked",
+                ...typeMonthly,
+              },
+            ],
+          };
+        }
     }
-  }, [selectedKpi, pastDue, open, groups, critical, total, services, closed, emergency, openedMonthly]);
+  }, [selectedKpi, pastDue, open, groups, critical, total, services, closed, emergency, openedMonthly, rows, groupMonthly, serviceMonthly, typeMonthly]);
 
   return (
     <Box>

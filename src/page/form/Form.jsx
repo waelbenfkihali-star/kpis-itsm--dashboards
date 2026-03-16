@@ -4,21 +4,16 @@ import TextField from "@mui/material/TextField";
 import { Alert, Button, MenuItem, Snackbar, Stack } from "@mui/material";
 import { useForm } from "react-hook-form";
 import Header from "../../components/Header";
+import { apiFetchJson } from "../../utils/api";
+import { useOutletContext } from "react-router-dom";
 
 const regEmail =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-const phoneRegExp =
-  /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/;
 
 const data = [
   {
     value: "Admin",
     label: "Admin",
-  },
-  {
-    value: "Manger",
-    label: "Manger",
   },
   {
     value: "User",
@@ -27,14 +22,23 @@ const data = [
 ];
 
 const Form = () => {
+  const { currentUser } = useOutletContext();
   const {
     register,
     handleSubmit,
-    watch,
+    reset,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      role: "User",
+    },
+  });
 
   const [open, setOpen] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+
+  const isAdmin = currentUser?.access === "Admin";
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -48,22 +52,58 @@ const Form = () => {
     setOpen(true);
   };
 
-  const onSubmit = () => {
-    console.log("doneeeeeeeeeeee");
+  const onSubmit = async (values) => {
+    setSaving(true);
+    setErrorMessage("");
 
-    handleClick();
+    try {
+      await apiFetchJson("/team/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: values.username,
+          first_name: values.firstName,
+          last_name: values.lastName,
+          email: values.email,
+          password: values.password,
+          access: values.role,
+        }),
+      });
+
+      reset({
+        username: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        role: "User",
+      });
+      handleClick();
+    } catch (error) {
+      setErrorMessage(error.message || "Unable to create account.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-
-
-
-
 <Box>
-  
-  
-      <Header title="CREATE USER" subTitle="Create a New User Profile" />
-  
+      <Header title="PROFILE FORM" subTitle="Create a New User or Admin Account" />
+
+      {!isAdmin && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          Only admins can create new accounts.
+        </Alert>
+      )}
+
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {errorMessage}
+        </Alert>
+      )}
+
       <Box
         onSubmit={handleSubmit(onSubmit)}
         component="form"
@@ -72,10 +112,25 @@ const Form = () => {
           flexDirection: "column",
           gap: 3,
         }}
+        aria-disabled={!isAdmin}
         noValidate
         autoComplete="off"
       >
         <Stack sx={{ gap: 2 }} direction={"row"}>
+          <TextField
+            error={Boolean(errors.username)}
+            helperText={
+              Boolean(errors.username)
+                ? "Username is required and must be at least 3 characters"
+                : null
+            }
+            {...register("username", { required: true, minLength: 3 })}
+            sx={{ flex: 1 }}
+            label="Username"
+            variant="filled"
+            disabled={!isAdmin || saving}
+          />
+
           <TextField
             error={Boolean(errors.firstName)}
             helperText={
@@ -87,8 +142,9 @@ const Form = () => {
             sx={{ flex: 1 }}
             label="First Name"
             variant="filled"
+            disabled={!isAdmin || saving}
           />
-  
+
           <TextField
             error={Boolean(errors.lastName)}
             helperText={
@@ -100,9 +156,10 @@ const Form = () => {
             sx={{ flex: 1 }}
             label="Last Name"
             variant="filled"
+            disabled={!isAdmin || saving}
           />
         </Stack>
-  
+
         <TextField
           error={Boolean(errors.email)}
           helperText={
@@ -111,28 +168,29 @@ const Form = () => {
           {...register("email", { required: true, pattern: regEmail })}
           label="Email"
           variant="filled"
+          disabled={!isAdmin || saving}
         />
-  
+
         <TextField
-          error={Boolean(errors.ContactNumber)}
+          error={Boolean(errors.password)}
           helperText={
-            Boolean(errors.ContactNumber)
-              ? "Please provide a valid Phone number"
+            Boolean(errors.password)
+              ? "Password is required and must contain at least 8 characters"
               : null
           }
-          {...register("ContactNumber", { required: true, pattern: phoneRegExp })}
-          label="Contact Number"
+          {...register("password", { required: true, minLength: 8 })}
+          label="Password"
+          type="password"
           variant="filled"
+          disabled={!isAdmin || saving}
         />
-        <TextField label="Adress 1" variant="filled" />
-        <TextField label="Adress 2" variant="filled" />
-  
+
         <TextField
           variant="filled"
-          id="outlined-select-currency"
           select
           label="Role"
-          defaultValue="User"
+          {...register("role")}
+          disabled={!isAdmin || saving}
         >
           {data.map((option) => (
             <MenuItem key={option.value} value={option.value}>
@@ -146,10 +204,11 @@ const Form = () => {
             type="submit"
             sx={{ textTransform: "capitalize" }}
             variant="contained"
+            disabled={!isAdmin || saving}
           >
-            Create New User
+            {saving ? "Creating..." : "Create New Account"}
           </Button>
-  
+
           <Snackbar
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
             open={open}
@@ -162,12 +221,7 @@ const Form = () => {
           </Snackbar>
         </Box>
       </Box>
-  
-  
 </Box>
-
-
-
 );
 };
 

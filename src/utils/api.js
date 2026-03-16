@@ -35,3 +35,19 @@ export async function apiFetch(path, options = {}) {
   return response;
 }
 
+export async function apiFetchJson(path, options = {}) {
+  const response = await apiFetch(path, options);
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+
+  if (!response.ok) {
+    const message = data?.detail || data?.error || `Request failed (HTTP ${response.status})`;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+export function fetchCurrentUser() {
+  return apiFetchJson("/auth/me/");
+}

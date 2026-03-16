@@ -1,15 +1,20 @@
 import pandas as pd
+from collections import defaultdict
+from django.contrib.auth.models import User
 from django.db import transaction
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.response import Response
 from rest_framework import status
-from collections import defaultdict
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
 from .models import Incident, Request, Change
-from .models import Incident, Request, Change
-from .serializers import IncidentSerializer, RequestSerializer, ChangeSerializer
+from .serializers import (
+    ChangeSerializer,
+    IncidentSerializer,
+    RequestSerializer,
+    TeamMemberCreateSerializer,
+    TeamMemberSerializer,
+)
 
 
 # -------- CLEANING FUNCTIONS --------
@@ -345,11 +350,15 @@ def change_detail(request, number):
     if not row:
         return Response({"detail": "Not found"}, status=404)
     return Response(ChangeSerializer(row).data)
+
+
 @api_view(["POST"])
 def delete_incidents(request):
     ids = request.data.get("ids", [])
     Incident.objects.filter(id__in=ids).delete()
     return Response({"deleted": len(ids)})
+
+
 @api_view(["POST"])
 def delete_requests(request):
     ids = request.data.get("ids", [])
@@ -362,6 +371,8 @@ def delete_changes(request):
     ids = request.data.get("ids", [])
     Change.objects.filter(id__in=ids).delete()
     return Response({"deleted": len(ids)})
+
+
 @api_view(["GET"])
 def monthly_stats(request):
 
@@ -402,3 +413,26 @@ def monthly_stats(request):
     result = sorted(data.values(), key=lambda x: x["month"])
 
     return Response(result)
+
+
+@api_view(["GET"])
+def current_user(request):
+    return Response(TeamMemberSerializer(request.user).data)
+
+
+@api_view(["GET", "POST"])
+def team_members(request):
+    if request.method == "GET":
+        users = User.objects.all().order_by("-is_superuser", "-is_staff", "username")
+        return Response(TeamMemberSerializer(users, many=True).data)
+
+    if not request.user.is_staff:
+        return Response(
+            {"detail": "Only admins can create new accounts."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    serializer = TeamMemberCreateSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
+    return Response(TeamMemberSerializer(user).data, status=status.HTTP_201_CREATED)

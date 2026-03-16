@@ -16,7 +16,9 @@ import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
-import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
+import QueryStatsOutlinedIcon from "@mui/icons-material/QueryStatsOutlined";
+import PlaylistAddCircleOutlinedIcon from "@mui/icons-material/PlaylistAddCircleOutlined";
+import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
 import { grey } from "@mui/material/colors";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
@@ -75,65 +77,75 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   ...theme.mixins.toolbar,
 }));
 
-const Array1 = [
+const operationsItems = [
   { text: "Dashboard", icon: <HomeOutlinedIcon />, path: "/" },
+  {
+    text: "Incidents",
+    icon: <WarningAmberOutlinedIcon />,
+    path: "/incidents",
+  },
+  {
+    text: "Requests",
+    icon: <AssignmentTurnedInOutlinedIcon />,
+    path: "/Requests",
+  },
+  {
+    text: "Changes",
+    icon: <BuildCircleOutlinedIcon />,
+    path: "/Changes",
+  },
+  {
+    text: "Import Excel",
+    icon: <UploadFileOutlinedIcon />,
+    path: "/importexcel",
+  },
+];
+
+const kpiItems = [
+  {
+    text: "My KPIs",
+    icon: <QueryStatsOutlinedIcon />,
+    path: "/mykpis",
+  },
+  {
+    text: "Define KPI",
+    icon: <PlaylistAddCircleOutlinedIcon />,
+    path: "/kpiform",
+  },
+];
+
+const adminItems = [
   { text: "Manage Team", icon: <PeopleOutlinedIcon />, path: "/team" },
+  { text: "Profile Form", icon: <PersonOutlinedIcon />, path: "/form" },
   {
     text: "Contacts Information",
     icon: <ContactsOutlinedIcon />,
     path: "/contacts",
   },
-   {
-    text: "Incidents",
-    icon: <WarningAmberOutlinedIcon/>,
-    path: "/incidents",
-  },
-   {
-    text: "Requests",
-    icon: <AssignmentTurnedInOutlinedIcon/>,
-    path: "/Requests",
-  },
-   {
-    text: "Changes",
-    icon: <BuildCircleOutlinedIcon />,
-    path: "/Changes",
-  },
+  { text: "Calendar", icon: <CalendarTodayOutlinedIcon />, path: "/calendar" },
 ];
 
-const Array2 = [
-  { text: "Profile Form", icon: <PersonOutlinedIcon />, path: "/form" },
-  { text: "Calendar", icon: <CalendarTodayOutlinedIcon />, path: "/calendar" },
+const supportItems = [
   {
-   text: "My KPIs",
-   icon: <BarChartOutlinedIcon />,
-   path: "/mykpis",
-  },
-  {
-    text: "Define KPI",
-    icon: <BarChartOutlinedIcon />,
-    path: "/kpiform",
-  },
-  {
-    text: "FAQ Page",
+    text: "FAQ & Help",
     icon: <HelpOutlineOutlinedIcon />,
     path: "/faq",
   },
-  {
-    text: "Import Excel",
-    icon: <HelpOutlineOutlinedIcon />,
-    path: "/importexcel",
-  },
 ];
 
-const SideBar = ({ open, handleDrawerClose }) => {
+const SideBar = ({ open, handleDrawerClose, currentUser }) => {
   let location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
   const logout = () => {
   localStorage.removeItem("access");
   localStorage.removeItem("refresh");
+  localStorage.removeItem("saved_user");
   navigate("/login", { replace: true });
 };
+
+  const displayName = currentUser?.full_name || currentUser?.username || "Workspace user";
+  const displayRole = currentUser?.access || "Authenticated";
   
   return (
     <Drawer variant="permanent" open={open}>
@@ -163,7 +175,7 @@ const SideBar = ({ open, handleDrawerClose }) => {
         align="center"
         sx={{ fontSize: open ? 17 : 0, transition: "0.25s" }}
       > 
-        Wael Ben Fekih Ali
+        {displayName}
       </Typography>
       <Typography
         align="center"
@@ -173,13 +185,13 @@ const SideBar = ({ open, handleDrawerClose }) => {
           color: theme.palette.info.main,
         }}
       >
-        Admin
+        {displayRole}
       </Typography>
 
       <Divider />
 
       <List>
-        {Array1.map((item) => (
+        {operationsItems.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ display: "block" }}>
             <Tooltip title={open ? null : item.text} placement="left">
               <ListItemButton
@@ -220,7 +232,7 @@ const SideBar = ({ open, handleDrawerClose }) => {
       <Divider />
 
       <List>
-        {Array2.map((item) => (
+        {kpiItems.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ display: "block" }}>
             <Tooltip title={open ? null : item.text} placement="left">
               <ListItemButton
@@ -260,36 +272,118 @@ const SideBar = ({ open, handleDrawerClose }) => {
 
       <Divider />
 
-<List>
-  <ListItem disablePadding sx={{ display: "block" }}>
-    <Tooltip title={open ? null : "Logout"} placement="left">
-      <ListItemButton
-        onClick={logout}
-        sx={{
-          minHeight: 48,
-          justifyContent: open ? "initial" : "center",
-          px: 2.5,
-        }}
-      >
-        <ListItemIcon
-          sx={{
-            minWidth: 0,
-            mr: open ? 3 : "auto",
-            justifyContent: "center",
-            color: "error.main",
-          }}
-        >
-          <LogoutOutlinedIcon />
-        </ListItemIcon>
+      <List>
+        {adminItems.map((item) => (
+          <ListItem key={item.path} disablePadding sx={{ display: "block" }}>
+            <Tooltip title={open ? null : item.text} placement="left">
+              <ListItemButton
+                onClick={() => {
+                  navigate(item.path);
+                }}
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? "initial" : "center",
+                  px: 2.5,
+                  bgcolor:
+                    location.pathname === item.path
+                      ? theme.palette.mode === "dark"
+                        ? grey[800]
+                        : grey[300]
+                      : null,
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  sx={{ opacity: open ? 1 : 0 }}
+                />
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        ))}
+      </List>
 
-        <ListItemText
-          primary="Logout"
-          sx={{ opacity: open ? 1 : 0, color: "error.main" }}
-        />
-      </ListItemButton>
-    </Tooltip>
-  </ListItem>
-</List>
+      <Divider />
+
+      <List>
+        {supportItems.map((item) => (
+          <ListItem key={item.path} disablePadding sx={{ display: "block" }}>
+            <Tooltip title={open ? null : item.text} placement="left">
+              <ListItemButton
+                onClick={() => {
+                  navigate(item.path);
+                }}
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? "initial" : "center",
+                  px: 2.5,
+                  bgcolor:
+                    location.pathname === item.path
+                      ? theme.palette.mode === "dark"
+                        ? grey[800]
+                        : grey[300]
+                      : null,
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  sx={{ opacity: open ? 1 : 0 }}
+                />
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        ))}
+      </List>
+
+      <Divider />
+
+      <List>
+        <ListItem disablePadding sx={{ display: "block" }}>
+          <Tooltip title={open ? null : "Logout"} placement="left">
+            <ListItemButton
+              onClick={logout}
+              sx={{
+                minHeight: 48,
+                justifyContent: open ? "initial" : "center",
+                px: 2.5,
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: open ? 3 : "auto",
+                  justifyContent: "center",
+                  color: "error.main",
+                }}
+              >
+                <LogoutOutlinedIcon />
+              </ListItemIcon>
+
+              <ListItemText
+                primary="Logout"
+                sx={{ opacity: open ? 1 : 0, color: "error.main" }}
+              />
+            </ListItemButton>
+          </Tooltip>
+        </ListItem>
+      </List>
     </Drawer>
   );
 };

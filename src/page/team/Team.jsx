@@ -1,52 +1,98 @@
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { rows } from "./data";
 import { useTheme } from "@mui/material";
-import { Box, Typography } from "@mui/material";
+import { Alert, Box, Button, Typography } from "@mui/material";
 import {
   AdminPanelSettingsOutlined,
   LockOpenOutlined,
-  SecurityOutlined,
 } from "@mui/icons-material";
 import Header from "../../components/Header";
+import { apiFetchJson } from "../../utils/api";
+import { useOutletContext } from "react-router-dom";
 
 const Team = () => {
   const theme = useTheme();
+  const { currentUser } = useOutletContext();
+  const [rows, setRows] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState("");
 
-  // field ==> Reqird
+  const isAdmin = currentUser?.access === "Admin";
+
+  const loadTeam = React.useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await apiFetchJson("/team/");
+      setRows(
+        data.map((member) => ({
+          ...member,
+          name: member.full_name || member.username,
+        }))
+      );
+    } catch (err) {
+      setError(err.message || "Unable to load team members.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    loadTeam();
+  }, [loadTeam]);
+
   const columns = [
     {
       field: "id",
       headerName: "ID",
-      width: 33,
+      width: 80,
+      align: "center",
+      headerAlign: "center",
+    },
+    {
+      field: "username",
+      headerName: "Username",
+      flex: 0.9,
       align: "center",
       headerAlign: "center",
     },
     {
       field: "name",
-      headerName: "name",
+      headerName: "Full Name",
+      flex: 1,
       align: "center",
       headerAlign: "center",
     },
     {
       field: "email",
-      headerName: "email",
+      headerName: "Email",
       flex: 1,
       align: "center",
       headerAlign: "center",
     },
-    { field: "age", headerName: "age", align: "center", headerAlign: "center" },
     {
-      field: "phone",
-      headerName: "phone",
-      flex: 1,
+      field: "is_active",
+      headerName: "Status",
+      width: 120,
       align: "center",
       headerAlign: "center",
+      renderCell: ({ value }) => (
+        <Typography
+          sx={{
+            fontSize: "13px",
+            fontWeight: 700,
+            color: value ? theme.palette.success.main : theme.palette.error.main,
+          }}
+        >
+          {value ? "Active" : "Disabled"}
+        </Typography>
+      ),
     },
     {
       field: "access",
-      headerName: "access",
-      flex: 1,
+      headerName: "Access",
+      width: 150,
       align: "center",
       headerAlign: "center",
       renderCell: ({ row: { access } }) => {
@@ -63,8 +109,6 @@ const Team = () => {
               backgroundColor:
                 access === "Admin"
                   ? theme.palette.primary.dark
-                  : access === "Manager"
-                  ? theme.palette.secondary.dark
                   : "#3da58a",
             }}
           >
@@ -73,10 +117,6 @@ const Team = () => {
                 sx={{ color: "#fff" }}
                 fontSize="small"
               />
-            )}
-
-            {access === "Manager" && (
-              <SecurityOutlined sx={{ color: "#fff" }} fontSize="small" />
             )}
 
             {access === "User" && (
@@ -96,13 +136,33 @@ const Team = () => {
     <Box>
       <Header title={"TEAM"} subTitle={"Managing the Team Members"} />
 
-      <Box sx={{ height: 600, mx: "auto" }}>
-        <DataGrid
-          rows={rows}
-          // @ts-ignore
-          columns={columns}
-        />
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+        <Button variant="outlined" onClick={loadTeam} disabled={loading}>
+          Refresh
+        </Button>
       </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      <Box sx={{ height: 600, mx: "auto" }}>
+        <DataGrid rows={rows} columns={columns} loading={loading} disableRowSelectionOnClick />
+      </Box>
+
+      {!isAdmin && currentUser && (
+        <Alert severity="info" sx={{ mt: 3 }}>
+          You can view team access here. Only admins can create accounts from Profile Form.
+        </Alert>
+      )}
+
+      {!currentUser && (
+        <Alert severity="warning" sx={{ mt: 3 }}>
+          Loading your session permissions...
+        </Alert>
+      )}
     </Box>
   );
 };

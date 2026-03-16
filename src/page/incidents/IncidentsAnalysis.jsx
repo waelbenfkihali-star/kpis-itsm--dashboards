@@ -54,6 +54,10 @@ function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   );
 }
 
+function hasKeyword(text, keywords) {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
 export default function IncidentsAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -282,6 +286,120 @@ export default function IncidentsAnalysis() {
           ],
         };
       default:
+        {
+          const descriptor = [
+            selectedKpi.name,
+            selectedKpi.dimension,
+            selectedKpi.formula,
+            selectedKpi.description,
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          if (hasKeyword(descriptor, ["sla", "breach", "compliance", "response", "resolution"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Compliance Rate", value: `${100 - ratio(slaBreached, total)}%`, note: "Estimated from selected incident scope" },
+                { title: "SLA Breached", value: slaBreached, note: "Incidents outside the SLA target" },
+                { title: "Resolved", value: resolved, note: "Resolved or closed incidents in selected scope" },
+              ],
+              chart: { title: "SLA Impact by Group", data: groups },
+              extras: [
+                {
+                  title: "SLA Pressure by Group per Month",
+                  note: "Monthly comparison of the groups exposed to SLA pressure.",
+                  type: "stacked",
+                  ...monthlyBreakdown(rows.filter((row) => row.sla_breached), "opened", "responsible_group", 5),
+                },
+                {
+                  title: "SLA Pressure by Service",
+                  note: "Shows which services are most represented in the breached scope.",
+                  type: "bar",
+                  data: countBy(rows.filter((row) => row.sla_breached), "affected_service"),
+                },
+              ],
+            };
+          }
+
+          if (hasKeyword(descriptor, ["major"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Major Incidents", value: major, note: `${ratio(major, total)}% of selected incidents are major` },
+                { title: "Incidents in Scope", value: total, note: "Rows selected for this KPI" },
+                { title: "Top Impacted Service", value: focusedServices[0]?.label || "-", note: "Service most exposed to major incidents" },
+              ],
+              chart: { title: "Major Incidents by Service", data: focusedServices },
+              extras: [
+                {
+                  title: "Major Incident Services per Month",
+                  note: "Monthly comparison of services impacted by major incidents.",
+                  type: "stacked",
+                  ...monthlyBreakdown(majorRows, "opened", "affected_service", 5),
+                },
+                {
+                  title: "Major Incident Sites",
+                  note: "Additional location view for the same KPI scope.",
+                  type: "bar",
+                  data: countBy(majorRows, "location"),
+                },
+              ],
+            };
+          }
+
+          if (hasKeyword(descriptor, ["backlog", "open", "pending"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Open Backlog", value: backlog, note: `${ratio(backlog, total)}% of the selected incidents are still open` },
+                { title: "Unassigned Backlog", value: unassignedBacklog, note: "Open incidents without responsible user" },
+                { title: "Top Service", value: services[0]?.label || "-", note: "Service carrying the biggest backlog" },
+              ],
+              chart: { title: "Open Backlog by Service", data: services },
+              extras: [
+                {
+                  title: "Backlog by Service per Month",
+                  note: "Monthly view of services contributing to the selected backlog.",
+                  type: "stacked",
+                  ...monthlyBreakdown(openBacklogRows, "opened", "affected_service", 5),
+                },
+                {
+                  title: "Backlog by Group",
+                  note: "Operational ownership distribution inside the selected backlog.",
+                  type: "bar",
+                  data: countBy(openBacklogRows, "responsible_group"),
+                },
+              ],
+            };
+          }
+
+          if (hasKeyword(descriptor, ["time", "duration", "hour"])) {
+            return {
+              ...base,
+              cards: [
+                { title: "Avg Handle Time", value: avgHandle || "-", note: "Average duration across the selected incidents" },
+                { title: "Avg Business Duration", value: avgBusiness || "-", note: "Business duration across the selected scope" },
+                { title: "Resolved Incidents", value: resolved, note: "Resolved or closed incidents in scope" },
+              ],
+              chart: { title: "Incident Workload by Group", data: groups },
+              extras: [
+                {
+                  title: "Incident Volume by Group per Month",
+                  note: "Monthly view of the groups involved in this KPI scope.",
+                  type: "stacked",
+                  ...groupMonthly,
+                },
+                {
+                  title: "Incident Volume by Service",
+                  note: "Service-based perspective for the same selected incidents.",
+                  type: "bar",
+                  data: services,
+                },
+              ],
+            };
+          }
+
         return {
           ...base,
           cards: [
@@ -299,6 +417,7 @@ export default function IncidentsAnalysis() {
             },
           ],
         };
+        }
     }
   }, [
     selectedKpi,
@@ -312,6 +431,11 @@ export default function IncidentsAnalysis() {
     slaBreached,
     groups,
     rows,
+    avgHandle,
+    avgBusiness,
+    openBacklogRows,
+    majorRows,
+    groupMonthly,
   ]);
 
   return (
