@@ -1,10 +1,10 @@
 import {
+  Avatar,
   Box,
   IconButton,
   InputBase,
   Stack,
   Toolbar,
-  Typography,
   styled,
   useTheme,
 } from "@mui/material";
@@ -13,12 +13,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import MenuIcon from "@mui/icons-material/Menu";
 import MuiAppBar from "@mui/material/AppBar";
 import { alpha } from "@mui/material/styles";
-import { Delete } from "@mui/icons-material";
 import Person2OutlinedIcon from "@mui/icons-material/Person2Outlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
@@ -81,8 +79,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const TopBar = ({ open, handleDrawerOpen, setMode }) => {
+const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
+
   return (
     <AppBar
       position="fixed"
@@ -148,16 +148,16 @@ const TopBar = ({ open, handleDrawerOpen, setMode }) => {
             </IconButton>
           )}
 
-          <IconButton color="inherit">
-            <NotificationsOutlinedIcon />
-          </IconButton>
-
-          <IconButton color="inherit">
-            <SettingsOutlinedIcon />
-          </IconButton>
-
-          <IconButton color="inherit">
-            <Person2OutlinedIcon />
+          <IconButton color="inherit" onClick={() => navigate("/profile")}>
+            {currentUser?.avatar ? (
+              <Avatar
+                src={currentUser.avatar}
+                alt={currentUser.full_name || currentUser.username || "Profile"}
+                sx={{ width: 32, height: 32 }}
+              />
+            ) : (
+              <Person2OutlinedIcon />
+            )}
           </IconButton>
         </Stack>
       </Toolbar>

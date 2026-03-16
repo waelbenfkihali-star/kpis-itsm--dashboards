@@ -146,6 +146,7 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
 
   const displayName = currentUser?.full_name || currentUser?.username || "Workspace user";
   const displayRole = currentUser?.access || "Authenticated";
+  const displayAvatar = currentUser?.avatar || myPhoto;
   
   return (
     <Drawer variant="permanent" open={open}>
@@ -168,8 +169,8 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
           border: "2px solid grey",
           transition: "0.25s",
         }}
-        alt="wael"
-        src={myPhoto}
+        alt={displayName}
+        src={displayAvatar}
       />
       <Typography
         align="center"

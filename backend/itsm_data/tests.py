@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from .models import UserProfile
+
 
 class TeamApiTests(APITestCase):
     def setUp(self):
@@ -73,3 +75,44 @@ class TeamApiTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_user_can_update_own_profile(self):
+        self.client.force_authenticate(user=self.user)
+
+        response = self.client.patch(
+            "/api/auth/me/update/",
+            {
+                "username": "ritha.updated",
+                "first_name": "Ritha",
+                "last_name": "Ben Ali",
+                "email": "ritha@example.com",
+                "avatar": "data:image/png;base64,abc123",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        profile = UserProfile.objects.get(user=self.user)
+        self.assertEqual(self.user.username, "ritha.updated")
+        self.assertEqual(profile.avatar, "data:image/png;base64,abc123")
+
+    def test_admin_can_deactivate_and_reset_password(self):
+        self.client.force_authenticate(user=self.admin)
+
+        update_response = self.client.patch(
+            f"/api/team/{self.user.id}/",
+            {"is_active": False, "access": "User"},
+            format="json",
+        )
+        password_response = self.client.post(
+            f"/api/team/{self.user.id}/password/",
+            {"new_password": "NewStrongPass456!"},
+            format="json",
+        )
+
+        self.assertEqual(update_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(password_response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.is_active)
+        self.assertTrue(self.user.check_password("NewStrongPass456!"))

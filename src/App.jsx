@@ -22,7 +22,7 @@ export default function App({ mode, setMode }) {
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
-  React.useEffect(() => {
+  const loadCurrentUser = React.useCallback(() => {
     let active = true;
 
     fetchCurrentUser()
@@ -42,6 +42,8 @@ export default function App({ mode, setMode }) {
     };
   }, []);
 
+  React.useEffect(() => loadCurrentUser(), [loadCurrentUser]);
+
   return (
 
       <Box sx={{ display: "flex" }}>
@@ -50,6 +52,7 @@ export default function App({ mode, setMode }) {
           open={open}
           handleDrawerOpen={handleDrawerOpen}
           setMode={setMode}
+          currentUser={currentUser}
         />
 
         <SideBar
@@ -62,7 +65,13 @@ export default function App({ mode, setMode }) {
 
           <DrawerHeader />
 
-          <Outlet context={{ currentUser }} />
+          <Outlet
+            context={{
+              currentUser,
+              setCurrentUser,
+              reloadCurrentUser: loadCurrentUser,
+            }}
+          />
 
         </Box>
 

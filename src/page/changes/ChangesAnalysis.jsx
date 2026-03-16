@@ -3,6 +3,7 @@ import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/mate
 import { DataGrid } from "@mui/x-data-grid";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
+import ExportPdfButton from "../../components/ExportPdfButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import ChartLegend from "../analysis/ChartLegend";
@@ -92,7 +93,7 @@ export default function ChangesAnalysis() {
 
   if (!rows.length) {
     return (
-      <Box>
+      <Box className="print-dashboard-root">
         <Header title="CHANGES DASHBOARD" subTitle="No changes selected" />
         <Paper sx={{ p: 2.5 }}>
           <Typography mb={2}>
@@ -423,8 +424,8 @@ export default function ChangesAnalysis() {
   }, [selectedKpi, pastDue, open, groups, critical, total, services, closed, emergency, openedMonthly, rows, groupMonthly, serviceMonthly, typeMonthly]);
 
   return (
-    <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+    <Box className="print-dashboard-root">
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }} mb={2} spacing={2}>
         <Header
           title={focusedView ? focusedView.title : "CHANGE MANAGEMENT DASHBOARD"}
           subTitle={
@@ -433,9 +434,12 @@ export default function ChangesAnalysis() {
               : `${total} selected changes - KPI report aligned to the monthly change slides`
           }
         />
-        <Button variant="outlined" onClick={() => navigate("/changes")}>
-          Back
-        </Button>
+        <Stack direction="row" spacing={1} className="print-export-hidden">
+          <Button variant="outlined" onClick={() => navigate("/changes")}>
+            Back
+          </Button>
+          <ExportPdfButton fileName={(focusedView?.title || "changes-dashboard").replaceAll(" ", "-").toLowerCase()} />
+        </Stack>
       </Stack>
 
       {focusedView ? (

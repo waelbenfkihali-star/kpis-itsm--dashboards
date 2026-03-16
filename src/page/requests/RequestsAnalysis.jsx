@@ -4,6 +4,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
 import { ResponsivePie } from "@nivo/pie";
+import ExportPdfButton from "../../components/ExportPdfButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import ChartLegend from "../analysis/ChartLegend";
@@ -103,7 +104,7 @@ export default function RequestsAnalysis() {
 
   if (!rows.length) {
     return (
-      <Box>
+      <Box className="print-dashboard-root">
         <Header title="REQUESTS DASHBOARD" subTitle="No requests selected" />
         <Paper sx={{ p: 2.5 }}>
           <Typography mb={2}>
@@ -395,8 +396,8 @@ export default function RequestsAnalysis() {
   }, [selectedKpi, backlog, total, olderThan60, groups, closed, services, items, openedMonthly, requestedFor, agingStateData, openRows, closedRows, serviceMonthly, groupMonthly, itemMonthly]);
 
   return (
-    <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+    <Box className="print-dashboard-root">
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }} mb={2} spacing={2}>
         <Header
           title={focusedView ? focusedView.title : "SERVICE REQUEST FULFILLMENT DASHBOARD"}
           subTitle={
@@ -405,9 +406,12 @@ export default function RequestsAnalysis() {
               : `${total} selected requests - KPI and aging view aligned to the monthly report`
           }
         />
-        <Button variant="outlined" onClick={() => navigate("/requests")}>
-          Back
-        </Button>
+        <Stack direction="row" spacing={1} className="print-export-hidden">
+          <Button variant="outlined" onClick={() => navigate("/requests")}>
+            Back
+          </Button>
+          <ExportPdfButton fileName={(focusedView?.title || "requests-dashboard").replaceAll(" ", "-").toLowerCase()} />
+        </Stack>
       </Stack>
 
       {focusedView ? (

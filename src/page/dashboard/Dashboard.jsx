@@ -13,6 +13,7 @@ import BuildCircleOutlinedIcon from "@mui/icons-material/BuildCircleOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
+import ExportPdfButton from "../../components/ExportPdfButton";
 import Header from "../../components/Header";
 import { apiFetch } from "../../utils/api";
 import ChartLegend from "../analysis/ChartLegend";
@@ -232,13 +233,21 @@ export default function Dashboard() {
   );
 
   return (
-    <Box>
-      <Header
-        isDashboard
-        title="KPI DASHBOARD"
-        subTitle="Top KPI views built directly from your incidents, requests, and changes data"
-      />
-
+    <Box className="print-dashboard-root">
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        justifyContent="space-between"
+        alignItems={{ xs: "flex-start", md: "center" }}
+        spacing={2}
+        sx={{ mb: 2 }}
+      >
+        <Header
+          isDashboard
+          title="KPI DASHBOARD"
+          subTitle="Top KPI views built directly from your incidents, requests, and changes data"
+        />
+        <ExportPdfButton fileName="kpi-dashboard" />
+      </Stack>
       {error ? <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert> : null}
       {loading ? <Alert severity="info" sx={{ mb: 2 }}>Loading dashboard data...</Alert> : null}
 

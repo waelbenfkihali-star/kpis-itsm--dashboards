@@ -2,6 +2,7 @@ import pandas as pd
 from collections import defaultdict
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
@@ -12,7 +13,10 @@ from .serializers import (
     ChangeSerializer,
     IncidentSerializer,
     RequestSerializer,
+    CurrentUserUpdateSerializer,
+    PasswordChangeSerializer,
     TeamMemberCreateSerializer,
+    TeamMemberAdminUpdateSerializer,
     TeamMemberSerializer,
 )
 
@@ -420,6 +424,34 @@ def current_user(request):
     return Response(TeamMemberSerializer(request.user).data)
 
 
+@api_view(["PATCH"])
+def update_current_user(request):
+    serializer = CurrentUserUpdateSerializer(
+        instance=request.user,
+        data=request.data,
+        partial=True,
+        context={"request": request},
+    )
+    serializer.is_valid(raise_exception=True)
+    serializer.update(request.user, serializer.validated_data)
+    return Response(TeamMemberSerializer(request.user).data)
+
+
+@api_view(["POST"])
+def change_current_user_password(request):
+    serializer = PasswordChangeSerializer(
+        data=request.data,
+        context={
+            "request": request,
+            "target_user": request.user,
+            "require_current_password": True,
+        },
+    )
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response({"detail": "Password updated successfully."})
+
+
 @api_view(["GET", "POST"])
 def team_members(request):
     if request.method == "GET":
@@ -436,3 +468,56 @@ def team_members(request):
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
     return Response(TeamMemberSerializer(user).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["PATCH", "DELETE"])
+def team_member_detail(request, user_id):
+    if not request.user.is_staff:
+        return Response(
+            {"detail": "Only admins can manage team accounts."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    user = get_object_or_404(User, pk=user_id)
+
+    if request.method == "DELETE":
+        if user.pk == request.user.pk:
+            return Response(
+                {"detail": "You cannot delete your own account."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    if user.pk == request.user.pk and "is_active" in request.data and request.data.get("is_active") is False:
+        return Response(
+            {"detail": "You cannot deactivate your own account."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    serializer = TeamMemberAdminUpdateSerializer(instance=user, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    serializer.update(user, serializer.validated_data)
+    return Response(TeamMemberSerializer(user).data)
+
+
+@api_view(["POST"])
+def team_member_password(request, user_id):
+    if not request.user.is_staff:
+        return Response(
+            {"detail": "Only admins can reset account passwords."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    user = get_object_or_404(User, pk=user_id)
+    serializer = PasswordChangeSerializer(
+        data=request.data,
+        context={
+            "request": request,
+            "target_user": user,
+            "require_current_password": False,
+        },
+    )
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response({"detail": "Password reset successfully."})

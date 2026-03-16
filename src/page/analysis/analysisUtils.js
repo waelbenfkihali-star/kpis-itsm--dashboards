@@ -206,10 +206,15 @@ Value: ${value}
 }
 
 export function renderLineTooltip(point) {
+  const payload = point?.point || point;
+  const seriesId = payload?.serieId || payload?.serie?.id || "Series";
+  const month = payload?.data?.xFormatted || payload?.data?.x || payload?.x || "-";
+  const value = payload?.data?.yFormatted || payload?.data?.y || payload?.y || "-";
+
   return `
-${point.serieId}
-Month: ${point.data.xFormatted}
-Value: ${point.data.yFormatted}
+${seriesId}
+Month: ${month}
+Value: ${value}
 `;
 }
 

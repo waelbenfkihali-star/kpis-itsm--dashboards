@@ -5,6 +5,7 @@ import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
 import { ResponsivePie } from "@nivo/pie";
 import { useLocation, useNavigate } from "react-router-dom";
+import ExportPdfButton from "../../components/ExportPdfButton";
 import Header from "../../components/Header";
 import {
   countBy,
@@ -70,7 +71,7 @@ export default function SelectionAnalysisDashboard({
 
   if (!rows.length) {
     return (
-      <Box>
+      <Box className="print-dashboard-root">
         <Header title={title} subTitle={`No ${subtitle.toLowerCase()} selected`} />
         <Alert severity="info" sx={{ mb: 2 }}>
           Select one or more rows from the table, then click Analyse again.
@@ -83,12 +84,15 @@ export default function SelectionAnalysisDashboard({
   }
 
   return (
-    <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+    <Box className="print-dashboard-root">
+      <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", md: "center" }} mb={2} spacing={2}>
         <Header title={title} subTitle={`${rows.length} selected ${subtitle.toLowerCase()}`} />
-        <Button variant="outlined" onClick={() => navigate(backPath)}>
-          Back
-        </Button>
+        <Stack direction="row" spacing={1} className="print-export-hidden">
+          <Button variant="outlined" onClick={() => navigate(backPath)}>
+            Back
+          </Button>
+          <ExportPdfButton fileName={title.replaceAll(" ", "-").toLowerCase()} />
+        </Stack>
       </Stack>
 
       <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
@@ -196,4 +200,3 @@ export default function SelectionAnalysisDashboard({
     </Box>
   );
 }
-

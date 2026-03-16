@@ -22,6 +22,7 @@ import Contacts from "./page/contacts/Contacts";
 import Form from "./page/form/Form";
 import Calendar from "./page/calendar/Calendar";
 import FAQ from "./page/faq/FAQ";
+import Profile from "./page/profile/Profile";
 import BarChart from "./page/barChart/BarChart";
 import PieChart from "./page/pieChart/PieChart";
 import LineChart from "./page/lineChart/LineChart";
@@ -100,6 +101,7 @@ function RootRouter() {
               <Route path="importexcel" element={<ImportExcel />} />
 
               <Route path="contacts" element={<Contacts />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="form" element={<Form />} />
               <Route path="calendar" element={<Calendar />} />
               <Route path="faq" element={<FAQ />} />

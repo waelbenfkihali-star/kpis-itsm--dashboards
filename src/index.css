@@ -42,3 +42,33 @@
  
 /* for Firefox */
  html {scrollbar-color: #9e4673 #3d4a59;} 
+
+@media print {
+  .MuiAppBar-root,
+  .MuiDrawer-root,
+  .print-export-hidden {
+    display: none !important;
+  }
+
+  body,
+  html {
+    background: #fff !important;
+  }
+
+  #root {
+    background: #fff !important;
+  }
+
+  main,
+  .print-dashboard-root {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .MuiPaper-root {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}

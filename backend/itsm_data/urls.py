@@ -12,12 +12,20 @@ from .views import (
     delete_requests,
     monthly_stats,
     current_user,
+    update_current_user,
+    change_current_user_password,
     team_members,
+    team_member_detail,
+    team_member_password,
 )
 
 urlpatterns = [
     path("auth/me/", current_user),
+    path("auth/me/update/", update_current_user),
+    path("auth/me/password/", change_current_user_password),
     path("team/", team_members),
+    path("team/<int:user_id>/", team_member_detail),
+    path("team/<int:user_id>/password/", team_member_password),
     path("import/", import_excel),
     path("incidents/", incidents_list),
     path("incidents/delete/", delete_incidents),
