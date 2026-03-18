@@ -1,18 +1,7 @@
-import {
-  Avatar,
-  Box,
-  IconButton,
-  InputBase,
-  Stack,
-  Toolbar,
-  styled,
-  useTheme,
-} from "@mui/material";
+import { Avatar, Box, IconButton, Stack, Toolbar, Typography, styled, useTheme } from "@mui/material";
 import React from "react";
-import SearchIcon from "@mui/icons-material/Search";
 import MenuIcon from "@mui/icons-material/Menu";
 import MuiAppBar from "@mui/material/AppBar";
-import { alpha } from "@mui/material/styles";
 import Person2OutlinedIcon from "@mui/icons-material/Person2Outlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -25,6 +14,10 @@ const AppBar = styled(MuiAppBar, {
   // @ts-ignore
 })(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.primary,
+  boxShadow: "none",
+  borderBottom: `1px solid ${theme.palette.divider}`,
   transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -39,49 +32,16 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-const Search = styled("div")(({ theme }) => ({
-  position: "relative",
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginRight: theme.spacing(2),
-  marginLeft: 0,
-  width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(3),
-    width: "auto",
-  },
-}));
-
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    // vertical padding + font size from searchIcon
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
-  },
-}));
+const actionButtonSx = (theme) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: 2,
+});
 
 const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const displayName =
+    currentUser?.full_name || currentUser?.username || "Workspace user";
 
   return (
     <AppBar
@@ -89,33 +49,33 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
       // @ts-ignore
       open={open}
     >
-      <Toolbar>
+      <Toolbar sx={{ minHeight: 72, px: { xs: 2, md: 3 } }}>
         <IconButton
           color="inherit"
           aria-label="open drawer"
           onClick={handleDrawerOpen}
           edge="start"
           sx={{
-            marginRight: 5,
+            ...actionButtonSx(theme),
+            mr: 2,
             ...(open && { display: "none" }),
           }}
         >
           <MenuIcon />
         </IconButton>
 
-        <Search>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Search…"
-            inputProps={{ "aria-label": "search" }}
-          />
-        </Search>
+        <Box>
+          <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
+            ITSM KPI Dashboard
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Incidents, requests, changes and KPI tracking
+          </Typography>
+        </Box>
 
         <Box flexGrow={1} />
 
-        <Stack direction={"row"}>
+        <Stack direction="row" spacing={1} alignItems="center">
           {theme.palette.mode === "light" ? (
             <IconButton
               onClick={() => {
@@ -128,6 +88,7 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
                 );
               }}
               color="inherit"
+              sx={actionButtonSx(theme)}
             >
               <LightModeOutlinedIcon />
             </IconButton>
@@ -143,22 +104,45 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
                 );
               }}
               color="inherit"
+              sx={actionButtonSx(theme)}
             >
               <DarkModeOutlinedIcon />
             </IconButton>
           )}
 
-          <IconButton color="inherit" onClick={() => navigate("/profile")}>
+          <Box
+            onClick={() => navigate("/profile")}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 1,
+              py: 0.5,
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: 2,
+              cursor: "pointer",
+            }}
+          >
             {currentUser?.avatar ? (
               <Avatar
                 src={currentUser.avatar}
-                alt={currentUser.full_name || currentUser.username || "Profile"}
-                sx={{ width: 32, height: 32 }}
+                alt={displayName}
+                sx={{ width: 34, height: 34 }}
               />
             ) : (
-              <Person2OutlinedIcon />
+              <Avatar sx={{ width: 34, height: 34 }}>
+                <Person2OutlinedIcon fontSize="small" />
+              </Avatar>
             )}
-          </IconButton>
+            <Box sx={{ display: { xs: "none", sm: "block" } }}>
+              <Typography variant="body2" fontWeight={700} lineHeight={1.1}>
+                {displayName}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                View profile
+              </Typography>
+            </Box>
+          </Box>
         </Stack>
       </Toolbar>
     </AppBar>

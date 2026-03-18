@@ -44,6 +44,11 @@
  html {scrollbar-color: #9e4673 #3d4a59;} 
 
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+
   .MuiAppBar-root,
   .MuiDrawer-root,
   .print-export-hidden {
@@ -67,8 +72,52 @@
     max-width: 100% !important;
   }
 
+  .print-dashboard-root {
+    color: #111827 !important;
+  }
+
+  .print-main-title,
+  .print-report-title {
+    color: #111827 !important;
+  }
+
+  .print-main-subtitle,
+  .print-report-subtitle,
+  .MuiTypography-body2 {
+    color: #4b5563 !important;
+  }
+
   .MuiPaper-root {
     box-shadow: none !important;
     break-inside: avoid;
+    border: 1px solid #d1d5db !important;
+  }
+
+  .print-report-header {
+    background: #f8fafc !important;
+  }
+
+  .chart-legend-swatch {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    border: 1px solid rgba(17, 24, 39, 0.55) !important;
+  }
+
+  .MuiStack-root {
+    gap: 12px !important;
+  }
+
+  .MuiDataGrid-root {
+    border-color: #d1d5db !important;
+    font-size: 11px !important;
+  }
+
+  .MuiDataGrid-columnHeaders {
+    background: #f3f4f6 !important;
+    color: #111827 !important;
+  }
+
+  .MuiDataGrid-footerContainer {
+    display: none !important;
   }
 }

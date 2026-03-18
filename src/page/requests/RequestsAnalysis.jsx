@@ -4,9 +4,11 @@ import { DataGrid } from "@mui/x-data-grid";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
 import { ResponsivePie } from "@nivo/pie";
+import ExecutiveSummary from "../../components/ExecutiveSummary";
 import ExportPdfButton from "../../components/ExportPdfButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
+import PrintReportHeader from "../../components/PrintReportHeader";
 import ChartLegend from "../analysis/ChartLegend";
 import {
   agingByState,
@@ -23,6 +25,7 @@ import {
   renderPieTooltip,
   topLabel,
 } from "../analysis/analysisUtils";
+import { buildRequestInsights } from "../analysis/reportInsights";
 
 function KpiCard({ title, value, note }) {
   return (
@@ -394,6 +397,19 @@ export default function RequestsAnalysis() {
         }
     }
   }, [selectedKpi, backlog, total, olderThan60, groups, closed, services, items, openedMonthly, requestedFor, agingStateData, openRows, closedRows, serviceMonthly, groupMonthly, itemMonthly]);
+  const summarySections = useMemo(
+    () =>
+      buildRequestInsights({
+        rows,
+        backlog,
+        closed,
+        olderThan60,
+        services,
+        groups,
+        items,
+      }),
+    [rows, backlog, closed, olderThan60, services, groups, items]
+  );
 
   return (
     <Box className="print-dashboard-root">
@@ -413,6 +429,16 @@ export default function RequestsAnalysis() {
           <ExportPdfButton fileName={(focusedView?.title || "requests-dashboard").replaceAll(" ", "-").toLowerCase()} />
         </Stack>
       </Stack>
+      <PrintReportHeader
+        reportTitle={focusedView ? focusedView.title : "Service Request Fulfillment Dashboard"}
+        reportSubtitle={
+          focusedView
+            ? focusedView.note
+            : "Request KPI analysis generated from the selected records."
+        }
+        scopeLabel={`${rows.length} requests selected for analysis`}
+      />
+      <ExecutiveSummary sections={summarySections} />
 
       {focusedView ? (
         <>

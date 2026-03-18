@@ -10,15 +10,19 @@ const Header = ({title, subTitle, isDashboard=false}) => {
   return (
     <Box mb={ isDashboard? 2 :        4}>
     <Typography
+      className="print-main-title"
       sx={{
-        color: theme.palette.info.light,
+        color:
+          theme.palette.mode === "dark"
+            ? theme.palette.info.light
+            : theme.palette.primary.main,
         fontWeight: "bold",
       }}
       variant="h5"
     >
       {title}
     </Typography>
-    <Typography variant="body1">{subTitle}</Typography>
+    <Typography className="print-main-subtitle" variant="body1">{subTitle}</Typography>
   </Box>
 
   

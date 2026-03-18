@@ -3,9 +3,11 @@ import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/mate
 import { DataGrid } from "@mui/x-data-grid";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
+import ExecutiveSummary from "../../components/ExecutiveSummary";
 import ExportPdfButton from "../../components/ExportPdfButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
+import PrintReportHeader from "../../components/PrintReportHeader";
 import ChartLegend from "../analysis/ChartLegend";
 import {
   countBy,
@@ -21,6 +23,7 @@ import {
   renderLineTooltip,
   topLabel,
 } from "../analysis/analysisUtils";
+import { buildChangeInsights } from "../analysis/reportInsights";
 
 function KpiCard({ title, value, note }) {
   return (
@@ -422,6 +425,20 @@ export default function ChangesAnalysis() {
         }
     }
   }, [selectedKpi, pastDue, open, groups, critical, total, services, closed, emergency, openedMonthly, rows, groupMonthly, serviceMonthly, typeMonthly]);
+  const summarySections = useMemo(
+    () =>
+      buildChangeInsights({
+        rows,
+        open,
+        closed,
+        critical,
+        emergency,
+        pastDue,
+        services,
+        groups,
+      }),
+    [rows, open, closed, critical, emergency, pastDue, services, groups]
+  );
 
   return (
     <Box className="print-dashboard-root">
@@ -441,6 +458,16 @@ export default function ChangesAnalysis() {
           <ExportPdfButton fileName={(focusedView?.title || "changes-dashboard").replaceAll(" ", "-").toLowerCase()} />
         </Stack>
       </Stack>
+      <PrintReportHeader
+        reportTitle={focusedView ? focusedView.title : "Change Management Dashboard"}
+        reportSubtitle={
+          focusedView
+            ? focusedView.note
+            : "Change KPI analysis generated from the selected records."
+        }
+        scopeLabel={`${rows.length} changes selected for analysis`}
+      />
+      <ExecutiveSummary sections={summarySections} />
 
       {focusedView ? (
         <>

@@ -15,7 +15,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
-import PageFilters from "../../components/PageFilters";
+import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
 
 export default function Changes() {
@@ -35,6 +35,7 @@ export default function Changes() {
     types: [],
     priorities: [],
     groups: [],
+    services: [],
     dateFrom: "",
     dateTo: ""
   });
@@ -69,6 +70,10 @@ export default function Changes() {
     () => [...new Set(rows.map((r) => r.responsible_group).filter(Boolean))],
     [rows]
   );
+  const serviceOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.affected_service).filter(Boolean))],
+    [rows]
+  );
 
   const filteredRows = useMemo(() => {
 
@@ -93,6 +98,9 @@ export default function Changes() {
       if (filters.groups.length && !filters.groups.includes(r.responsible_group))
         return false;
 
+      if (filters.services.length && !filters.services.includes(r.affected_service))
+        return false;
+
       if (filters.dateFrom && new Date(r.planned_start_date) < new Date(filters.dateFrom))
         return false;
 
@@ -113,6 +121,7 @@ export default function Changes() {
         filters.types.length,
         filters.priorities.length,
         filters.groups.length,
+        filters.services.length,
         filters.dateFrom,
         filters.dateTo,
       ].filter(Boolean).length,
@@ -126,9 +135,13 @@ export default function Changes() {
       types: [],
       priorities: [],
       groups: [],
+      services: [],
       dateFrom: "",
       dateTo: ""
     });
+  }
+  function updateFilter(key, value) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
   function handleAnalyse() {
@@ -224,28 +237,16 @@ export default function Changes() {
 
       </Stack>
 
-      <PageFilters
+      <GlobalScopeFilters
         title="Change Filters"
         activeCount={activeFilterCount}
         onReset={resetFilters}
+        filters={filters}
+        onChange={updateFilter}
+        statusOptions={stateOptions}
+        serviceOptions={serviceOptions}
+        groupOptions={groupOptions}
       >
-        <TextField
-          label="Global Search"
-          size="small"
-          value={filters.search}
-          onChange={(e)=>setFilters({...filters,search:e.target.value})}
-          sx={{width:220}}
-        />
-
-        <Autocomplete
-          multiple
-          options={stateOptions}
-          value={filters.states}
-          onChange={(e,v)=>setFilters({...filters,states:v})}
-          renderInput={(p)=><TextField {...p} label="Status" size="small"/>}
-          sx={{width:200}}
-        />
-
         <Autocomplete
           multiple
           options={typeOptions}
@@ -263,34 +264,7 @@ export default function Changes() {
           renderInput={(p)=><TextField {...p} label="Priority" size="small"/>}
           sx={{width:200}}
         />
-
-        <Autocomplete
-          multiple
-          options={groupOptions}
-          value={filters.groups}
-          onChange={(e,v)=>setFilters({...filters,groups:v})}
-          renderInput={(p)=><TextField {...p} label="Group" size="small"/>}
-          sx={{width:200}}
-        />
-
-        <TextField
-          type="date"
-          label="From"
-          size="small"
-          InputLabelProps={{shrink:true}}
-          value={filters.dateFrom}
-          onChange={(e)=>setFilters({...filters,dateFrom:e.target.value})}
-        />
-
-        <TextField
-          type="date"
-          label="To"
-          size="small"
-          InputLabelProps={{shrink:true}}
-          value={filters.dateTo}
-          onChange={(e)=>setFilters({...filters,dateTo:e.target.value})}
-        />
-      </PageFilters>
+      </GlobalScopeFilters>
 
       <Box sx={{height:650}}>
 

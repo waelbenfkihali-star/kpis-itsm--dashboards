@@ -3,9 +3,11 @@ import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/mate
 import { DataGrid } from "@mui/x-data-grid";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
+import ExecutiveSummary from "../../components/ExecutiveSummary";
 import ExportPdfButton from "../../components/ExportPdfButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
+import PrintReportHeader from "../../components/PrintReportHeader";
 import ChartLegend from "../analysis/ChartLegend";
 import {
   average,
@@ -21,6 +23,7 @@ import {
   renderLineTooltip,
   topLabel,
 } from "../analysis/analysisUtils";
+import { buildIncidentInsights } from "../analysis/reportInsights";
 
 function KpiCard({ title, value, note }) {
   return (
@@ -438,6 +441,19 @@ export default function IncidentsAnalysis() {
     majorRows,
     groupMonthly,
   ]);
+  const summarySections = useMemo(
+    () =>
+      buildIncidentInsights({
+        rows,
+        backlog,
+        major,
+        slaBreached,
+        unassignedBacklog,
+        services,
+        groups,
+      }),
+    [rows, backlog, major, slaBreached, unassignedBacklog, services, groups]
+  );
 
   return (
     <Box className="print-dashboard-root">
@@ -457,6 +473,16 @@ export default function IncidentsAnalysis() {
           <ExportPdfButton fileName={(focusedView?.title || "incidents-dashboard").replaceAll(" ", "-").toLowerCase()} />
         </Stack>
       </Stack>
+      <PrintReportHeader
+        reportTitle={focusedView ? focusedView.title : "Incident Management KPI Dashboard"}
+        reportSubtitle={
+          focusedView
+            ? focusedView.note
+            : "Incident KPI analysis generated from the selected records."
+        }
+        scopeLabel={`${rows.length} incidents selected for analysis`}
+      />
+      <ExecutiveSummary sections={summarySections} />
 
       {focusedView ? (
         <>

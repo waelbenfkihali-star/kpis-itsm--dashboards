@@ -15,7 +15,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
-import PageFilters from "../../components/PageFilters";
+import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
 
 export default function Requests() {
@@ -153,6 +153,9 @@ export default function Requests() {
       closedTo: ""
     });
   }
+  function updateFilter(key, value) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }
 
   function handleAnalyse() {
     const selectedData = filteredRows.filter((row) => selectedIds.includes(row.id));
@@ -247,28 +250,21 @@ export default function Requests() {
 
       </Stack>
 
-      <PageFilters
+      <GlobalScopeFilters
         title="Request Filters"
         activeCount={activeFilterCount}
         onReset={resetFilters}
+        filters={filters}
+        onChange={updateFilter}
+        statusOptions={stateOptions}
+        serviceOptions={serviceOptions}
+        serviceLabel="IT Service"
+        groupOptions={groupOptions}
+        dateFromKey="openedFrom"
+        dateToKey="openedTo"
+        dateFromLabel="Opened From"
+        dateToLabel="Opened To"
       >
-        <TextField
-          label="Global Search"
-          size="small"
-          value={filters.search}
-          onChange={(e)=>setFilters({...filters,search:e.target.value})}
-          sx={{width:220}}
-        />
-
-        <Autocomplete
-          multiple
-          options={stateOptions}
-          value={filters.states}
-          onChange={(e,v)=>setFilters({...filters,states:v})}
-          renderInput={(p)=><TextField {...p} label="Status" size="small"/>}
-          sx={{width:200}}
-        />
-
         <Autocomplete
           multiple
           options={itemOptions}
@@ -280,47 +276,11 @@ export default function Requests() {
 
         <Autocomplete
           multiple
-          options={serviceOptions}
-          value={filters.services}
-          onChange={(e,v)=>setFilters({...filters,services:v})}
-          renderInput={(p)=><TextField {...p} label="IT Service" size="small"/>}
-          sx={{width:220}}
-        />
-
-        <Autocomplete
-          multiple
-          options={groupOptions}
-          value={filters.groups}
-          onChange={(e,v)=>setFilters({...filters,groups:v})}
-          renderInput={(p)=><TextField {...p} label="Group" size="small"/>}
-          sx={{width:220}}
-        />
-
-        <Autocomplete
-          multiple
           options={userOptions}
           value={filters.users}
           onChange={(e,v)=>setFilters({...filters,users:v})}
           renderInput={(p)=><TextField {...p} label="Requested For" size="small"/>}
           sx={{width:220}}
-        />
-
-        <TextField
-          type="date"
-          label="Opened From"
-          size="small"
-          InputLabelProps={{shrink:true}}
-          value={filters.openedFrom}
-          onChange={(e)=>setFilters({...filters,openedFrom:e.target.value})}
-        />
-
-        <TextField
-          type="date"
-          label="Opened To"
-          size="small"
-          InputLabelProps={{shrink:true}}
-          value={filters.openedTo}
-          onChange={(e)=>setFilters({...filters,openedTo:e.target.value})}
         />
 
         <TextField
@@ -340,7 +300,7 @@ export default function Requests() {
           value={filters.closedTo}
           onChange={(e)=>setFilters({...filters,closedTo:e.target.value})}
         />
-      </PageFilters>
+      </GlobalScopeFilters>
 
       <Box sx={{height:650}}>
 

@@ -5,8 +5,10 @@ import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
 import { ResponsivePie } from "@nivo/pie";
 import { useLocation, useNavigate } from "react-router-dom";
+import ExecutiveSummary from "../../components/ExecutiveSummary";
 import ExportPdfButton from "../../components/ExportPdfButton";
 import Header from "../../components/Header";
+import PrintReportHeader from "../../components/PrintReportHeader";
 import {
   countBy,
   makeBarData,
@@ -14,6 +16,7 @@ import {
   makePieData,
   monthlySeries,
 } from "./analysisUtils";
+import { buildSelectionInsights } from "./reportInsights";
 
 function KpiCard({ label, value, helper }) {
   return (
@@ -68,6 +71,17 @@ export default function SelectionAnalysisDashboard({
     () => (typeof insightBuilder === "function" ? insightBuilder(rows) : []),
     [rows, insightBuilder]
   );
+  const summarySections = useMemo(
+    () =>
+      buildSelectionInsights({
+        rows,
+        statusCounts,
+        primaryCounts,
+        secondaryCounts,
+        subtitle,
+      }),
+    [rows, statusCounts, primaryCounts, secondaryCounts, subtitle]
+  );
 
   if (!rows.length) {
     return (
@@ -94,6 +108,12 @@ export default function SelectionAnalysisDashboard({
           <ExportPdfButton fileName={title.replaceAll(" ", "-").toLowerCase()} />
         </Stack>
       </Stack>
+      <PrintReportHeader
+        reportTitle={title}
+        reportSubtitle={`Detailed ${subtitle.toLowerCase()} review built from the current selected rows.`}
+        scopeLabel={`${rows.length} selected ${subtitle.toLowerCase()}`}
+      />
+      <ExecutiveSummary sections={summarySections} />
 
       <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
         {metricCards.map((card) => (

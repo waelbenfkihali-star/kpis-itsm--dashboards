@@ -17,7 +17,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
-import PageFilters from "../../components/PageFilters";
+import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
 
 export default function Incidents() {
@@ -149,6 +149,17 @@ export default function Incidents() {
     });
     setDateFrom("");
     setDateTo("");
+  }
+  function updateFilter(key, value) {
+    if (key === "dateFrom") {
+      setDateFrom(value);
+      return;
+    }
+    if (key === "dateTo") {
+      setDateTo(value);
+      return;
+    }
+    setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
   const columns = useMemo(() => [
@@ -285,30 +296,17 @@ export default function Incidents() {
 
       {/* Filters */}
 
-      <PageFilters
+      <GlobalScopeFilters
         title="Incident Filters"
         activeCount={activeFilterCount}
         onReset={resetFilters}
+        filters={{ ...filters, dateFrom, dateTo }}
+        onChange={updateFilter}
+        statusOptions={stateOptions}
+        statusLabel="State"
+        serviceOptions={serviceOptions}
+        groupOptions={groupOptions}
       >
-        <TextField
-          label="Global Search"
-          size="small"
-          value={filters.search}
-          onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          sx={{ width: 220 }}
-        />
-
-        <Autocomplete
-          multiple
-          options={stateOptions}
-          value={filters.states}
-          onChange={(e, v) => setFilters({ ...filters, states: v })}
-          renderInput={(params) => (
-            <TextField {...params} label="State" size="small" />
-          )}
-          sx={{ width: 220 }}
-        />
-
         <Autocomplete
           multiple
           options={priorityOptions}
@@ -319,49 +317,7 @@ export default function Incidents() {
           )}
           sx={{ width: 220 }}
         />
-
-        <Autocomplete
-          multiple
-          options={serviceOptions}
-          value={filters.services}
-          onChange={(e, v) => setFilters({ ...filters, services: v })}
-          renderInput={(params) => (
-            <TextField {...params} label="Service" size="small" />
-          )}
-          sx={{ width: 260 }}
-        />
-
-        <Autocomplete
-          multiple
-          options={groupOptions}
-          value={filters.groups}
-          onChange={(e, v) => setFilters({ ...filters, groups: v })}
-          renderInput={(params) => (
-            <TextField {...params} label="Group" size="small" />
-          )}
-          sx={{ width: 260 }}
-        />
-
-        <TextField
-          type="date"
-          label="From"
-          size="small"
-          InputLabelProps={{ shrink: true }}
-          value={dateFrom}
-          onChange={(e) => setDateFrom(e.target.value)}
-          sx={{ width: 160 }}
-        />
-
-        <TextField
-          type="date"
-          label="To"
-          size="small"
-          InputLabelProps={{ shrink: true }}
-          value={dateTo}
-          onChange={(e) => setDateTo(e.target.value)}
-          sx={{ width: 160 }}
-        />
-      </PageFilters>
+      </GlobalScopeFilters>
 
       <Box sx={{ height: 650 }}>
 

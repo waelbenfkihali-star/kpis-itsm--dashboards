@@ -13,10 +13,13 @@ import BuildCircleOutlinedIcon from "@mui/icons-material/BuildCircleOutlined";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
+import ExecutiveSummary from "../../components/ExecutiveSummary";
 import ExportPdfButton from "../../components/ExportPdfButton";
 import Header from "../../components/Header";
+import PrintReportHeader from "../../components/PrintReportHeader";
 import { apiFetch } from "../../utils/api";
 import ChartLegend from "../analysis/ChartLegend";
+import { buildDashboardInsights } from "../analysis/reportInsights";
 import {
   countBy,
   countWhere,
@@ -231,6 +234,19 @@ export default function Dashboard() {
     () => countBy(openChanges, "responsible_group")[0]?.label || "-",
     [openChanges]
   );
+  const summarySections = useMemo(
+    () =>
+      buildDashboardInsights({
+        incidents,
+        requests,
+        changes,
+        majorIncidents,
+        incidentBacklog,
+        openRequests,
+        openChanges,
+      }),
+    [incidents, requests, changes, majorIncidents, incidentBacklog, openRequests, openChanges]
+  );
 
   return (
     <Box className="print-dashboard-root">
@@ -248,6 +264,12 @@ export default function Dashboard() {
         />
         <ExportPdfButton fileName="kpi-dashboard" />
       </Stack>
+      <PrintReportHeader
+        reportTitle="ITSM KPI Dashboard"
+        reportSubtitle="Executive overview of incidents, requests, and changes with the most important KPI trends."
+        scopeLabel={`${incidents.length} incidents, ${requests.length} requests, ${changes.length} changes included`}
+      />
+      <ExecutiveSummary sections={summarySections} />
       {error ? <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert> : null}
       {loading ? <Alert severity="info" sx={{ mb: 2 }}>Loading dashboard data...</Alert> : null}
 

@@ -20,7 +20,6 @@ import Dashboard from "./page/dashboard/Dashboard";
 import Team from "./page/team/Team";
 import Contacts from "./page/contacts/Contacts";
 import Form from "./page/form/Form";
-import Calendar from "./page/calendar/Calendar";
 import FAQ from "./page/faq/FAQ";
 import Profile from "./page/profile/Profile";
 import BarChart from "./page/barChart/BarChart";
@@ -103,7 +102,6 @@ function RootRouter() {
               <Route path="contacts" element={<Contacts />} />
               <Route path="profile" element={<Profile />} />
               <Route path="form" element={<Form />} />
-              <Route path="calendar" element={<Calendar />} />
               <Route path="faq" element={<FAQ />} />
 
               <Route path="bar" element={<BarChart />} />
