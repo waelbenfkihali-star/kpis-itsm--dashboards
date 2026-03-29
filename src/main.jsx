@@ -15,6 +15,7 @@ import {
 import App from "./App";
 import Login from "./page/Login/Login";
 import ProtectedRoute from "./auth/ProtectedRoute";
+import RoleRoute from "./auth/RoleRoute";
 
 import Dashboard from "./page/dashboard/Dashboard";
 import Team from "./page/team/Team";
@@ -27,6 +28,7 @@ import PieChart from "./page/pieChart/PieChart";
 import LineChart from "./page/lineChart/LineChart";
 import Geography from "./page/geography/Geography";
 import NotFound from "./page/notFound/NotFound";
+import AssistantDashboard from "./page/ai/AssistantDashboard";
 
 import Incidents from "./page/incidents/Incidents";
 import Requests from "./page/requests/Requests";
@@ -80,7 +82,6 @@ function RootRouter() {
 
               <Route index element={<Dashboard />} />
 
-              <Route path="team" element={<Team />} />
               <Route path="incidents" element={<Incidents />} />
               <Route path="requests" element={<Requests />} />
               <Route path="changes" element={<Changes />} />
@@ -92,22 +93,22 @@ function RootRouter() {
               <Route path="changes/:number" element={<ChangeDetails />} />
               <Route path="changes-analysis" element={<ChangesAnalysis />} />
 
-              <Route path="kpiform" element={<KpiForm />} />
               <Route path="mykpis" element={<MyKpis />} />
               <Route path="mykpis/:id" element={<KpiDetails />} />
-              <Route path="editkpi/:id" element={<EditKpi />} />
-
-              <Route path="importexcel" element={<ImportExcel />} />
-
-              <Route path="contacts" element={<Contacts />} />
+              <Route path="team" element={<RoleRoute><Team /></RoleRoute>} />
+              <Route path="kpiform" element={<RoleRoute><KpiForm /></RoleRoute>} />
+              <Route path="editkpi/:id" element={<RoleRoute><EditKpi /></RoleRoute>} />
+              <Route path="importexcel" element={<RoleRoute><ImportExcel /></RoleRoute>} />
+              <Route path="contacts" element={<RoleRoute><Contacts /></RoleRoute>} />
               <Route path="profile" element={<Profile />} />
-              <Route path="form" element={<Form />} />
+              <Route path="ai-dashboard" element={<AssistantDashboard />} />
+              <Route path="form" element={<RoleRoute><Form /></RoleRoute>} />
               <Route path="faq" element={<FAQ />} />
 
-              <Route path="bar" element={<BarChart />} />
-              <Route path="pie" element={<PieChart />} />
-              <Route path="line" element={<LineChart />} />
-              <Route path="geography" element={<Geography />} />
+              <Route path="bar" element={<RoleRoute><BarChart /></RoleRoute>} />
+              <Route path="pie" element={<RoleRoute><PieChart /></RoleRoute>} />
+              <Route path="line" element={<RoleRoute><LineChart /></RoleRoute>} />
+              <Route path="geography" element={<RoleRoute><Geography /></RoleRoute>} />
 
               <Route path="*" element={<NotFound />} />
 

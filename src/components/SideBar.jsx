@@ -24,6 +24,7 @@ import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import BuildCircleOutlinedIcon from "@mui/icons-material/BuildCircleOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import { isAdminUser } from "../auth/roleUtils";
 // @ts-ignore
 import myPhoto from "../assets/wael.jpg";
 
@@ -145,6 +146,14 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
   const displayName = currentUser?.full_name || currentUser?.username || "Workspace user";
   const displayRole = currentUser?.access || "Authenticated";
   const displayAvatar = currentUser?.avatar || myPhoto;
+  const isAdmin = isAdminUser(currentUser);
+  const visibleOperationsItems = isAdmin
+    ? operationsItems
+    : operationsItems.filter((item) => item.path !== "/importexcel");
+  const visibleKpiItems = isAdmin
+    ? kpiItems
+    : kpiItems.filter((item) => item.path === "/mykpis");
+  const visibleAdminItems = isAdmin ? adminItems : [];
   
   return (
     <Drawer variant="permanent" open={open}>
@@ -190,7 +199,7 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
       <Divider />
 
       <List>
-        {operationsItems.map((item) => (
+        {visibleOperationsItems.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ display: "block" }}>
             <Tooltip title={open ? null : item.text} placement="left">
               <ListItemButton
@@ -231,7 +240,7 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
       <Divider />
 
       <List>
-        {kpiItems.map((item) => (
+        {visibleKpiItems.map((item) => (
           <ListItem key={item.path} disablePadding sx={{ display: "block" }}>
             <Tooltip title={open ? null : item.text} placement="left">
               <ListItemButton
@@ -269,48 +278,52 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
         ))}
       </List>
 
-      <Divider />
+      {visibleAdminItems.length ? (
+        <>
+          <Divider />
 
-      <List>
-        {adminItems.map((item) => (
-          <ListItem key={item.path} disablePadding sx={{ display: "block" }}>
-            <Tooltip title={open ? null : item.text} placement="left">
-              <ListItemButton
-                onClick={() => {
-                  navigate(item.path);
-                }}
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                  bgcolor:
-                    location.pathname === item.path
-                      ? theme.palette.mode === "dark"
-                        ? grey[800]
-                        : grey[300]
-                      : null,
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
-              </ListItemButton>
-            </Tooltip>
-          </ListItem>
-        ))}
-      </List>
+          <List>
+            {visibleAdminItems.map((item) => (
+              <ListItem key={item.path} disablePadding sx={{ display: "block" }}>
+                <Tooltip title={open ? null : item.text} placement="left">
+                  <ListItemButton
+                    onClick={() => {
+                      navigate(item.path);
+                    }}
+                    sx={{
+                      minHeight: 48,
+                      justifyContent: open ? "initial" : "center",
+                      px: 2.5,
+                      bgcolor:
+                        location.pathname === item.path
+                          ? theme.palette.mode === "dark"
+                            ? grey[800]
+                            : grey[300]
+                          : null,
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: open ? 3 : "auto",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.text}
+                      sx={{ opacity: open ? 1 : 0 }}
+                    />
+                  </ListItemButton>
+                </Tooltip>
+              </ListItem>
+            ))}
+          </List>
 
-      <Divider />
+          <Divider />
+        </>
+      ) : null}
 
       <List>
         {supportItems.map((item) => (

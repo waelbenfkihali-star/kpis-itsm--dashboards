@@ -2,6 +2,7 @@ import * as React from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 
+import InsightAssistant from "./components/InsightAssistant";
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
 import { Outlet } from "react-router-dom";
@@ -18,12 +19,14 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 export default function App({ mode, setMode }) {
   const [open, setOpen] = React.useState(false);
   const [currentUser, setCurrentUser] = React.useState(null);
+  const [currentUserLoading, setCurrentUserLoading] = React.useState(true);
 
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
   const loadCurrentUser = React.useCallback(() => {
     let active = true;
+    setCurrentUserLoading(true);
 
     fetchCurrentUser()
       .then((user) => {
@@ -35,6 +38,11 @@ export default function App({ mode, setMode }) {
         if (active) {
           setCurrentUser(null);
         }
+      })
+      .finally(() => {
+        if (active) {
+          setCurrentUserLoading(false);
+        }
       });
 
     return () => {
@@ -45,7 +53,7 @@ export default function App({ mode, setMode }) {
   React.useEffect(() => loadCurrentUser(), [loadCurrentUser]);
 
   return (
-
+    <>
       <Box sx={{ display: "flex" }}>
 
         <TopBar
@@ -68,6 +76,7 @@ export default function App({ mode, setMode }) {
           <Outlet
             context={{
               currentUser,
+              currentUserLoading,
               setCurrentUser,
               reloadCurrentUser: loadCurrentUser,
             }}
@@ -76,5 +85,7 @@ export default function App({ mode, setMode }) {
         </Box>
 
       </Box>
+      <InsightAssistant />
+    </>
   );
 }

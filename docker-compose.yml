@@ -18,6 +18,8 @@ services:
       - "8001:8000"
     environment:
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,backend,192.168.0.108
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_DASHBOARD_MODEL=${OPENAI_DASHBOARD_MODEL:-gpt-5}
     volumes:
       - ./backend:/app
     restart: unless-stopped

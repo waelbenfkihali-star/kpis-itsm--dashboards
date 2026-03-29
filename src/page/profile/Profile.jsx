@@ -6,7 +6,12 @@ import {
   Button,
   Card,
   CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
+  Slider,
   Stack,
   TextField,
   Typography,
@@ -15,6 +20,73 @@ import { useOutletContext } from "react-router-dom";
 
 import Header from "../../components/Header";
 import { apiFetchJson } from "../../utils/api";
+
+const AVATAR_PREVIEW_SIZE = 320;
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function getImageBounds(imageSize, zoom) {
+  const baseScale = Math.max(
+    AVATAR_PREVIEW_SIZE / imageSize.width,
+    AVATAR_PREVIEW_SIZE / imageSize.height
+  );
+  const scale = baseScale * zoom;
+  const scaledWidth = imageSize.width * scale;
+  const scaledHeight = imageSize.height * scale;
+
+  return {
+    scale,
+    maxOffsetX: Math.max(0, (scaledWidth - AVATAR_PREVIEW_SIZE) / 2),
+    maxOffsetY: Math.max(0, (scaledHeight - AVATAR_PREVIEW_SIZE) / 2),
+  };
+}
+
+async function cropAvatarImage(src, cropState) {
+  const image = await new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+
+  const { scale } = getImageBounds(
+    { width: image.naturalWidth, height: image.naturalHeight },
+    cropState.zoom
+  );
+
+  const sourceSize = AVATAR_PREVIEW_SIZE / scale;
+  const sourceX = clamp(
+    (image.naturalWidth - sourceSize) / 2 - cropState.offsetX / scale,
+    0,
+    image.naturalWidth - sourceSize
+  );
+  const sourceY = clamp(
+    (image.naturalHeight - sourceSize) / 2 - cropState.offsetY / scale,
+    0,
+    image.naturalHeight - sourceSize
+  );
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 512;
+  const context = canvas.getContext("2d");
+
+  context.drawImage(
+    image,
+    sourceX,
+    sourceY,
+    sourceSize,
+    sourceSize,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  return canvas.toDataURL("image/png");
+}
 
 export default function Profile() {
   const { currentUser, setCurrentUser, reloadCurrentUser } = useOutletContext();
@@ -30,6 +102,15 @@ export default function Profile() {
     new_password: "",
     confirm_password: "",
   });
+  const [avatarEditor, setAvatarEditor] = React.useState({
+    open: false,
+    src: "",
+    zoom: 1,
+    offsetX: 0,
+    offsetY: 0,
+    imageSize: { width: 1, height: 1 },
+  });
+  const [dragState, setDragState] = React.useState(null);
   const [savingProfile, setSavingProfile] = React.useState(false);
   const [savingPassword, setSavingPassword] = React.useState(false);
   const [profileMessage, setProfileMessage] = React.useState({ type: "", text: "" });
@@ -46,6 +127,11 @@ export default function Profile() {
       avatar: currentUser.avatar || "",
     });
   }, [currentUser]);
+
+  const avatarBounds = React.useMemo(
+    () => getImageBounds(avatarEditor.imageSize, avatarEditor.zoom),
+    [avatarEditor.imageSize, avatarEditor.zoom]
+  );
 
   function updateProfileField(field) {
     return (event) => {
@@ -65,6 +151,19 @@ export default function Profile() {
     };
   }
 
+  function updateAvatarEditor(patch) {
+    setAvatarEditor((prev) => {
+      const next = { ...prev, ...patch };
+      const bounds = getImageBounds(next.imageSize, next.zoom);
+
+      return {
+        ...next,
+        offsetX: clamp(next.offsetX, -bounds.maxOffsetX, bounds.maxOffsetX),
+        offsetY: clamp(next.offsetY, -bounds.maxOffsetY, bounds.maxOffsetY),
+      };
+    });
+  }
+
   async function handleAvatarUpload(event) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -76,19 +175,68 @@ export default function Profile() {
       reader.readAsDataURL(file);
     });
 
+    const imageSize = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () =>
+        resolve({ width: img.naturalWidth || 1, height: img.naturalHeight || 1 });
+      img.onerror = reject;
+      img.src = dataUrl;
+    });
+
+    setAvatarEditor({
+      open: true,
+      src: dataUrl,
+      zoom: 1,
+      offsetX: 0,
+      offsetY: 0,
+      imageSize,
+    });
+
+    event.target.value = "";
+  }
+
+  function closeAvatarEditor() {
+    setAvatarEditor((prev) => ({ ...prev, open: false }));
+    setDragState(null);
+  }
+
+  function startAvatarDrag(event) {
+    event.preventDefault();
+    setDragState({
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: avatarEditor.offsetX,
+      originY: avatarEditor.offsetY,
+    });
+  }
+
+  function moveAvatarDrag(event) {
+    if (!dragState) return;
+
+    updateAvatarEditor({
+      offsetX: dragState.originX + (event.clientX - dragState.startX),
+      offsetY: dragState.originY + (event.clientY - dragState.startY),
+    });
+  }
+
+  async function applyAvatarCrop() {
+    const croppedAvatar = await cropAvatarImage(avatarEditor.src, avatarEditor);
+
     setProfileForm((prev) => ({
       ...prev,
-      avatar: dataUrl,
+      avatar: croppedAvatar,
     }));
 
     setCurrentUser?.((prev) =>
       prev
         ? {
             ...prev,
-            avatar: dataUrl,
+            avatar: croppedAvatar,
           }
         : prev
     );
+
+    closeAvatarEditor();
   }
 
   async function saveProfile() {
@@ -184,7 +332,7 @@ export default function Profile() {
                     <input hidden type="file" accept="image/*" onChange={handleAvatarUpload} />
                   </Button>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    Supported: any image file from your device.
+                    After choosing the image, you can move and zoom it before saving.
                   </Typography>
                 </Box>
               </Stack>
@@ -260,6 +408,149 @@ export default function Profile() {
           </Card>
         </Grid>
       </Grid>
+
+      <Dialog
+        open={avatarEditor.open}
+        onClose={closeAvatarEditor}
+        fullScreen
+        PaperProps={{
+          sx: {
+            background: "rgba(10, 15, 25, 0.96)",
+            color: "#fff",
+          },
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          Position Your Profile Picture
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} alignItems="center" sx={{ pt: 1 }}>
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.72)" }}>
+              Drag the image to choose the exact area you want to appear in the avatar.
+            </Typography>
+
+            <Box
+              onPointerDown={startAvatarDrag}
+              onPointerMove={moveAvatarDrag}
+              onPointerUp={() => setDragState(null)}
+              onPointerLeave={() => setDragState(null)}
+              sx={{
+                width: AVATAR_PREVIEW_SIZE,
+                height: AVATAR_PREVIEW_SIZE,
+                overflow: "hidden",
+                borderRadius: "50%",
+                border: "4px solid rgba(255,255,255,0.92)",
+                position: "relative",
+                cursor: dragState ? "grabbing" : "grab",
+                background:
+                  "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), rgba(255,255,255,0.04))",
+                touchAction: "none",
+                userSelect: "none",
+              }}
+            >
+              {avatarEditor.src ? (
+                <Box
+                  component="img"
+                  src={avatarEditor.src}
+                  alt="Avatar crop preview"
+                  draggable={false}
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    width: avatarEditor.imageSize.width,
+                    height: avatarEditor.imageSize.height,
+                    transform: `translate(calc(-50% + ${avatarEditor.offsetX}px), calc(-50% + ${avatarEditor.offsetY}px)) scale(${avatarBounds.scale})`,
+                    transformOrigin: "center center",
+                    pointerEvents: "none",
+                  }}
+                />
+              ) : null}
+
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  pointerEvents: "none",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    width: 34,
+                    height: 34,
+                    transform: "translate(-50%, -50%)",
+                    borderRadius: "50%",
+                    border: "2px solid rgba(255,255,255,0.95)",
+                    boxShadow: "0 0 0 999px rgba(0,0,0,0.12)",
+                  },
+                  "&::after": {
+                    content: '""',
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    width: 12,
+                    height: 12,
+                    transform: "translate(-50%, -50%)",
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(255,255,255,0.98)",
+                    boxShadow: "0 0 12px rgba(255,255,255,0.55)",
+                  },
+                }}
+              />
+            </Box>
+
+            <Stack spacing={2} sx={{ width: "100%", maxWidth: 520 }}>
+              <Box>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Zoom
+                </Typography>
+                <Slider
+                  min={1}
+                  max={3}
+                  step={0.05}
+                  value={avatarEditor.zoom}
+                  onChange={(_, value) => updateAvatarEditor({ zoom: value })}
+                />
+              </Box>
+
+              <Box>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Move Left / Right
+                </Typography>
+                <Slider
+                  min={-avatarBounds.maxOffsetX}
+                  max={avatarBounds.maxOffsetX}
+                  step={1}
+                  value={avatarEditor.offsetX}
+                  onChange={(_, value) => updateAvatarEditor({ offsetX: value })}
+                />
+              </Box>
+
+              <Box>
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  Move Up / Down
+                </Typography>
+                <Slider
+                  min={-avatarBounds.maxOffsetY}
+                  max={avatarBounds.maxOffsetY}
+                  step={1}
+                  value={avatarEditor.offsetY}
+                  onChange={(_, value) => updateAvatarEditor({ offsetY: value })}
+                />
+              </Box>
+            </Stack>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button variant="outlined" color="inherit" onClick={closeAvatarEditor}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={applyAvatarCrop}>
+            Use This Picture
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

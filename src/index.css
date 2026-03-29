@@ -41,7 +41,14 @@
 }
  
 /* for Firefox */
- html {scrollbar-color: #9e4673 #3d4a59;} 
+ html {
+  scrollbar-color: #9e4673 #3d4a59;
+  scrollbar-gutter: stable both-edges;
+}
+
+body {
+  overflow-y: scroll;
+}
 
 @media print {
   @page {

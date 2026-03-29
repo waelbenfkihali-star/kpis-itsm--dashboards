@@ -1,4 +1,6 @@
+import json
 import pandas as pd
+import urllib.error
 from collections import defaultdict
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -8,6 +10,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
 
+from .ai_dashboard import build_ai_dashboard_intent
 from .models import Incident, Request, Change
 from .serializers import (
     ChangeSerializer,
@@ -417,6 +420,31 @@ def monthly_stats(request):
     result = sorted(data.values(), key=lambda x: x["month"])
 
     return Response(result)
+
+
+@api_view(["POST"])
+def ai_dashboard_query(request):
+    prompt = str(request.data.get("prompt", "")).strip()
+    if not prompt:
+        return Response({"detail": "Prompt is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        intent = build_ai_dashboard_intent(prompt)
+        return Response({"ok": True, "intent": intent})
+    except urllib.error.HTTPError as error:
+        try:
+            payload = json.loads(error.read().decode("utf-8"))
+            message = payload.get("error", {}).get("message") or payload.get("detail")
+        except Exception:
+            message = None
+        return Response(
+            {"detail": message or "AI dashboard request failed."},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+    except RuntimeError as error:
+        return Response({"detail": str(error)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    except Exception as error:
+        return Response({"detail": str(error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(["GET"])

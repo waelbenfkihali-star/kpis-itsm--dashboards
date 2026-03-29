@@ -17,6 +17,7 @@ from .views import (
     team_members,
     team_member_detail,
     team_member_password,
+    ai_dashboard_query,
 )
 
 urlpatterns = [
@@ -37,5 +38,6 @@ urlpatterns = [
     path("changes/delete/", delete_changes),
     path("changes/<str:number>/", change_detail),
     path("monthly-stats/", monthly_stats),
+    path("ai/dashboard-query/", ai_dashboard_query),
     
 ]
