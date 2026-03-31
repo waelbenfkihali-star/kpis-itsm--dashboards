@@ -147,15 +147,18 @@ def import_excel(request):
                 rows, used_sheet = read_excel_rows(inc_file, sheet_name)
                 used_sheets["incidents"] = used_sheet
 
-                Incident.objects.all().delete()
-
                 objs = []
+                existing_numbers = set(
+                    Incident.objects.exclude(number__isnull=True)
+                    .exclude(number__exact="")
+                    .values_list("number", flat=True)
+                )
 
                 for row in rows:
 
                     number = clean_text(row.get("Number"))
 
-                    if not number:
+                    if not number or number in existing_numbers:
                         continue
 
                     priority = clean_priority(row.get("Priority"))
@@ -195,6 +198,7 @@ def import_excel(request):
                             sla_breached=to_bool(row.get("SLA Breached")) or "breach" in sla_value,
                         )
                     )
+                    existing_numbers.add(number)
 
                 Incident.objects.bulk_create(objs, batch_size=500)
                 imported_counts["incidents"] = len(objs)
@@ -206,15 +210,18 @@ def import_excel(request):
                 rows, used_sheet = read_excel_rows(req_file, sheet_name)
                 used_sheets["requests"] = used_sheet
 
-                Request.objects.all().delete()
-
                 objs = []
+                existing_numbers = set(
+                    Request.objects.exclude(number__isnull=True)
+                    .exclude(number__exact="")
+                    .values_list("number", flat=True)
+                )
 
                 for row in rows:
 
                     number = clean_text(row.get("Number"))
 
-                    if not number:
+                    if not number or number in existing_numbers:
                         continue
 
                     objs.append(
@@ -245,6 +252,7 @@ def import_excel(request):
                             it_service=clean_text(row.get("IT Service")),
                         )
                     )
+                    existing_numbers.add(number)
 
                 Request.objects.bulk_create(objs, batch_size=500)
                 imported_counts["requests"] = len(objs)
@@ -256,15 +264,18 @@ def import_excel(request):
                 rows, used_sheet = read_excel_rows(chg_file, sheet_name)
                 used_sheets["changes"] = used_sheet
 
-                Change.objects.all().delete()
-
                 objs = []
+                existing_numbers = set(
+                    Change.objects.exclude(number__isnull=True)
+                    .exclude(number__exact="")
+                    .values_list("number", flat=True)
+                )
 
                 for row in rows:
 
                     number = clean_text(row.get("Number"))
 
-                    if not number:
+                    if not number or number in existing_numbers:
                         continue
 
                     objs.append(
@@ -295,6 +306,7 @@ def import_excel(request):
                             close_notes=clean_text(row.get("Close notes") or row.get("Close Notes")),
                         )
                     )
+                    existing_numbers.add(number)
 
                 Change.objects.bulk_create(objs, batch_size=500)
                 imported_counts["changes"] = len(objs)
