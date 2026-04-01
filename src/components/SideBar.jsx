@@ -12,7 +12,6 @@ import { Avatar, styled, useTheme, Typography, Tooltip } from "@mui/material";
 import MuiDrawer from "@mui/material/Drawer";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PeopleOutlinedIcon from "@mui/icons-material/PeopleOutlined";
-import ContactsOutlinedIcon from "@mui/icons-material/ContactsOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import QueryStatsOutlinedIcon from "@mui/icons-material/QueryStatsOutlined";
@@ -117,11 +116,6 @@ const kpiItems = [
 const adminItems = [
   { text: "Manage Team", icon: <PeopleOutlinedIcon />, path: "/team" },
   { text: "Profile Form", icon: <PersonOutlinedIcon />, path: "/form" },
-  {
-    text: "Contacts Information",
-    icon: <ContactsOutlinedIcon />,
-    path: "/contacts",
-  },
 ];
 
 const supportItems = [

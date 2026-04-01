@@ -16,8 +16,11 @@ import {
   getChartColor,
   makeLegendItems,
   monthlyBreakdown,
+  monthlyBreakdownInRange,
   monthlyDualSeries,
+  monthlyDualSeriesInRange,
   monthlySeries,
+  monthlySeriesInRange,
   ratio,
   renderBarTooltip,
   renderLineTooltip,
@@ -79,9 +82,12 @@ export default function IncidentsAnalysis() {
     [rows]
   );
 
-  const backlogMonthly = useMemo(() => monthlySeries(openBacklogRows, "opened"), [openBacklogRows]);
+  const backlogMonthly = useMemo(
+    () => monthlySeriesInRange(openBacklogRows, "opened", rows, "opened"),
+    [openBacklogRows, rows]
+  );
   const openVsClosedMonthly = useMemo(
-    () => monthlyDualSeries(rows, "opened", "resolved", "Opened", "Resolved"),
+    () => monthlyDualSeriesInRange(rows, "opened", "resolved", "Opened", "Resolved", rows, "opened"),
     [rows]
   );
 
@@ -128,9 +134,18 @@ export default function IncidentsAnalysis() {
   const avgBusiness = average(rows, "business_duration");
   const avgMajorResolution = average(rows, "duration", (row) => row.is_major);
   const focusedServices = useMemo(() => countBy(majorRows, "affected_service"), [majorRows]);
-  const serviceMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "affected_service", 5), [rows]);
-  const groupMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "responsible_group", 5), [rows]);
-  const siteMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "location", 5), [rows]);
+  const serviceMonthly = useMemo(
+    () => monthlyBreakdownInRange(rows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
+    [rows]
+  );
+  const groupMonthly = useMemo(
+    () => monthlyBreakdownInRange(rows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
+    [rows]
+  );
+  const siteMonthly = useMemo(
+    () => monthlyBreakdownInRange(rows, "opened", "location", 5, "Unknown", rows, "opened"),
+    [rows]
+  );
 
   const focusedView = useMemo(() => {
     if (!selectedKpi) return null;
@@ -156,7 +171,7 @@ export default function IncidentsAnalysis() {
               title: "Major Incidents by Service per Month",
               note: "Compares top impacted services month by month inside the selected scope.",
               type: "stacked",
-              ...monthlyBreakdown(majorRows, "opened", "affected_service", 5),
+              ...monthlyBreakdownInRange(majorRows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Major Incident Sites",
@@ -180,7 +195,7 @@ export default function IncidentsAnalysis() {
               title: "Backlog by Service per Month",
               note: "Shows how top services contribute to backlog over time.",
               type: "stacked",
-              ...monthlyBreakdown(openBacklogRows, "opened", "affected_service", 5),
+              ...monthlyBreakdownInRange(openBacklogRows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Backlog by Responsible Group",
@@ -198,7 +213,7 @@ export default function IncidentsAnalysis() {
             { title: "Resolved or Closed", value: resolved, note: `${ratio(resolved, total)}% already resolved` },
             { title: "SLA Breached", value: slaBreached, note: "Selected incidents breaching SLA" },
           ],
-          line: { title: "Incidents Created Trend", data: monthlySeries(rows, "opened"), label: "Created Incidents" },
+          line: { title: "Incidents Created Trend", data: monthlySeriesInRange(rows, "opened", rows, "opened"), label: "Created Incidents" },
           extras: [
             {
               title: "Incident Volume by Service per Month",
@@ -254,7 +269,7 @@ export default function IncidentsAnalysis() {
               title: "Breached Incidents by Group per Month",
               note: "Monthly comparison of groups most exposed to SLA breaches.",
               type: "stacked",
-              ...monthlyBreakdown(rows.filter((row) => row.sla_breached), "opened", "responsible_group", 5),
+              ...monthlyBreakdownInRange(rows.filter((row) => row.sla_breached), "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Breached Incidents by Service",
@@ -314,7 +329,7 @@ export default function IncidentsAnalysis() {
                   title: "SLA Pressure by Group per Month",
                   note: "Monthly comparison of the groups exposed to SLA pressure.",
                   type: "stacked",
-                  ...monthlyBreakdown(rows.filter((row) => row.sla_breached), "opened", "responsible_group", 5),
+                  ...monthlyBreakdownInRange(rows.filter((row) => row.sla_breached), "opened", "responsible_group", 5, "Unknown", rows, "opened"),
                 },
                 {
                   title: "SLA Pressure by Service",
@@ -340,7 +355,7 @@ export default function IncidentsAnalysis() {
                   title: "Major Incident Services per Month",
                   note: "Monthly comparison of services impacted by major incidents.",
                   type: "stacked",
-                  ...monthlyBreakdown(majorRows, "opened", "affected_service", 5),
+                  ...monthlyBreakdownInRange(majorRows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
                 },
                 {
                   title: "Major Incident Sites",
@@ -366,7 +381,7 @@ export default function IncidentsAnalysis() {
                   title: "Backlog by Service per Month",
                   note: "Monthly view of services contributing to the selected backlog.",
                   type: "stacked",
-                  ...monthlyBreakdown(openBacklogRows, "opened", "affected_service", 5),
+                  ...monthlyBreakdownInRange(openBacklogRows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
                 },
                 {
                   title: "Backlog by Group",
@@ -620,8 +635,8 @@ export default function IncidentsAnalysis() {
 
       <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mb={2}>
         <ChartCard
-          title="Incident Management KPI Results - Past 6 Months"
-          note="Selected incidents opened by month, similar to the report's control trend."
+          title="Incident Management KPI Results - Across Selected Period"
+          note="Selected incidents opened by month across the full date range of the selected rows."
         >
           <ResponsiveLine
             data={[

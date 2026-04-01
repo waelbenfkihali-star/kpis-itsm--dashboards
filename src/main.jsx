@@ -19,7 +19,6 @@ import RoleRoute from "./auth/RoleRoute";
 
 import Dashboard from "./page/dashboard/Dashboard";
 import Team from "./page/team/Team";
-import Contacts from "./page/contacts/Contacts";
 import Form from "./page/form/Form";
 import FAQ from "./page/faq/FAQ";
 import Profile from "./page/profile/Profile";
@@ -99,7 +98,6 @@ function RootRouter() {
               <Route path="kpiform" element={<RoleRoute><KpiForm /></RoleRoute>} />
               <Route path="editkpi/:id" element={<RoleRoute><EditKpi /></RoleRoute>} />
               <Route path="importexcel" element={<RoleRoute><ImportExcel /></RoleRoute>} />
-              <Route path="contacts" element={<RoleRoute><Contacts /></RoleRoute>} />
               <Route path="profile" element={<Profile />} />
               <Route path="ai-dashboard" element={<AssistantDashboard />} />
               <Route path="form" element={<RoleRoute><Form /></RoleRoute>} />

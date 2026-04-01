@@ -16,8 +16,11 @@ import {
   getChartColor,
   makeLegendItems,
   monthlyBreakdown,
+  monthlyBreakdownInRange,
   monthlyDualSeries,
+  monthlyDualSeriesInRange,
   monthlySeries,
+  monthlySeriesInRange,
   ratio,
   renderBarTooltip,
   renderLineTooltip,
@@ -69,18 +72,27 @@ export default function ChangesAnalysis() {
   const rows = Array.isArray(location.state?.data) ? location.state.data : [];
   const selectedKpi = location.state?.selectedKpi || null;
 
-  const openedMonthly = useMemo(() => monthlySeries(rows, "opened"), [rows]);
+  const openedMonthly = useMemo(() => monthlySeriesInRange(rows, "opened", rows, "opened"), [rows]);
   const openedVsClosed = useMemo(
-    () => monthlyDualSeries(rows, "opened", "closed", "Opened", "Closed"),
+    () => monthlyDualSeriesInRange(rows, "opened", "closed", "Opened", "Closed", rows, "opened"),
     [rows]
   );
   const services = useMemo(() => countBy(rows, "affected_service"), [rows]);
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
   const states = useMemo(() => countBy(rows, "state"), [rows]);
   const types = useMemo(() => countBy(rows, "type"), [rows]);
-  const serviceMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "affected_service", 5), [rows]);
-  const groupMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "responsible_group", 5), [rows]);
-  const typeMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "type", 5), [rows]);
+  const serviceMonthly = useMemo(
+    () => monthlyBreakdownInRange(rows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
+    [rows]
+  );
+  const groupMonthly = useMemo(
+    () => monthlyBreakdownInRange(rows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
+    [rows]
+  );
+  const typeMonthly = useMemo(
+    () => monthlyBreakdownInRange(rows, "opened", "type", 5, "Unknown", rows, "opened"),
+    [rows]
+  );
 
   const columns = [
     { field: "number", headerName: "Change ID", flex: 1, minWidth: 140 },
@@ -178,7 +190,7 @@ export default function ChangesAnalysis() {
               title: "Critical Changes by Service per Month",
               note: "Monthly service comparison for critical changes.",
               type: "stacked",
-              ...monthlyBreakdown(rows.filter((row) => row.priority === "P1"), "opened", "affected_service", 5),
+              ...monthlyBreakdownInRange(rows.filter((row) => row.priority === "P1"), "opened", "affected_service", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Critical Changes by Group",
@@ -226,7 +238,7 @@ export default function ChangesAnalysis() {
               title: "Emergency Changes by Group per Month",
               note: "Monthly comparison of emergency workload by group.",
               type: "stacked",
-              ...monthlyBreakdown(rows.filter((row) => String(row.type || "").toLowerCase().includes("emergency")), "opened", "responsible_group", 5),
+              ...monthlyBreakdownInRange(rows.filter((row) => String(row.type || "").toLowerCase().includes("emergency")), "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Emergency Changes by Service",
@@ -250,7 +262,7 @@ export default function ChangesAnalysis() {
               title: "Closed Changes by Service per Month",
               note: "Monthly comparison of closure volume across top services.",
               type: "stacked",
-              ...monthlyBreakdown(rows.filter((row) => ["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)), "closed", "affected_service", 5),
+              ...monthlyBreakdownInRange(rows.filter((row) => ["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)), "closed", "affected_service", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Closed Changes by Group",
@@ -335,7 +347,7 @@ export default function ChangesAnalysis() {
                   title: "Critical Changes by Service per Month",
                   note: "Monthly service comparison for critical work.",
                   type: "stacked",
-                  ...monthlyBreakdown(rows.filter((row) => row.priority === "P1"), "opened", "affected_service", 5),
+                  ...monthlyBreakdownInRange(rows.filter((row) => row.priority === "P1"), "opened", "affected_service", 5, "Unknown", rows, "opened"),
                 },
                 {
                   title: "Critical Changes by Group",
@@ -361,7 +373,7 @@ export default function ChangesAnalysis() {
                   title: "Emergency Changes by Group per Month",
                   note: "Monthly comparison of emergency workload by group.",
                   type: "stacked",
-                  ...monthlyBreakdown(rows.filter((row) => String(row.type || "").toLowerCase().includes("emergency")), "opened", "responsible_group", 5),
+                  ...monthlyBreakdownInRange(rows.filter((row) => String(row.type || "").toLowerCase().includes("emergency")), "opened", "responsible_group", 5, "Unknown", rows, "opened"),
                 },
                 {
                   title: "Emergency Changes by Service",
@@ -387,7 +399,7 @@ export default function ChangesAnalysis() {
                   title: "Closed Changes by Service per Month",
                   note: "Monthly comparison of closure volume across services.",
                   type: "stacked",
-                  ...monthlyBreakdown(rows.filter((row) => ["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)), "closed", "affected_service", 5),
+                  ...monthlyBreakdownInRange(rows.filter((row) => ["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)), "closed", "affected_service", 5, "Unknown", rows, "opened"),
                 },
                 {
                   title: "Closed Changes by Group",
@@ -605,8 +617,8 @@ export default function ChangesAnalysis() {
 
       <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mb={2}>
         <ChartCard
-          title="Change Management KPI Results - Past 6 Months"
-          note="Selected changes opened by month, acting as the control KPI trend."
+          title="Change Management KPI Results - Across Selected Period"
+          note="Selected changes opened by month across the full date range of the selected rows."
         >
           <ResponsiveLine
             data={[

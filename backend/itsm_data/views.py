@@ -2,6 +2,7 @@ import json
 import pandas as pd
 import urllib.error
 from collections import defaultdict
+from datetime import datetime
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -29,7 +30,15 @@ from .serializers import (
 def clean_text(value):
     if value is None:
         return ""
-    return str(value).strip()
+    text = str(value).strip()
+    if text.lower() in {"nan", "nat", "none", "null"}:
+        return ""
+    return " ".join(text.split())
+
+
+def clean_name_like(value, fallback="Unknown"):
+    text = clean_text(value)
+    return text or fallback
 
 
 def clean_state(value):
@@ -41,10 +50,22 @@ def clean_state(value):
     mapping = {
         "open": "Open",
         "opened": "Open",
+        "new": "Open",
+        "assigned": "Open",
         "closed": "Closed",
         "resolved": "Resolved",
         "in progress": "In Progress",
+        "work in progress": "In Progress",
+        "wip": "In Progress",
         "pending": "Pending",
+        "pending user info": "Pending",
+        "pending vendor": "Pending",
+        "pending change": "Pending",
+        "on hold": "Pending",
+        "awaiting info": "Pending",
+        "complete": "Completed",
+        "completed": "Completed",
+        "implemented": "Implemented",
     }
 
     return mapping.get(v, v.capitalize())
@@ -91,6 +112,24 @@ def to_float(value):
         return float(value)
     except Exception:
         return 0
+
+
+def normalize_date(value):
+    if value in ["", None]:
+        return ""
+
+    if isinstance(value, datetime):
+        return value.strftime("%Y-%m-%d %H:%M:%S")
+
+    try:
+        timestamp = pd.to_datetime(value, errors="coerce", dayfirst=False)
+        if pd.isna(timestamp):
+            timestamp = pd.to_datetime(value, errors="coerce", dayfirst=True)
+        if pd.isna(timestamp):
+            return clean_text(value)
+        return timestamp.strftime("%Y-%m-%d %H:%M:%S")
+    except Exception:
+        return clean_text(value)
 
 
 # -------- READ EXCEL --------
@@ -172,27 +211,27 @@ def import_excel(request):
                             affected_service=clean_text(row.get("Affected Service")),
                             parent=clean_text(row.get("Parent")),
                             parent_incident=clean_text(row.get("Parent Incident")),
-                            service_owner=clean_text(row.get("Service Owner")),
-                            configuration_item=clean_text(row.get("Configuration item")),
-                            location=clean_text(row.get("Location")),
+                            service_owner=clean_name_like(row.get("Service Owner")),
+                            configuration_item=clean_name_like(row.get("Configuration item")),
+                            location=clean_name_like(row.get("Location")),
                             description=clean_text(row.get("Description")),
                             short_description=clean_text(row.get("Short description")),
-                            opened=clean_text(row.get("Opened")),
+                            opened=normalize_date(row.get("Opened")),
                             resolution_code=clean_text(row.get("Resolution code")),
                             resolution_notes=clean_text(row.get("Resolution notes")),
-                            responsible_group=clean_text(row.get("Responsible group")),
-                            responsible_user=clean_text(row.get("Responsible user")),
-                            resolved=clean_text(row.get("Resolved")),
+                            responsible_group=clean_name_like(row.get("Responsible group")),
+                            responsible_user=clean_name_like(row.get("Responsible user")),
+                            resolved=normalize_date(row.get("Resolved")),
                             reopen_count=to_int(row.get("Reopen count")),
-                            caller=clean_text(row.get("Caller")),
-                            aging_group=clean_text(row.get("Aging Group")),
+                            caller=clean_name_like(row.get("Caller")),
+                            aging_group=clean_name_like(row.get("Aging Group")),
                             duration=to_float(row.get("Duration")),
                             service_classification=clean_text(row.get("Service classification")),
                             business_duration=to_float(row.get("Business duration")),
                             problem=clean_text(row.get("Problem")),
                             sla=clean_text(row.get("SLA")),
-                            schedule=clean_text(row.get("Schedule")),
-                            location_division=clean_text(row.get("Location Division")),
+                            schedule=clean_name_like(row.get("Schedule")),
+                            location_division=clean_name_like(row.get("Location Division")),
                             service_request=clean_text(row.get("Service Request")),
                             is_major=to_bool(row.get("Is Major")) or priority == "P1",
                             sla_breached=to_bool(row.get("SLA Breached")) or "breach" in sla_value,
@@ -229,27 +268,27 @@ def import_excel(request):
                             count=to_int(row.get("Count")),
                             number=number,
                             state=clean_state(row.get("State")),
-                            item=clean_text(row.get("Item")),
+                            item=clean_name_like(row.get("Item")),
                             short_description=clean_text(row.get("Short description")),
                             description=clean_text(row.get("Description")),
-                            affected_service=clean_text(row.get("Affected Service")),
+                            affected_service=clean_name_like(row.get("Affected Service")),
                             parent=clean_text(row.get("Parent")),
-                            service_owner=clean_text(row.get("Service Owner")),
+                            service_owner=clean_name_like(row.get("Service Owner")),
                             request=clean_text(row.get("Request")),
-                            requested_for=clean_text(row.get("Requested for")),
-                            opened=clean_text(row.get("Opened")),
-                            opened_by=clean_text(row.get("Opened by")),
-                            responsible_group=clean_text(row.get("Responsible group")),
-                            responsible_user=clean_text(row.get("Responsible user")),
-                            location=clean_text(row.get("Location")),
-                            aging_group=clean_text(row.get("Aging Group")),
-                            location_division=clean_text(row.get("Location Division")),
-                            updated=clean_text(row.get("Updated")),
+                            requested_for=clean_name_like(row.get("Requested for")),
+                            opened=normalize_date(row.get("Opened")),
+                            opened_by=clean_name_like(row.get("Opened by")),
+                            responsible_group=clean_name_like(row.get("Responsible group")),
+                            responsible_user=clean_name_like(row.get("Responsible user")),
+                            location=clean_name_like(row.get("Location")),
+                            aging_group=clean_name_like(row.get("Aging Group")),
+                            location_division=clean_name_like(row.get("Location Division")),
+                            updated=normalize_date(row.get("Updated")),
                             resolve_time=clean_text(row.get("Resolve Time")),
                             service_classification=clean_text(row.get("Service classification")),
-                            closed=clean_text(row.get("Closed")),
-                            closed_by=clean_text(row.get("Closed by")),
-                            it_service=clean_text(row.get("IT Service")),
+                            closed=normalize_date(row.get("Closed")),
+                            closed_by=clean_name_like(row.get("Closed by")),
+                            it_service=clean_name_like(row.get("IT Service") or row.get("Affected Service")),
                         )
                     )
                     existing_numbers.add(number)
@@ -285,23 +324,23 @@ def import_excel(request):
                             type=clean_text(row.get("Type")),
                             state=clean_state(row.get("State")),
                             priority=clean_priority(row.get("Priority")),
-                            affected_service=clean_text(row.get("Affected Service")),
+                            affected_service=clean_name_like(row.get("Affected Service")),
                             parent=clean_text(row.get("Parent")),
-                            service_owner=clean_text(row.get("Service Owner")),
-                            configuration_item=clean_text(row.get("Configuration item")),
-                            location=clean_text(row.get("Location")),
+                            service_owner=clean_name_like(row.get("Service Owner")),
+                            configuration_item=clean_name_like(row.get("Configuration item")),
+                            location=clean_name_like(row.get("Location")),
                             description=clean_text(row.get("Description")),
                             short_description=clean_text(row.get("Short description")),
-                            opened=clean_text(row.get("Opened")),
-                            planned_start_date=clean_text(row.get("Planned start date")),
-                            planned_end_date=clean_text(row.get("Planned end date")),
-                            closed=clean_text(row.get("Closed")),
-                            responsible_group=clean_text(row.get("Responsible group")),
-                            responsible_user=clean_text(row.get("Responsible user")),
-                            location_division=clean_text(row.get("Location Division")),
+                            opened=normalize_date(row.get("Opened")),
+                            planned_start_date=normalize_date(row.get("Planned start date")),
+                            planned_end_date=normalize_date(row.get("Planned end date")),
+                            closed=normalize_date(row.get("Closed")),
+                            responsible_group=clean_name_like(row.get("Responsible group")),
+                            responsible_user=clean_name_like(row.get("Responsible user")),
+                            location_division=clean_name_like(row.get("Location Division")),
                             service_classification=clean_text(row.get("Service classification")),
-                            risk=clean_text(row.get("Risk")),
-                            category=clean_text(row.get("Category")),
+                            risk=clean_name_like(row.get("Risk")),
+                            category=clean_name_like(row.get("Category")),
                             close_code=clean_text(row.get("Close code") or row.get("Close Code")),
                             close_notes=clean_text(row.get("Close notes") or row.get("Close Notes")),
                         )

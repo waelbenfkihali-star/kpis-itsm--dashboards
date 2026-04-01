@@ -36,6 +36,34 @@ export function parseDate(value) {
 }
 
 export function monthlySeries(rows, key) {
+  return monthlySeriesInRange(rows, key, rows);
+}
+
+function buildMonthRange(rows, key) {
+  const months = rows
+    .map((row) => parseDate(row[key]))
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b));
+
+  if (!months.length) return [];
+
+  const [startYear, startMonth] = months[0].split("-").map(Number);
+  const [endYear, endMonth] = months[months.length - 1].split("-").map(Number);
+  const cursor = new Date(startYear, startMonth - 1, 1);
+  const end = new Date(endYear, endMonth - 1, 1);
+  const range = [];
+
+  while (cursor <= end) {
+    range.push(
+      `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`
+    );
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  return range;
+}
+
+export function monthlySeriesInRange(rows, key, rangeRows = rows, rangeKey = key) {
   const counts = {};
 
   rows.forEach((row) => {
@@ -44,12 +72,29 @@ export function monthlySeries(rows, key) {
     counts[month] = (counts[month] || 0) + 1;
   });
 
-  return Object.entries(counts)
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([month, value]) => ({ month, value }));
+  const monthRange = buildMonthRange(rangeRows, rangeKey);
+  if (!monthRange.length) {
+    return Object.entries(counts)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([month, value]) => ({ month, value }));
+  }
+
+  return monthRange.map((month) => ({ month, value: counts[month] || 0 }));
 }
 
 export function monthlyDualSeries(rows, firstKey, secondKey, firstLabel, secondLabel) {
+  return monthlyDualSeriesInRange(rows, firstKey, secondKey, firstLabel, secondLabel, rows, firstKey);
+}
+
+export function monthlyDualSeriesInRange(
+  rows,
+  firstKey,
+  secondKey,
+  firstLabel,
+  secondLabel,
+  rangeRows = rows,
+  rangeKey = firstKey
+) {
   const counts = {};
 
   function touch(month) {
@@ -70,10 +115,31 @@ export function monthlyDualSeries(rows, firstKey, secondKey, firstLabel, secondL
     if (secondMonth) touch(secondMonth)[secondLabel] += 1;
   });
 
-  return Object.values(counts).sort((a, b) => a.month.localeCompare(b.month));
+  const monthRange = buildMonthRange(rangeRows, rangeKey);
+  if (!monthRange.length) {
+    return Object.values(counts).sort((a, b) => a.month.localeCompare(b.month));
+  }
+
+  return monthRange.map((month) => ({
+    month,
+    [firstLabel]: counts[month]?.[firstLabel] || 0,
+    [secondLabel]: counts[month]?.[secondLabel] || 0,
+  }));
 }
 
 export function monthlyBreakdown(rows, dateKey, groupKey, limit = 5, fallback = "Unknown") {
+  return monthlyBreakdownInRange(rows, dateKey, groupKey, limit, fallback, rows, dateKey);
+}
+
+export function monthlyBreakdownInRange(
+  rows,
+  dateKey,
+  groupKey,
+  limit = 5,
+  fallback = "Unknown",
+  rangeRows = rows,
+  rangeKey = dateKey
+) {
   const topGroups = countBy(rows, groupKey, fallback)
     .slice(0, limit)
     .map((item) => item.label);
@@ -93,9 +159,20 @@ export function monthlyBreakdown(rows, dateKey, groupKey, limit = 5, fallback = 
     counts[month][group] += 1;
   });
 
+  const monthRange = buildMonthRange(rangeRows, rangeKey);
+  const data = monthRange.length
+    ? monthRange.map((month) => {
+        const item = counts[month] || { month };
+        topGroups.forEach((label) => {
+          if (item[label] === undefined) item[label] = 0;
+        });
+        return item;
+      })
+    : Object.values(counts).sort((a, b) => a.month.localeCompare(b.month));
+
   return {
     keys: topGroups,
-    data: Object.values(counts).sort((a, b) => a.month.localeCompare(b.month)),
+    data,
   };
 }
 

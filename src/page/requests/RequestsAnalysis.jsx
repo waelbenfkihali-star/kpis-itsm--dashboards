@@ -17,8 +17,11 @@ import {
   getChartColor,
   makeLegendItems,
   monthlyBreakdown,
+  monthlyBreakdownInRange,
   monthlyDualSeries,
+  monthlyDualSeriesInRange,
   monthlySeries,
+  monthlySeriesInRange,
   ratio,
   renderBarTooltip,
   renderLineTooltip,
@@ -80,9 +83,9 @@ export default function RequestsAnalysis() {
     [rows]
   );
 
-  const openedMonthly = useMemo(() => monthlySeries(rows, "opened"), [rows]);
+  const openedMonthly = useMemo(() => monthlySeriesInRange(rows, "opened", rows, "opened"), [rows]);
   const openedVsClosed = useMemo(
-    () => monthlyDualSeries(rows, "opened", "closed", "Opened", "Closed"),
+    () => monthlyDualSeriesInRange(rows, "opened", "closed", "Opened", "Closed", rows, "opened"),
     [rows]
   );
   const agingStateData = useMemo(() => agingByState(openRows, "opened", "state"), [openRows]);
@@ -90,9 +93,18 @@ export default function RequestsAnalysis() {
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
   const requestedFor = useMemo(() => countBy(rows, "requested_for"), [rows]);
   const items = useMemo(() => countBy(rows, "item"), [rows]);
-  const serviceMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "it_service", 5), [rows]);
-  const groupMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "responsible_group", 5), [rows]);
-  const itemMonthly = useMemo(() => monthlyBreakdown(rows, "opened", "item", 5), [rows]);
+  const serviceMonthly = useMemo(
+    () => monthlyBreakdownInRange(rows, "opened", "it_service", 5, "Unknown", rows, "opened"),
+    [rows]
+  );
+  const groupMonthly = useMemo(
+    () => monthlyBreakdownInRange(rows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
+    [rows]
+  );
+  const itemMonthly = useMemo(
+    () => monthlyBreakdownInRange(rows, "opened", "item", 5, "Unknown", rows, "opened"),
+    [rows]
+  );
 
   const columns = [
     { field: "number", headerName: "Request ID", flex: 1, minWidth: 140 },
@@ -152,7 +164,7 @@ export default function RequestsAnalysis() {
               title: "Backlog by Group per Month",
               note: "Monthly comparison of top groups inside the request backlog.",
               type: "stacked",
-              ...monthlyBreakdown(openRows, "opened", "responsible_group", 5),
+              ...monthlyBreakdownInRange(openRows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Backlog by Service",
@@ -176,7 +188,7 @@ export default function RequestsAnalysis() {
               title: "Closed Requests by Service per Month",
               note: "Monthly closure comparison for the top services.",
               type: "stacked",
-              ...monthlyBreakdown(closedRows, "closed", "it_service", 5),
+              ...monthlyBreakdownInRange(closedRows, "closed", "it_service", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Closed Requests by Item",
@@ -224,7 +236,7 @@ export default function RequestsAnalysis() {
               title: "Old Backlog by Group per Month",
               note: "Month over month view of the groups driving older backlog.",
               type: "stacked",
-              ...monthlyBreakdown(openRows.filter((row) => row.opened && row.state), "opened", "responsible_group", 5),
+              ...monthlyBreakdownInRange(openRows.filter((row) => row.opened && row.state), "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Old Backlog by Item",
@@ -248,7 +260,7 @@ export default function RequestsAnalysis() {
               title: "Closure Rate Support View by Service per Month",
               note: "Monthly closure comparison for top business services.",
               type: "stacked",
-              ...monthlyBreakdown(closedRows, "closed", "it_service", 5),
+              ...monthlyBreakdownInRange(closedRows, "closed", "it_service", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Closure Contributors by Group",
@@ -307,7 +319,7 @@ export default function RequestsAnalysis() {
                   title: "Backlog by Group per Month",
                   note: "Monthly comparison of top groups inside the selected backlog.",
                   type: "stacked",
-                  ...monthlyBreakdown(openRows, "opened", "responsible_group", 5),
+                  ...monthlyBreakdownInRange(openRows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
                 },
                 {
                   title: "Backlog by Service",
@@ -333,7 +345,7 @@ export default function RequestsAnalysis() {
                   title: "Closed Requests by Service per Month",
                   note: "Monthly closure comparison across the top services.",
                   type: "stacked",
-                  ...monthlyBreakdown(closedRows, "closed", "it_service", 5),
+                  ...monthlyBreakdownInRange(closedRows, "closed", "it_service", 5, "Unknown", rows, "opened"),
                 },
                 {
                   title: "Closed Requests by Group",
@@ -598,8 +610,8 @@ export default function RequestsAnalysis() {
 
       <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mb={2}>
         <ChartCard
-          title="Service Request KPI Results - Past 6 Months"
-          note="Selected requests opened by month, used as control KPI trend."
+          title="Service Request KPI Results - Across Selected Period"
+          note="Selected requests opened by month across the full date range of the selected rows."
         >
           <ResponsiveLine
             data={[
