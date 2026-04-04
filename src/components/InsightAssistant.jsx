@@ -1,10 +1,15 @@
 import React from "react";
 import { Box, Button } from "@mui/material";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function InsightAssistant() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  if (location.pathname === "/profile") {
+    return null;
+  }
 
   return (
     <Box
