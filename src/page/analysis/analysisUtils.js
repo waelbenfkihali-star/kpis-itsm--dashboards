@@ -254,14 +254,14 @@ export function makeLineData(points, label) {
 }
 
 export const CHART_COLORS = [
-  "#4e79a7",
-  "#f28e2b",
-  "#e15759",
-  "#76b7b2",
-  "#59a14f",
-  "#edc948",
-  "#b07aa1",
-  "#ff9da7",
+  "#c26d3a",
+  "#7a8f46",
+  "#a44a3f",
+  "#3f7c85",
+  "#8b5e83",
+  "#d4a239",
+  "#5b6c8f",
+  "#b86f7a",
 ];
 
 export function getChartColor(index = 0) {

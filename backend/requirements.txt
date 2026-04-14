@@ -4,3 +4,4 @@ django-cors-headers>=4.4
 pandas
 openpyxl
 djangorestframework-simplejwt
+psycopg[binary]>=3.2

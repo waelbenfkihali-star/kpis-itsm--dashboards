@@ -1,4 +1,21 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "${POSTGRES_EXPOSE_PORT:-5433}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-itsm_dashboard}
+      - POSTGRES_USER=${POSTGRES_USER:-itsm_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-itsm_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-itsm_user} -d ${POSTGRES_DB:-itsm_dashboard}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   frontend:
     build: .
     ports:
@@ -13,13 +30,25 @@ services:
   backend:
     build: ./backend
     working_dir: /app
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8001:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,backend,192.168.0.108
+      - DB_ENGINE=${DB_ENGINE:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-itsm_dashboard}
+      - POSTGRES_USER=${POSTGRES_USER:-itsm_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-itsm_password}
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_DASHBOARD_MODEL=${OPENAI_DASHBOARD_MODEL:-gpt-5}
     volumes:
       - ./backend:/app
     restart: unless-stopped
+
+volumes:
+  postgres_data:

@@ -7,17 +7,52 @@ AI_INTENT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
     "properties": {
+        "compare": {
+            "type": "boolean",
+        },
         "module": {
-            "type": "string",
-            "enum": ["incidents", "requests", "changes"],
+            "anyOf": [
+                {
+                    "type": "string",
+                    "enum": ["incidents", "requests", "changes"],
+                },
+                {"type": "null"},
+            ],
+        },
+        "modules": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": ["incidents", "requests", "changes"],
+            },
         },
         "grouping": {
             "type": "string",
             "enum": ["service", "group", "month", "priority", "state", "site", "item", "type", "user"],
         },
+        "groupings": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "enum": ["service", "group", "month", "priority", "state", "site", "item", "type", "user"],
+            },
+        },
+        "secondary_grouping": {
+            "anyOf": [
+                {
+                    "type": "string",
+                    "enum": ["service", "group", "month", "priority", "state", "site", "item", "type", "user"],
+                },
+                {"type": "null"},
+            ],
+        },
         "state": {
             "type": "string",
             "enum": ["all", "open", "closed"],
+        },
+        "metric": {
+            "type": "string",
+            "enum": ["count", "major", "sla", "emergency", "pastDue"],
         },
         "year": {
             "anyOf": [
@@ -25,9 +60,32 @@ AI_INTENT_SCHEMA = {
                 {"type": "null"},
             ],
         },
+        "year_range": {
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "minItems": 2,
+                    "maxItems": 2,
+                },
+                {"type": "null"},
+            ],
+        },
+        "quarter": {
+            "anyOf": [
+                {"type": "integer", "minimum": 1, "maximum": 4},
+                {"type": "null"},
+            ],
+        },
+        "top_n": {
+            "anyOf": [
+                {"type": "integer", "minimum": 1, "maximum": 20},
+                {"type": "null"},
+            ],
+        },
         "chart_type": {
             "type": "string",
-            "enum": ["bar", "line"],
+            "enum": ["bar", "line", "pie"],
         },
         "title": {"type": "string"},
         "answer": {"type": "string"},
@@ -36,7 +94,24 @@ AI_INTENT_SCHEMA = {
             "items": {"type": "string"},
         },
     },
-    "required": ["module", "grouping", "state", "year", "chart_type", "title", "answer", "summary"],
+    "required": [
+        "compare",
+        "module",
+        "modules",
+        "grouping",
+        "groupings",
+        "secondary_grouping",
+        "state",
+        "metric",
+        "year",
+        "year_range",
+        "quarter",
+        "top_n",
+        "chart_type",
+        "title",
+        "answer",
+        "summary",
+    ],
 }
 
 
@@ -61,10 +136,15 @@ def build_ai_dashboard_intent(prompt):
 
     developer_prompt = (
         "Convert the user's ITSM dashboard request into a strict JSON intent. "
-        "The user may write in English or French. "
-        "Infer the closest module, grouping, state scope, year, and chart type. "
-        "Prefer 'month' for trends over time, 'service' or 'group' for breakdowns, and 'bar' for categorical charts. "
-        "The answer and summary must stay grounded in the requested intent only, not invented data."
+        "The user may write in English, French, Arabic transliteration, or a mixed sentence. "
+        "Infer the closest dashboard intent from incidents, requests, and changes. "
+        "Use compare=true when the user clearly compares multiple modules. "
+        "Set module to null only for comparisons; otherwise choose the closest single module. "
+        "Use groupings to capture one or two requested dimensions in order of importance. "
+        "Prefer 'month' for trends over time, 'service' or 'group' for operational breakdowns, and 'bar' for categorical charts. "
+        "Use metric=count unless the user explicitly asks for major incidents, SLA breaches, emergency changes, or past-due changes. "
+        "Keep title, answer, and summary grounded in the requested dashboard intent only. "
+        "Never invent data values."
     )
 
     body = {

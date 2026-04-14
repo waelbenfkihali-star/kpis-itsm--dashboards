@@ -1,11 +1,24 @@
+import os
 import random
-import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[2]
-DB_PATH = ROOT / "backend" / "db.sqlite3"
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+
+import sys
+
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
+import django
+
+django.setup()
+
+from itsm_data.models import Change, Incident, Request
+
 
 NOW = datetime(2026, 4, 1, 9, 0, 0)
 START_DATE = datetime(2023, 1, 1, 8, 0, 0)
@@ -135,37 +148,37 @@ def incident_rows(count=240):
             else ["Within SLA", "Within SLA", "Target Met", "Monitoring"]
         )
         rows.append(
-            (
-                f"INC{2026:04d}{i:05d}",
-                state,
-                priority,
-                service,
-                maybe_parent("TASK", 700 + i),
-                maybe_parent("INC", max(1, i - random.randint(1, 10))),
-                f"{service} Owner",
-                f"{service} - Node {random.randint(1, 24)}",
-                location,
-                f"{service} issue reported by user at {location}.",
-                f"{priority} incident affecting {service}",
-                fmt(opened),
-                resolution_code,
-                resolution_notes,
-                group,
-                user,
-                resolved,
-                random.randint(0, 3) if state in {"Resolved", "Closed"} else random.randint(0, 1),
-                caller,
-                random.choice(["0-7 Days", "8-30 Days", "31-60 Days", "> 60 Days"]),
-                duration,
-                random.choice(CLASSIFICATIONS),
-                business_duration,
-                maybe_parent("PRB", 100 + i),
-                sla_text,
-                random.choice(SCHEDULES),
-                division,
-                maybe_parent("REQ", 200 + i),
-                1 if is_major else 0,
-                1 if breached else 0,
+            Incident(
+                number=f"INC{2026:04d}{i:05d}",
+                state=state,
+                priority=priority,
+                affected_service=service,
+                parent=maybe_parent("TASK", 700 + i),
+                parent_incident=maybe_parent("INC", max(1, i - random.randint(1, 10))),
+                service_owner=f"{service} Owner",
+                configuration_item=f"{service} - Node {random.randint(1, 24)}",
+                location=location,
+                description=f"{service} issue reported by user at {location}.",
+                short_description=f"{priority} incident affecting {service}",
+                opened=fmt(opened),
+                resolution_code=resolution_code,
+                resolution_notes=resolution_notes,
+                responsible_group=group,
+                responsible_user=user,
+                resolved=resolved,
+                reopen_count=random.randint(0, 3) if state in {"Resolved", "Closed"} else random.randint(0, 1),
+                caller=caller,
+                aging_group=random.choice(["0-7 Days", "8-30 Days", "31-60 Days", "> 60 Days"]),
+                duration=duration,
+                service_classification=random.choice(CLASSIFICATIONS),
+                business_duration=business_duration,
+                problem=maybe_parent("PRB", 100 + i),
+                sla=sla_text,
+                schedule=random.choice(SCHEDULES),
+                location_division=division,
+                service_request=maybe_parent("REQ", 200 + i),
+                is_major=is_major,
+                sla_breached=breached,
             )
         )
     return rows
@@ -197,31 +210,31 @@ def request_rows(count=210):
             resolve_time = f"{random.randint(2, 96)} hours"
 
         rows.append(
-            (
-                1,
-                f"REQ{2026:04d}{i:05d}",
-                state,
-                item,
-                f"{item} request for {requested_for}",
-                f"Business user requested {item.lower()} related to {service}.",
-                service,
-                maybe_parent("RITM", 400 + i),
-                f"{service} Owner",
-                f"REQPARENT-{random.randint(1000, 9999)}",
-                requested_for,
-                fmt(opened),
-                opened_by,
-                group,
-                user,
-                location,
-                "0-7 Days" if age_days < 8 else "8-30 Days" if age_days < 31 else "31-60 Days" if age_days < 61 else "> 60 Days",
-                division,
-                fmt(updated),
-                resolve_time,
-                random.choice(CLASSIFICATIONS),
-                closed,
-                closed_by,
-                service,
+            Request(
+                count=1,
+                number=f"REQ{2026:04d}{i:05d}",
+                state=state,
+                item=item,
+                short_description=f"{item} request for {requested_for}",
+                description=f"Business user requested {item.lower()} related to {service}.",
+                affected_service=service,
+                parent=maybe_parent("RITM", 400 + i),
+                service_owner=f"{service} Owner",
+                request=f"REQPARENT-{random.randint(1000, 9999)}",
+                requested_for=requested_for,
+                opened=fmt(opened),
+                opened_by=opened_by,
+                responsible_group=group,
+                responsible_user=user,
+                location=location,
+                aging_group="0-7 Days" if age_days < 8 else "8-30 Days" if age_days < 31 else "31-60 Days" if age_days < 61 else "> 60 Days",
+                location_division=division,
+                updated=fmt(updated),
+                resolve_time=resolve_time,
+                service_classification=random.choice(CLASSIFICATIONS),
+                closed=closed,
+                closed_by=closed_by,
+                it_service=service,
             )
         )
     return rows
@@ -255,84 +268,47 @@ def change_rows(count=180):
             close_notes = f"{close_code} after validation and stakeholder communication."
 
         rows.append(
-            (
-                1,
-                f"CHG{2026:04d}{i:05d}",
-                change_type,
-                state,
-                priority,
-                service,
-                maybe_parent("RFC", 800 + i),
-                f"{service} Owner",
-                f"{service} CI-{random.randint(10, 99)}",
-                location,
-                f"{change_type} change planned for {service} at {location}.",
-                f"{change_type} change for {service}",
-                fmt(opened),
-                fmt(start),
-                fmt(end),
-                closed,
-                group,
-                user,
-                division,
-                random.choice(CLASSIFICATIONS),
-                random.choice(RISKS),
-                random.choice(CHANGE_CATEGORIES),
-                close_code,
-                close_notes,
+            Change(
+                count=1,
+                number=f"CHG{2026:04d}{i:05d}",
+                type=change_type,
+                state=state,
+                priority=priority,
+                affected_service=service,
+                parent=maybe_parent("RFC", 800 + i),
+                service_owner=f"{service} Owner",
+                configuration_item=f"{service} CI-{random.randint(10, 99)}",
+                location=location,
+                description=f"{change_type} change planned for {service} at {location}.",
+                short_description=f"{change_type} change for {service}",
+                opened=fmt(opened),
+                planned_start_date=fmt(start),
+                planned_end_date=fmt(end),
+                closed=closed,
+                responsible_group=group,
+                responsible_user=user,
+                location_division=division,
+                service_classification=random.choice(CLASSIFICATIONS),
+                risk=random.choice(RISKS),
+                category=random.choice(CHANGE_CATEGORIES),
+                close_code=close_code,
+                close_notes=close_notes,
             )
         )
     return rows
 
 
 def main():
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
+    Incident.objects.all().delete()
+    Request.objects.all().delete()
+    Change.objects.all().delete()
 
-    cur.execute("DELETE FROM itsm_data_incident")
-    cur.execute("DELETE FROM itsm_data_request")
-    cur.execute("DELETE FROM itsm_data_change")
+    Incident.objects.bulk_create(incident_rows(), batch_size=500)
+    Request.objects.bulk_create(request_rows(), batch_size=500)
+    Change.objects.bulk_create(change_rows(), batch_size=500)
 
-    cur.executemany(
-        """
-        INSERT INTO itsm_data_incident (
-            number, state, priority, affected_service, parent, parent_incident, service_owner,
-            configuration_item, location, description, short_description, opened, resolution_code,
-            resolution_notes, responsible_group, responsible_user, resolved, reopen_count, caller,
-            aging_group, duration, service_classification, business_duration, problem, sla, schedule,
-            location_division, service_request, is_major, sla_breached
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        incident_rows(),
-    )
-
-    cur.executemany(
-        """
-        INSERT INTO itsm_data_request (
-            count, number, state, item, short_description, description, affected_service, parent,
-            service_owner, request, requested_for, opened, opened_by, responsible_group,
-            responsible_user, location, aging_group, location_division, updated, resolve_time,
-            service_classification, closed, closed_by, it_service
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        request_rows(),
-    )
-
-    cur.executemany(
-        """
-        INSERT INTO itsm_data_change (
-            count, number, type, state, priority, affected_service, parent, service_owner,
-            configuration_item, location, description, short_description, opened, planned_start_date,
-            planned_end_date, closed, responsible_group, responsible_user, location_division,
-            service_classification, risk, category, close_code, close_notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        change_rows(),
-    )
-
-    conn.commit()
-    conn.close()
-    print("Seeded realistic demo data into db.sqlite3")
+    db_name = os.getenv("POSTGRES_DB") if os.getenv("DB_ENGINE", "sqlite").lower() in {"postgres", "postgresql"} else os.getenv("SQLITE_PATH", "backend/db.sqlite3")
+    print(f"Seeded realistic demo data into configured database: {db_name}")
 
 
 if __name__ == "__main__":
