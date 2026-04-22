@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="620" viewBox="0 0 1400 620">
+  <defs>
+    <marker id="arrowBlue" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#0b5c9c"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#0a8f3d"/>
+    </marker>
+    <marker id="arrowBrown" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto">
+      <path d="M2,2 L12,7 L2,12 Z" fill="#b06a00"/>
+    </marker>
+    <style>
+      .label { font: 400 24px Consolas, Arial, sans-serif; fill: #1f2937; }
+      .title { font: 700 22px Arial, sans-serif; fill: white; }
+      .nodeText { font: 700 26px Arial, sans-serif; fill: white; }
+      .small { font: 400 22px Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <rect width="1400" height="620" fill="#ffffff"/>
+
+  <!-- User icon -->
+  <circle cx="90" cy="70" r="48" fill="#a3a3a3" stroke="#111" stroke-width="6"/>
+  <path d="M20 250 Q20 140 90 140 Q160 140 160 250 L160 265 L20 265 Z" fill="#a3a3a3" stroke="#111" stroke-width="6"/>
+  <line x1="52" y1="205" x2="52" y2="265" stroke="#111" stroke-width="10"/>
+  <line x1="128" y1="205" x2="128" y2="265" stroke="#111" stroke-width="10"/>
+
+  <!-- View -->
+  <rect x="250" y="390" width="300" height="120" rx="24" fill="#0f7aa8" stroke="#0b5c7d" stroke-width="6"/>
+  <text x="400" y="463" text-anchor="middle" class="nodeText">View</text>
+
+  <!-- Controller -->
+  <rect x="580" y="60" width="290" height="130" rx="24" fill="#0a9b38" stroke="#08762b" stroke-width="6"/>
+  <text x="725" y="138" text-anchor="middle" class="nodeText">Controller</text>
+
+  <!-- Model -->
+  <rect x="900" y="400" width="290" height="120" rx="24" fill="#ff9c14" stroke="#c97708" stroke-width="6"/>
+  <text x="1045" y="472" text-anchor="middle" class="nodeText">Model</text>
+
+  <!-- Database icon -->
+  <rect x="1215" y="35" width="170" height="230" rx="18" fill="#7a7a7a" stroke="#111" stroke-width="6"/>
+  <rect x="1245" y="70" width="110" height="12" fill="#fff"/>
+  <rect x="1245" y="105" width="110" height="12" fill="#fff"/>
+  <rect x="1245" y="140" width="110" height="12" fill="#fff"/>
+
+  <!-- Arrows -->
+  <path d="M95 265 Q105 355 240 438" fill="none" stroke="#111" stroke-width="7" marker-end="url(#arrowBlue)"/>
+  <text x="84" y="405" class="label">action</text>
+
+  <path d="M395 392 Q385 185 570 125" fill="none" stroke="#0b5c9c" stroke-width="8" marker-end="url(#arrowBlue)"/>
+  <text x="275" y="214" class="label small" fill="#0b5c9c">manipulates</text>
+
+  <path d="M675 192 Q650 290 595 390" fill="none" stroke="#0a8f3d" stroke-width="7" stroke-dasharray="16 12" marker-end="url(#arrowGreen)"/>
+  <text x="470" y="330" class="label small" fill="#0a8f3d">updates view</text>
+
+  <path d="M770 192 Q815 315 975 398" fill="none" stroke="#0a8f3d" stroke-width="7" stroke-dasharray="16 12" marker-end="url(#arrowGreen)"/>
+  <text x="835" y="312" class="label small" fill="#0a8f3d">updates model</text>
+
+  <path d="M550 450 L888 450" fill="none" stroke="#0b5c9c" stroke-width="8" marker-end="url(#arrowBlue)"/>
+  <text x="705" y="435" class="label small" fill="#0b5c9c">reads</text>
+
+  <path d="M1190 445 Q1290 425 1295 280" fill="none" stroke="#b06a00" stroke-width="8" marker-end="url(#arrowBrown)"/>
+  <text x="1230" y="372" class="label small" fill="#b06a00">connects</text>
+
+  <!-- App labels -->
+  <text x="400" y="545" text-anchor="middle" class="label small">React pages and dashboards</text>
+  <text x="725" y="225" text-anchor="middle" class="label small">API, routes, BI logic</text>
+  <text x="1045" y="555" text-anchor="middle" class="label small">Incidents, Requests, Changes, KPI</text>
+</svg>

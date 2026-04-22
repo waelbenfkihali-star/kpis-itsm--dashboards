@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="760" viewBox="0 0 1300 760">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbfcff"/>
+      <stop offset="100%" stop-color="#eef7f3"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#1d3557" flood-opacity="0.14"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1,1 L11,6 L1,11 Z" fill="#315f9f"/>
+    </marker>
+    <style>
+      .title { font: 700 36px Arial, sans-serif; fill: #16324f; }
+      .subtitle { font: 400 21px Arial, sans-serif; fill: #52677a; }
+      .box { fill: #ffffff; stroke: #1f6feb; stroke-width: 3; }
+      .fact { fill: #fff4df; stroke: #d88716; stroke-width: 3; }
+      .cr { fill: #eef7f3; stroke: #0e8a6a; stroke-width: 3; }
+      .name { font: 700 23px Arial, sans-serif; fill: #16324f; }
+      .text { font: 400 18px Arial, sans-serif; fill: #334e68; }
+      .formula { font: 700 22px Arial, sans-serif; fill: #0e5d4d; }
+      .link { stroke: #315f9f; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1300" height="760" fill="url(#bg)"/>
+
+  <text x="650" y="58" text-anchor="middle" class="title">Détection des classes représentatives de l'analyse</text>
+  <text x="650" y="94" text-anchor="middle" class="subtitle">Identification des événements métiers utilisés pour construire les tables de faits</text>
+
+  <!-- Sources -->
+  <g filter="url(#shadow)">
+    <rect x="80" y="210" width="300" height="290" rx="8" class="box"/>
+    <text x="230" y="252" text-anchor="middle" class="name">Sources de données</text>
+    <line x1="110" y1="272" x2="350" y2="272" stroke="#1f6feb" stroke-width="2"/>
+    <text x="230" y="318" text-anchor="middle" class="text">Fichier Incidents</text>
+    <text x="230" y="366" text-anchor="middle" class="text">Fichier Requests</text>
+    <text x="230" y="414" text-anchor="middle" class="text">Fichier Changes</text>
+    <text x="230" y="462" text-anchor="middle" class="text">Données importées</text>
+  </g>
+
+  <!-- CR -->
+  <g filter="url(#shadow)">
+    <rect x="500" y="185" width="300" height="340" rx="8" class="cr"/>
+    <text x="650" y="226" text-anchor="middle" class="name">Classes représentatives</text>
+    <line x1="530" y1="246" x2="770" y2="246" stroke="#0e8a6a" stroke-width="2"/>
+    <text x="650" y="294" text-anchor="middle" class="formula">CR = {</text>
+    <text x="650" y="342" text-anchor="middle" class="text">Incidents</text>
+    <text x="650" y="390" text-anchor="middle" class="text">Requests</text>
+    <text x="650" y="438" text-anchor="middle" class="text">Changes</text>
+    <text x="650" y="486" text-anchor="middle" class="formula">}</text>
+  </g>
+
+  <!-- Facts -->
+  <g filter="url(#shadow)">
+    <rect x="920" y="210" width="300" height="290" rx="8" class="fact"/>
+    <text x="1070" y="252" text-anchor="middle" class="name">Tables de faits</text>
+    <line x1="950" y1="272" x2="1190" y2="272" stroke="#d88716" stroke-width="2"/>
+    <text x="1070" y="318" text-anchor="middle" class="text">Fait_Incidents</text>
+    <text x="1070" y="366" text-anchor="middle" class="text">Fait_Requests</text>
+    <text x="1070" y="414" text-anchor="middle" class="text">Fait_Changes</text>
+    <text x="1070" y="462" text-anchor="middle" class="text">Mesures KPI</text>
+  </g>
+
+  <!-- Arrows -->
+  <path class="link" d="M380 355 L490 355"/>
+  <path class="link" d="M800 355 L910 355"/>
+
+  <!-- Bottom explanation -->
+  <g filter="url(#shadow)">
+    <rect x="205" y="610" width="890" height="72" rx="8" fill="#ffffff" stroke="#c8d8e6" stroke-width="2"/>
+    <text x="650" y="654" text-anchor="middle" class="text">Les classes représentatives permettent de déterminer les tables de faits utilisées dans l'analyse BI.</text>
+  </g>
+</svg>

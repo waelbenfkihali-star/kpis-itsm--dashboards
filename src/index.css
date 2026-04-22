@@ -50,6 +50,14 @@ body {
   overflow-y: scroll;
 }
 
+.print-only {
+  display: none !important;
+}
+
+.screen-only {
+  display: block !important;
+}
+
 @media print {
   @page {
     size: A4 landscape;
@@ -60,6 +68,14 @@ body {
   .MuiDrawer-root,
   .print-export-hidden {
     display: none !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
   }
 
   body,
@@ -102,6 +118,7 @@ body {
 
   .print-report-header {
     background: #f8fafc !important;
+    margin-bottom: 14px !important;
   }
 
   .chart-legend-swatch {
@@ -112,6 +129,12 @@ body {
 
   .MuiStack-root {
     gap: 12px !important;
+  }
+
+  .print-chart-card {
+    margin-bottom: 14px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .MuiDataGrid-root {

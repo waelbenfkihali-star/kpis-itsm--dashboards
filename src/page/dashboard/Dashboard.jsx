@@ -51,9 +51,9 @@ function StatCard({ icon, title, subtitle, value, note }) {
   );
 }
 
-function DashboardChartCard({ title, note, children, legendItems = [], height = 320 }) {
+function DashboardChartCard({ title, note, children, legendItems = [], height = 250, className = "" }) {
   return (
-    <Paper sx={{ p: 2, borderRadius: 3, minWidth: 340, flex: 1 }}>
+    <Paper className={className} sx={{ p: 2, borderRadius: 3 }}>
       <Typography variant="h6" mb={0.5}>
         {title}
       </Typography>
@@ -75,6 +75,35 @@ function takeLastBreakdown(breakdown, limit = 6) {
     keys: breakdown.keys || [],
     data: (breakdown.data || []).slice(-limit),
   };
+}
+
+function buildIntegerTickValues(chart) {
+  const values =
+    chart.type === "line"
+      ? (chart.data || []).map((item) => Number(item.value) || 0)
+      : (chart.data || []).flatMap((item) =>
+          (chart.keys || []).map((key) => Number(item[key]) || 0)
+        );
+
+  const max = Math.max(0, ...values);
+
+  if (max <= 5) {
+    return Array.from({ length: max + 1 }, (_, index) => index);
+  }
+
+  const steps = 4;
+  const step = Math.max(1, Math.ceil(max / steps));
+  const ticks = [0];
+
+  for (let current = step; current < max; current += step) {
+    ticks.push(current);
+  }
+
+  if (ticks[ticks.length - 1] !== max) {
+    ticks.push(max);
+  }
+
+  return ticks;
 }
 
 export default function Dashboard() {
@@ -147,7 +176,7 @@ export default function Dashboard() {
       return planned.getTime() < Date.now();
     });
 
-    const chartDefs = [
+    return [
       {
         title: "INC-01 Major Incidents",
         note: "Past 6 months major incident volume.",
@@ -221,11 +250,12 @@ export default function Dashboard() {
         ...takeLastBreakdown(monthlyBreakdown(openChanges, "opened", "responsible_group", 4)),
       },
     ];
-
-    return chartDefs;
   }, [incidents, requests, changes, majorIncidents, incidentBacklog, openRequests, openChanges]);
 
-  const topService = useMemo(() => countBy(incidentBacklog, "affected_service")[0]?.label || "-", [incidentBacklog]);
+  const topService = useMemo(
+    () => countBy(incidentBacklog, "affected_service")[0]?.label || "-",
+    [incidentBacklog]
+  );
   const topRequestGroup = useMemo(
     () => countBy(openRequests, "responsible_group")[0]?.label || "-",
     [openRequests]
@@ -264,12 +294,14 @@ export default function Dashboard() {
         />
         <ExportPdfButton fileName="kpi-dashboard" />
       </Stack>
+
       <PrintReportHeader
         reportTitle="ITSM KPI Dashboard"
         reportSubtitle="Executive overview of incidents, requests, and changes with the most important KPI trends."
         scopeLabel={`${incidents.length} incidents, ${requests.length} requests, ${changes.length} changes included`}
       />
       <ExecutiveSummary sections={summarySections} />
+
       {error ? <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert> : null}
       {loading ? <Alert severity="info" sx={{ mb: 2 }}>Loading dashboard data...</Alert> : null}
 
@@ -304,13 +336,24 @@ export default function Dashboard() {
         />
       </Stack>
 
-      <Stack direction={{ xs: "column", xl: "row" }} flexWrap="wrap" gap={1.5}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr",
+            md: "repeat(2, minmax(0, 1fr))",
+            xl: "repeat(3, minmax(0, 1fr))",
+          },
+          gap: 1.5,
+        }}
+      >
         {charts.map((chart) => (
           <DashboardChartCard
             key={chart.title}
             title={chart.title}
             note={chart.note}
             legendItems={chart.type === "stacked" ? makeLegendItems(chart.keys) : []}
+            className="print-chart-card"
           >
             {chart.type === "line" ? (
               <ResponsiveLine
@@ -324,7 +367,13 @@ export default function Dashboard() {
                 xScale={{ type: "point" }}
                 yScale={{ type: "linear", min: 0, max: "auto", stacked: false }}
                 axisBottom={{ tickRotation: -35 }}
-                axisLeft={{ legend: "Count", legendOffset: -40 }}
+                axisLeft={{
+                  legend: "Count",
+                  legendOffset: -40,
+                  tickValues: buildIntegerTickValues(chart),
+                  format: (value) => `${value}`,
+                }}
+                yFormat={(value) => `${Math.round(Number(value) || 0)}`}
                 pointSize={8}
                 pointBorderWidth={2}
                 pointBorderColor={{ from: "serieColor" }}
@@ -345,14 +394,20 @@ export default function Dashboard() {
                 padding={0.28}
                 colors={({ id }) => getChartColor(chart.keys.indexOf(id))}
                 axisBottom={{ tickRotation: -35 }}
-                axisLeft={{ legend: "Count", legendOffset: -40 }}
+                axisLeft={{
+                  legend: "Count",
+                  legendOffset: -40,
+                  tickValues: buildIntegerTickValues(chart),
+                  format: (value) => `${value}`,
+                }}
+                valueFormat={(value) => `${Math.round(Number(value) || 0)}`}
                 tooltip={renderBarTooltip}
                 theme={{ textColor: theme.palette.text.primary }}
               />
             )}
           </DashboardChartCard>
         ))}
-      </Stack>
+      </Box>
     </Box>
   );
 }
