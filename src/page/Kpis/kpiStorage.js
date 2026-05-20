@@ -43,6 +43,38 @@ export function saveKpis(list) {
   localStorage.setItem(KEY, JSON.stringify(list));
 }
 
+export function validateKpi(form) {
+  const current = loadKpis();
+  const kpiId = String(form.kpi_id || "").trim();
+  const name = String(form.name || "").trim();
+
+  if (!kpiId || !name || !String(form.owner || "").trim() || !String(form.module || "").trim()) {
+    return "Veuillez renseigner tous les champs obligatoires : KPI ID, nom, propriétaire et module.";
+  }
+
+  const duplicateKpiId = current.find((item) =>
+    String(item.kpi_id || "").trim().toLowerCase() === kpiId.toLowerCase() &&
+    String(item.id) !== String(form.id)
+  );
+  if (duplicateKpiId) {
+    return `Échec de l’ajout du KPI : l’identifiant KPI "${kpiId}" est déjà utilisé.`;
+  }
+
+  const duplicateName = current.find((item) =>
+    String(item.name || "").trim().toLowerCase() === name.toLowerCase() &&
+    String(item.id) !== String(form.id)
+  );
+  if (duplicateName) {
+    return `Échec de l’ajout du KPI : le nom "${name}" est déjà utilisé.`;
+  }
+
+  if (String(form.target || "").match(/-\s*\d+/)) {
+    return "Échec de l’ajout du KPI : le seuil doit être un nombre positif.";
+  }
+
+  return "";
+}
+
 export function upsertKpi(kpi) {
   const list = loadKpis();
   const idx = list.findIndex((x) => String(x.id) === String(kpi.id));

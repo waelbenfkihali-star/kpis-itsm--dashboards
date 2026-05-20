@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f6f3ea"/>
+      <stop offset="100%" stop-color="#eef3f1"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f8faf9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#25443a" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#45685b"/>
+    </marker>
+    <style>
+      .title { font: 700 34px 'Segoe UI', Arial, sans-serif; fill: #1f342d; }
+      .subtitle { font: 500 18px 'Segoe UI', Arial, sans-serif; fill: #536a62; }
+      .section { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #214136; }
+      .label { font: 700 20px 'Segoe UI', Arial, sans-serif; fill: #1f342d; }
+      .text { font: 500 16px 'Segoe UI', Arial, sans-serif; fill: #445a53; }
+      .small { font: 500 14px 'Segoe UI', Arial, sans-serif; fill: #5d746c; }
+      .port { font: 700 14px 'Consolas', monospace; fill: #9b5b1a; }
+      .box { fill: url(#panel); stroke: #cfd9d4; stroke-width: 2; rx: 24; filter: url(#shadow); }
+      .service { fill: #ffffff; stroke: #b9cbc4; stroke-width: 2; rx: 18; filter: url(#shadow); }
+      .accent1 { fill: #dce9e3; }
+      .accent2 { fill: #f5dfc7; }
+      .accent3 { fill: #e5ead5; }
+      .accent4 { fill: #d8e5ef; }
+      .line { stroke: #45685b; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 10 8; }
+    </style>
+  </defs>
+  <rect width="1400" height="900" fill="url(#bg)"/>
+  <text x="700" y="62" text-anchor="middle" class="title">Diagramme de Deploiement - KPI ITSM Dashboards</text>
+  <text x="700" y="94" text-anchor="middle" class="subtitle">Architecture conteneurisee de l'application avec Docker Compose, PostgreSQL et service IA</text>
+  <rect x="60" y="155" width="220" height="150" class="service accent2"/>
+  <text x="170" y="200" text-anchor="middle" class="label">Utilisateur</text>
+  <text x="170" y="230" text-anchor="middle" class="text">Navigateur Web</text>
+  <text x="170" y="258" text-anchor="middle" class="small">Acces a l'interface</text>
+  <text x="170" y="286" text-anchor="middle" class="port">http://localhost:5173</text>
+  <rect x="340" y="130" width="760" height="620" class="box"/>
+  <text x="380" y="172" class="section">Hote local - Docker Compose</text>
+  <rect x="390" y="210" width="300" height="190" class="service accent4"/>
+  <text x="540" y="252" text-anchor="middle" class="label">Container Frontend</text>
+  <text x="540" y="282" text-anchor="middle" class="text">React + Vite</text>
+  <text x="540" y="310" text-anchor="middle" class="small">Interface utilisateur</text>
+  <text x="540" y="338" text-anchor="middle" class="small">Consomme les API backend</text>
+  <text x="540" y="368" text-anchor="middle" class="port">Port 5173:5173</text>
+  <rect x="740" y="210" width="300" height="240" class="service accent1"/>
+  <text x="890" y="252" text-anchor="middle" class="label">Container Backend</text>
+  <text x="890" y="282" text-anchor="middle" class="text">Django + DRF</text>
+  <text x="890" y="310" text-anchor="middle" class="small">JWT, logique metier, ETL</text>
+  <text x="890" y="338" text-anchor="middle" class="small">Generation de dashboards IA</text>
+  <text x="890" y="366" text-anchor="middle" class="small">Migrations automatiques au demarrage</text>
+  <text x="890" y="396" text-anchor="middle" class="port">Port 8001:8000</text>
+  <rect x="565" y="500" width="300" height="180" class="service accent3"/>
+  <text x="715" y="542" text-anchor="middle" class="label">Container Base de donnees</text>
+  <text x="715" y="572" text-anchor="middle" class="text">PostgreSQL 16</text>
+  <text x="715" y="600" text-anchor="middle" class="small">Stockage des incidents, requests, changes</text>
+  <text x="715" y="628" text-anchor="middle" class="small">Volume persistant: postgres_data</text>
+  <text x="715" y="658" text-anchor="middle" class="port">Port 5433:5432</text>
+  <rect x="1145" y="250" width="200" height="160" class="service accent2"/>
+  <text x="1245" y="292" text-anchor="middle" class="label">Service IA</text>
+  <text x="1245" y="322" text-anchor="middle" class="text">Ollama</text>
+  <text x="1245" y="350" text-anchor="middle" class="small">Interpretation du prompt</text>
+  <text x="1245" y="378" text-anchor="middle" class="port">http://host.docker.internal:11434</text>
+  <path d="M280 230 C320 230, 340 290, 390 290" class="line"/>
+  <path d="M690 305 C720 305, 730 305, 740 305" class="line"/>
+  <path d="M890 450 C890 485, 790 500, 760 500" class="line"/>
+  <path d="M1040 330 C1090 330, 1105 330, 1145 330" class="line"/>
+  <path d="M1145 360 C1090 360, 1080 360, 1040 360" class="line dash"/>
+  <text x="700" y="822" text-anchor="middle" class="text">Le frontend communique avec le backend Django, qui utilise PostgreSQL et peut interroger Ollama pour l'assistance IA.</text>
+</svg>

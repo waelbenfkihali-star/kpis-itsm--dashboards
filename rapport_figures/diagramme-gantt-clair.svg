@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1300" viewBox="0 0 2400 1300">
+  <rect width="100%" height="100%" fill="white"/>
+  <style>
+    .title { font: 700 34px Arial, sans-serif; fill: #1f2933; }
+    .subtitle { font: 18px Arial, sans-serif; fill: #52606d; }
+    .head { font: 700 18px Arial, sans-serif; fill: white; }
+    .label { font: 16px Arial, sans-serif; fill: #1f2933; }
+    .small { font: 14px Arial, sans-serif; fill: white; }
+    .foot { font: 16px Arial, sans-serif; fill: #52606d; }
+    .group { font: 700 18px Arial, sans-serif; fill: white; }
+  </style>
+
+  <text x="60" y="55" class="title">Diagramme de Gantt du projet par semaine</text>
+  <text x="60" y="88" class="subtitle">Planification des sprints du projet KPI ITSM Dashboards sur 14 semaines</text>
+
+  <rect x="60" y="115" width="32" height="18" rx="4" fill="#e74c3c"/>
+  <text x="104" y="129" class="label">Sprint 1</text>
+  <rect x="230" y="115" width="32" height="18" rx="4" fill="#f1c40f"/>
+  <text x="274" y="129" class="label">Sprint 2</text>
+  <rect x="400" y="115" width="32" height="18" rx="4" fill="#1abc9c"/>
+  <text x="444" y="129" class="label">Sprint 3</text>
+
+  <rect x="60" y="165" width="520" height="70" fill="#34495e"/>
+  <rect x="580" y="165" width="1540" height="70" fill="#34495e"/>
+  <text x="80" y="208" class="head">Taches du projet</text>
+
+  <rect x="580" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="602" y="208" class="head">Semaine 1</text>
+  <rect x="690" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="712" y="208" class="head">Semaine 2</text>
+  <rect x="800" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="822" y="208" class="head">Semaine 3</text>
+  <rect x="910" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="932" y="208" class="head">Semaine 4</text>
+  <rect x="1020" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="1042" y="208" class="head">Semaine 5</text>
+  <rect x="1130" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="1152" y="208" class="head">Semaine 6</text>
+  <rect x="1240" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="1262" y="208" class="head">Semaine 7</text>
+  <rect x="1350" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="1372" y="208" class="head">Semaine 8</text>
+  <rect x="1460" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="1482" y="208" class="head">Semaine 9</text>
+  <rect x="1570" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="1586" y="208" class="head">Semaine 10</text>
+  <rect x="1680" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="1696" y="208" class="head">Semaine 11</text>
+  <rect x="1790" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="1806" y="208" class="head">Semaine 12</text>
+  <rect x="1900" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="1916" y="208" class="head">Semaine 13</text>
+  <rect x="2010" y="165" width="110" height="70" fill="none" stroke="#d5dbe1" stroke-width="1"/>
+  <text x="2026" y="208" class="head">Semaine 14</text>
+
+  <!-- Row 1 -->
+  <rect x="60" y="235" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <rect x="60" y="235" width="520" height="48" fill="#c0392b"/>
+  <text x="76" y="265" class="group">SPRINT 1</text>
+  <rect x="588" y="243" width="424" height="32" rx="8" fill="#c0392b" stroke="#7b8794" stroke-width="0.8"/>
+
+  <!-- Row 2 -->
+  <rect x="60" y="283" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="313" class="label">Analyse des besoins</text>
+  <rect x="588" y="291" width="94" height="32" rx="8" fill="#e74c3c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="600" y="312" class="small">S1</text>
+
+  <!-- Row 3 -->
+  <rect x="60" y="331" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="361" class="label">Conception UML</text>
+  <rect x="698" y="339" width="204" height="32" rx="8" fill="#e74c3c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="710" y="360" class="small">S2-S3</text>
+
+  <!-- Row 4 -->
+  <rect x="60" y="379" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="409" class="label">Setup backend/frontend</text>
+  <rect x="698" y="387" width="204" height="32" rx="8" fill="#e74c3c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="710" y="408" class="small">S2-S3</text>
+
+  <!-- Row 5 -->
+  <rect x="60" y="427" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="457" class="label">Authentification</text>
+  <rect x="808" y="435" width="204" height="32" rx="8" fill="#e74c3c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="820" y="456" class="small">S3-S4</text>
+
+  <!-- Row 6 -->
+  <rect x="60" y="475" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="505" class="label">Tests initiaux</text>
+  <rect x="918" y="483" width="94" height="32" rx="8" fill="#e74c3c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="930" y="504" class="small">S4</text>
+
+  <!-- Row 7 -->
+  <rect x="60" y="523" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <rect x="60" y="523" width="520" height="48" fill="#d4ac0d"/>
+  <text x="76" y="553" class="group">SPRINT 2</text>
+  <rect x="1028" y="531" width="534" height="32" rx="8" fill="#d4ac0d" stroke="#7b8794" stroke-width="0.8"/>
+
+  <!-- Row 8 -->
+  <rect x="60" y="571" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="601" class="label">Collecte des donnees ITSM</text>
+  <rect x="1028" y="579" width="94" height="32" rx="8" fill="#f1c40f" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1040" y="600" class="small">S5</text>
+
+  <!-- Row 9 -->
+  <rect x="60" y="619" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="649" class="label">Conception Data Warehouse</text>
+  <rect x="1138" y="627" width="314" height="32" rx="8" fill="#f1c40f" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1150" y="648" class="small">S6-S8</text>
+
+  <!-- Row 10 -->
+  <rect x="60" y="667" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="697" class="label">Mise en place ETL</text>
+  <rect x="1138" y="675" width="314" height="32" rx="8" fill="#f1c40f" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1150" y="696" class="small">S6-S8</text>
+
+  <!-- Row 11 -->
+  <rect x="60" y="715" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="745" class="label">Transformation des donnees</text>
+  <rect x="1138" y="723" width="314" height="32" rx="8" fill="#f1c40f" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1150" y="744" class="small">S6-S8</text>
+
+  <!-- Row 12 -->
+  <rect x="60" y="763" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="793" class="label">Creation des KPI</text>
+  <rect x="1358" y="771" width="204" height="32" rx="8" fill="#f1c40f" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1370" y="792" class="small">S8-S9</text>
+
+  <!-- Row 13 -->
+  <rect x="60" y="811" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="841" class="label">Developpement des dashboards</text>
+  <rect x="1358" y="819" width="204" height="32" rx="8" fill="#f1c40f" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1370" y="840" class="small">S8-S9</text>
+
+  <!-- Row 14 -->
+  <rect x="60" y="859" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="889" class="label">Tests BI</text>
+  <rect x="1468" y="867" width="94" height="32" rx="8" fill="#f1c40f" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1480" y="888" class="small">S9</text>
+
+  <!-- Row 15 -->
+  <rect x="60" y="907" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <rect x="60" y="907" width="520" height="48" fill="#16a085"/>
+  <text x="76" y="937" class="group">SPRINT 3</text>
+  <rect x="1578" y="915" width="534" height="32" rx="8" fill="#16a085" stroke="#7b8794" stroke-width="0.8"/>
+
+  <!-- Row 16 -->
+  <rect x="60" y="955" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="985" class="label">Analyse des besoins IA</text>
+  <rect x="1578" y="963" width="94" height="32" rx="8" fill="#1abc9c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1590" y="984" class="small">S10</text>
+
+  <!-- Row 17 -->
+  <rect x="60" y="1003" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="1033" class="label">Preparation des donnees</text>
+  <rect x="1688" y="1011" width="94" height="32" rx="8" fill="#1abc9c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1700" y="1032" class="small">S11</text>
+
+  <!-- Row 18 -->
+  <rect x="60" y="1051" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="1081" class="label">Implementation du module IA</text>
+  <rect x="1798" y="1059" width="204" height="32" rx="8" fill="#1abc9c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1810" y="1080" class="small">S12-S13</text>
+
+  <!-- Row 19 -->
+  <rect x="60" y="1099" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="1129" class="label">Generation d'insights</text>
+  <rect x="1908" y="1107" width="204" height="32" rx="8" fill="#1abc9c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="1920" y="1128" class="small">S13-S14</text>
+
+  <!-- Row 20 -->
+  <rect x="60" y="1147" width="2060" height="48" fill="white" stroke="#e1e8ed"/>
+  <text x="78" y="1177" class="label">Tests IA</text>
+  <rect x="2018" y="1155" width="94" height="32" rx="8" fill="#1abc9c" stroke="#7b8794" stroke-width="0.8"/>
+  <text x="2030" y="1176" class="small">S14</text>
+
+  <text x="60" y="1255" class="foot">Lecture : chaque barre represente la periode d'execution d'une tache sur les 14 semaines du projet.</text>
+</svg>

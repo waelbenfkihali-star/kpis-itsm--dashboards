@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, parser_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
@@ -26,6 +28,46 @@ from .serializers import (
 
 
 # -------- CLEANING FUNCTIONS --------
+
+def sample_distinct_values(queryset, field_name, limit=5):
+    values = (
+        queryset.exclude(**{f"{field_name}__isnull": True})
+        .exclude(**{field_name: ""})
+        .values_list(field_name, flat=True)
+        .distinct()[:limit]
+    )
+    return [str(value).strip() for value in values if str(value).strip()]
+
+
+def build_ai_data_context():
+    return {
+        "modules": {
+            "incidents": {
+                "service_values": sample_distinct_values(Incident.objects.all(), "affected_service"),
+                "group_values": sample_distinct_values(Incident.objects.all(), "responsible_group"),
+                "division_values": sample_distinct_values(Incident.objects.all(), "location_division"),
+                "ci_values": sample_distinct_values(Incident.objects.all(), "configuration_item"),
+            },
+            "requests": {
+                "service_values": sample_distinct_values(Request.objects.all(), "it_service"),
+                "group_values": sample_distinct_values(Request.objects.all(), "responsible_group"),
+                "division_values": sample_distinct_values(Request.objects.all(), "location_division"),
+                "item_values": sample_distinct_values(Request.objects.all(), "item"),
+            },
+            "changes": {
+                "service_values": sample_distinct_values(Change.objects.all(), "affected_service"),
+                "group_values": sample_distinct_values(Change.objects.all(), "responsible_group"),
+                "division_values": sample_distinct_values(Change.objects.all(), "location_division"),
+                "ci_values": sample_distinct_values(Change.objects.all(), "configuration_item"),
+                "type_values": sample_distinct_values(Change.objects.all(), "type"),
+            },
+        },
+        "guidance": {
+            "ib_means": "division",
+            "service_owner_means": "owner",
+            "ci_means": "configuration item",
+        },
+    }
 
 def clean_text(value):
     if value is None:
@@ -474,13 +516,15 @@ def monthly_stats(request):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def ai_dashboard_query(request):
     prompt = str(request.data.get("prompt", "")).strip()
+    hint_intent = request.data.get("hint_intent")
     if not prompt:
         return Response({"detail": "Prompt is required."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        intent = build_ai_dashboard_intent(prompt)
+        intent = build_ai_dashboard_intent(prompt, build_ai_data_context(), hint_intent)
         return Response({"ok": True, "intent": intent})
     except urllib.error.HTTPError as error:
         try:

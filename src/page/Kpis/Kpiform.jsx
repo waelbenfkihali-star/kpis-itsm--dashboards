@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import {
   Box,
   Button,
+  Alert,
   Stack,
   Paper,
 } from "@mui/material";
@@ -10,15 +11,17 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../components/Header";
 import KpiFieldsForm from "./KpiFieldsForm";
 import { KPI_INITIAL_FORM } from "./kpiFormConfig";
-import { upsertKpi } from "./kpiStorage";
+import { upsertKpi, validateKpi } from "./kpiStorage";
 
 const KpiForm = () => {
 
   const navigate = useNavigate();
 
   const [form, setForm] = useState(KPI_INITIAL_FORM);
+  const [error, setError] = useState("");
 
   function setField(key, value) {
+    setError("");
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
@@ -39,6 +42,12 @@ const KpiForm = () => {
 
     if (!isValid) return;
 
+    const validationMessage = validateKpi(form);
+    if (validationMessage) {
+      setError(validationMessage);
+      return;
+    }
+
     const newKpi = {
       id: Date.now(),
       ...form,
@@ -58,6 +67,12 @@ const KpiForm = () => {
         title="DEFINE KPI"
         subTitle="Create a KPI definition"
       />
+
+      {error ? (
+        <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+          {error}
+        </Alert>
+      ) : null}
 
       <Paper sx={{ mt: 3, p: 3, width: "100%" }}>
 

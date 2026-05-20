@@ -9,14 +9,29 @@ const QUERY_ALIASES = [
   [/dashboard/g, "overview"],
   [/\bwarini\b/g, "show me"],
   [/\bwrini\b/g, "show me"],
+  [/\bwari?ni\b/g, "show me"],
+  [/\bawrini\b/g, "show me"],
+  [/\bwarri?ni\b/g, "show me"],
   [/\baatini\b/g, "give me"],
   [/\b3tini\b/g, "give me"],
+  [/\ba3tini\b/g, "give me"],
+  [/\b3atini\b/g, "give me"],
+  [/\bheb\b/g, "want"],
+  [/\bn7eb\b/g, "want"],
+  [/\bnحب\b/g, "want"],
   [/\b9aren\b/g, "compare"],
   [/\b9arinna\b/g, "compare"],
+  [/\b9arinni\b/g, "compare"],
   [/\bcompares?\b/g, "compare"],
+  [/\b9assem\b/g, "split"],
   [/\bchnouma\b/g, "what are"],
   [/\bchnowa\b/g, "what is"],
   [/\bkifech\b/g, "how"],
+  [/\b9adech\b/g, "how many"],
+  [/\b9addech\b/g, "how many"],
+  [/\bch7al\b/g, "how many"],
+  [/\b9olli\b/g, "tell me"],
+  [/\bgolli\b/g, "tell me"],
   [/\bkol\b/g, "all"],
   [/\bba3d\b/g, "after"],
   [/\b9bal\b/g, "before"],
@@ -28,20 +43,35 @@ const QUERY_ALIASES = [
   [/\bma7loul\b/g, "resolved"],
   [/\bmsakker\b/g, "closed"],
   [/\bmaftou7\b/g, "open"],
+  [/\bme7loul\b/g, "resolved"],
+  [/\bmesakker\b/g, "closed"],
+  [/\bma7loula\b/g, "resolved"],
+  [/\bmaskra\b/g, "closed"],
   [/\bmta3\b/g, "of"],
   [/\bmt3\b/g, "of"],
+  [/\bta3\b/g, "of"],
+  [/\btaa\b/g, "of"],
   [/\binc\b/g, "incidents"],
   [/\breq\b/g, "requests"],
   [/\bchg\b/g, "changes"],
   [/\btal3li\b/g, "show me"],
   [/\byfhem\b/g, "understand"],
+  [/\bfassar\b/g, "explain"],
+  [/\bfaserli\b/g, "explain"],
+  [/\b7allel\b/g, "analyze"],
+  [/\b7allelli\b/g, "analyze"],
+  [/\bchnowa\b/g, "what is"],
+  [/\bchniya\b/g, "what is"],
   [/\bakhter\b/g, "top"],
   [/\bakther\b/g, "top"],
   [/\bmost\b/g, "top"],
   [/\bhighest\b/g, "top"],
+  [/\ba9wa\b/g, "top"],
+  [/\ba3la\b/g, "top"],
   [/\bbrcha\b/g, "many"],
   [/\bmoch\b/g, "not"],
   [/\bmahir?\b/g, "not"],
+  [/\bmouch\b/g, "not"],
   [/\b7\b/g, "h"],
   [/\bslm\b/g, "sla"],
   [/\bprio\b/g, "priority"],
@@ -51,6 +81,37 @@ const QUERY_ALIASES = [
   [/\bsites?\b/g, "location"],
   [/\bplants?\b/g, "location"],
   [/\bapps?\b/g, "applications"],
+  [/\bmois\b/g, "month"],
+  [/\btendance\b/g, "month"],
+  [/\b3awem\b/g, "years"],
+  [/\bla3wem\b/g, "years"],
+  [/\bsnin\b/g, "years"],
+  [/\bsana\b/g, "year"],
+  [/\b3am\b/g, "year"],
+  [/\bsn\b/g, "year"],
+  [/\bfiltrage\b/g, "filtering"],
+  [/\bfiltre\b/g, "filter"],
+  [/\bfiltres\b/g, "filters"],
+  [/\bsevice\b/g, "service"],
+  [/\bsrv\b/g, "service"],
+  [/\bit service\b/g, "service"],
+  [/\bib\b/g, "division"],
+  [/\bdivision mta3\b/g, "division"],
+  [/\bowner\b/g, "service owner"],
+  [/\bci\b/g, "configuration item"],
+  [/\bmas2oul\b/g, "owner"],
+  [/\bresponsable\b/g, "group"],
+  [/\bequipe\b/g, "group"],
+  [/\bbacklog\b/g, "open"],
+  [/\bretard\b/g, "past due"],
+  [/\ben retard\b/g, "past due"],
+  [/\burgent\b/g, "emergency"],
+  [/\bcritique\b/g, "major"],
+  [/\bpar mois\b/g, "by month"],
+  [/\bpar service\b/g, "by service"],
+  [/\bpar groupe\b/g, "by group"],
+  [/\bpar priorite\b/g, "by priority"],
+  [/\bpar etat\b/g, "by state"],
 ];
 
 const EXTRA_KEYWORD_GROUPS = {
@@ -63,6 +124,9 @@ const EXTRA_KEYWORD_GROUPS = {
     "side by side",
     "difference between",
     "trend comparison",
+    "9aren",
+    "far9",
+    "mo9arna",
   ],
   overview: [
     "dashboard",
@@ -74,6 +138,13 @@ const EXTRA_KEYWORD_GROUPS = {
     "kpi dashboard",
     "main dashboard",
     "snapshot",
+    "general view",
+    "vue d ensemble",
+    "vue globale",
+    "resume",
+    "global",
+    "kol chay",
+    "synthese",
   ],
   open: [
     "open",
@@ -84,6 +155,8 @@ const EXTRA_KEYWORD_GROUPS = {
     "not closed",
     "backlog",
     "awaiting",
+    "maftou7",
+    "encours",
   ],
   closed: [
     "closed",
@@ -93,6 +166,9 @@ const EXTRA_KEYWORD_GROUPS = {
     "implemented",
     "finished",
     "completed tickets",
+    "msakker",
+    "me7loul",
+    "m7al",
   ],
 };
 
@@ -151,6 +227,25 @@ const INTENT_TEMPLATES = [
       chart_type: baseIntent.compare ? "line" : "bar",
     }),
   },
+  {
+    id: "monthly_trend_default",
+    terms: ["month"],
+    build: (baseIntent) => ({
+      ...baseIntent,
+      grouping: "month",
+      groupings: unique(["month", ...(baseIntent.groupings || [])]).slice(0, 3),
+      chart_type: "line",
+    }),
+  },
+  {
+    id: "top_breakdown_default",
+    terms: ["top"],
+    build: (baseIntent) => ({
+      ...baseIntent,
+      topN: baseIntent.topN || 8,
+      chart_type: "bar",
+    }),
+  },
 ];
 
 const MODULE_CONFIG = {
@@ -177,6 +272,7 @@ const MODULE_CONFIG = {
       "outages",
       "alert",
       "alerts",
+      "incidentat",
     ],
     defaultDateKey: "opened",
     groupKeys: {
@@ -187,6 +283,23 @@ const MODULE_CONFIG = {
       state: "state",
       site: "location",
       user: "responsible_user",
+      division: "location_division",
+      owner: "service_owner",
+      classification: "service_classification",
+      ci: "configuration_item",
+    },
+    filterKeys: {
+      service: "affected_service",
+      group: "responsible_group",
+      month: "opened",
+      priority: "priority",
+      state: "state",
+      site: "location",
+      user: "responsible_user",
+      division: "location_division",
+      owner: "service_owner",
+      classification: "service_classification",
+      ci: "configuration_item",
     },
   },
   requests: {
@@ -212,6 +325,8 @@ const MODULE_CONFIG = {
       "access request",
       "access requests",
       "onboarding requests",
+      "talabat",
+      "طلبات",
     ],
     defaultDateKey: "opened",
     groupKeys: {
@@ -222,6 +337,21 @@ const MODULE_CONFIG = {
       state: "state",
       user: "requested_for",
       site: "location",
+      division: "location_division",
+      owner: "service_owner",
+      classification: "service_classification",
+    },
+    filterKeys: {
+      service: "it_service",
+      group: "responsible_group",
+      month: "opened",
+      item: "item",
+      state: "state",
+      user: "requested_for",
+      site: "location",
+      division: "location_division",
+      owner: "service_owner",
+      classification: "service_classification",
     },
   },
   changes: {
@@ -243,6 +373,7 @@ const MODULE_CONFIG = {
       "change requests",
       "implementation",
       "deployments",
+      "taghyir",
     ],
     defaultDateKey: "opened",
     groupKeys: {
@@ -254,6 +385,24 @@ const MODULE_CONFIG = {
       state: "state",
       site: "location",
       user: "responsible_user",
+      division: "location_division",
+      owner: "service_owner",
+      classification: "service_classification",
+      ci: "configuration_item",
+    },
+    filterKeys: {
+      service: "affected_service",
+      group: "responsible_group",
+      month: "opened",
+      type: "type",
+      priority: "priority",
+      state: "state",
+      site: "location",
+      user: "responsible_user",
+      division: "location_division",
+      owner: "service_owner",
+      classification: "service_classification",
+      ci: "configuration_item",
     },
   },
 };
@@ -348,6 +497,36 @@ const GROUP_KEYWORDS = {
     "office",
     "hub",
     "region",
+  ],
+  division: [
+    "division",
+    "divisions",
+    "ib",
+    "business unit",
+    "branch",
+    "entity",
+    "location division",
+  ],
+  owner: [
+    "owner",
+    "service owner",
+    "owners",
+    "ownership",
+    "managed by",
+  ],
+  classification: [
+    "classification",
+    "service classification",
+    "class",
+    "category family",
+  ],
+  ci: [
+    "ci",
+    "configuration item",
+    "config item",
+    "asset",
+    "server",
+    "application ci",
   ],
   item: [
     "item",
@@ -495,7 +674,12 @@ function normalizeQuery(value) {
     .replace(/\bfi\b/g, "in")
     .replace(/\billi\b/g, "that")
     .replace(/\btickets?\b/g, "incidents")
-    .replace(/\bdemandes?\b/g, "requests");
+    .replace(/\bdemandes?\b/g, "requests")
+    .replace(/\bproblemes?\b/g, "incidents")
+    .replace(/\brequetes?\b/g, "requests")
+    .replace(/\bchangements?\b/g, "changes")
+    .replace(/\bstatut\b/g, "state")
+    .replace(/\bpriorite\b/g, "priority");
 
   QUERY_ALIASES.forEach(([pattern, replacement]) => {
     text = text.replace(pattern, replacement);
@@ -616,6 +800,7 @@ function detectModules(text) {
     return {
       modules: ["incidents"],
       confidence: 0.34,
+      explicit: false,
       scores: scoredModules,
     };
   }
@@ -627,6 +812,7 @@ function detectModules(text) {
   return {
     modules: selected.length ? selected : [scoredModules[0].key],
     confidence: normalizedConfidence(topScore, 8),
+    explicit: topScore > 0,
     scores: scoredModules,
   };
 }
@@ -704,10 +890,10 @@ function detectMetric(text) {
       score: keywordScore(text, keywords),
     }))
     .sort((left, right) => right.score - left.score);
-  const metric = scored[0]?.score > 0 ? scored[0].key : "count";
+  let metric = scored[0]?.score > 0 ? scored[0].key : "count";
 
-  if (metric === "backlog") return "count";
-  if (metric === "volume") return "count";
+  if (metric === "backlog") metric = "count";
+  if (metric === "volume") metric = "count";
   return {
     value: metric,
     confidence: metric === "count" ? 0.45 : normalizedConfidence(scored[0]?.score || 1, 5),
@@ -726,8 +912,14 @@ function detectChartType(text, grouping, compare) {
 }
 
 function buildInterpretation(intent, detection) {
+  const moduleLabel = intent.overview && (!intent.module || intent.compare)
+    ? "global overview"
+    : intent.compare
+      ? intent.modules.join(" vs ")
+      : intent.module;
+
   return {
-    module: intent.compare ? intent.modules.join(" vs ") : intent.module,
+    module: moduleLabel,
     groupings: intent.groupings || [intent.grouping],
     state: intent.state,
     metric: intent.metric,
@@ -782,6 +974,33 @@ function detectDateScope(text) {
   const years = detectAllYears(text);
   const quarter = detectQuarter(text);
   const currentYear = new Date().getFullYear();
+  const now = new Date();
+
+  if (/\bthis quarter\b/.test(text) || /\bcurrent quarter\b/.test(text)) {
+    const currentQuarter = Math.floor(now.getMonth() / 3) + 1;
+    return {
+      year: now.getFullYear(),
+      yearRange: null,
+      quarter: currentQuarter,
+      startDate: new Date(now.getFullYear(), (currentQuarter - 1) * 3, 1),
+      endDate: endOfMonth(now.getFullYear(), currentQuarter * 3 - 1),
+      label: `Q${currentQuarter} ${now.getFullYear()}`,
+    };
+  }
+
+  if (/\blast quarter\b/.test(text) || /\bprevious quarter\b/.test(text)) {
+    const currentQuarter = Math.floor(now.getMonth() / 3) + 1;
+    const quarterYear = currentQuarter === 1 ? now.getFullYear() - 1 : now.getFullYear();
+    const previousQuarter = currentQuarter === 1 ? 4 : currentQuarter - 1;
+    return {
+      year: quarterYear,
+      yearRange: null,
+      quarter: previousQuarter,
+      startDate: new Date(quarterYear, (previousQuarter - 1) * 3, 1),
+      endDate: endOfMonth(quarterYear, previousQuarter * 3 - 1),
+      label: `Q${previousQuarter} ${quarterYear}`,
+    };
+  }
 
   const lastDaysMatch = text.match(/\b(last|past)\s+(\d{1,3})\s+days?\b/);
   if (lastDaysMatch) {
@@ -850,7 +1069,8 @@ function detectDateScope(text) {
     text.match(/\bbetween\s+(20\d{2})\s+(and|to)\s+(20\d{2})\b/) ||
     text.match(/\bfrom\s+(20\d{2})\s+to\s+(20\d{2})\b/) ||
     text.match(/\bentre\s+(20\d{2})\s+et\s+(20\d{2})\b/) ||
-    text.match(/\bde\s+(20\d{2})\s+a\s+(20\d{2})\b/);
+    text.match(/\bde\s+(20\d{2})\s+a\s+(20\d{2})\b/) ||
+    text.match(/\b(20\d{2})\s*[-/]\s*(20\d{2})\b/);
   if (betweenYearMatch) {
     const firstYear = Number(betweenYearMatch[1]);
     const secondYear = Number(betweenYearMatch[3] || betweenYearMatch[2]);
@@ -871,6 +1091,16 @@ function detectDateScope(text) {
   if (monthName) {
     const monthIndex = MONTH_ALIASES[monthName] - 1;
     const year = years[0] || currentYear;
+    if (quarter) {
+      return {
+        year,
+        yearRange: null,
+        quarter,
+        startDate: new Date(year, (quarter - 1) * 3, 1),
+        endDate: endOfMonth(year, quarter * 3 - 1),
+        label: `Q${quarter} ${year}`,
+      };
+    }
     return {
       year,
       yearRange: null,
@@ -965,28 +1195,112 @@ function detectPriorityFilter(text) {
   return match ? `P${match[1]}` : null;
 }
 
-function detectModuleFilters(text, module, datasets) {
-  const rows = Array.isArray(datasets[module]) ? datasets[module] : [];
-  const config = MODULE_CONFIG[module];
+function extractFilterCandidates(text, keywords = []) {
+  const escaped = keywords
+    .map((keyword) => keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .sort((left, right) => right.length - left.length);
+
+  const candidates = [];
+
+  escaped.forEach((keyword) => {
+    const patterns = [
+      new RegExp(`\\b(?:for|by|with|in|on)\\s+${keyword}\\s+([\\w\\s/-]{2,60})`, "g"),
+      new RegExp(`\\b${keyword}\\s*(?::|=|-)?\\s*([\\w\\s/-]{2,60})`, "g"),
+    ];
+
+    patterns.forEach((pattern) => {
+      let match = pattern.exec(text);
+      while (match) {
+        const value = normalizeText(match[1])
+          .replace(/\b(and|with|by|for|in|on|filter|filters|month|months|year|years|quarter|q[1-4])\b.*$/, "")
+          .trim();
+        if (value.length >= 2) {
+          candidates.push(value);
+        }
+        match = pattern.exec(text);
+      }
+    });
+  });
+
+  return unique(candidates).slice(0, 4);
+}
+
+function collectRowsForModules(modules, datasets) {
+  return unique(modules)
+    .filter((module) => MODULE_CONFIG[module])
+    .flatMap((module) => Array.isArray(datasets[module]) ? datasets[module] : []);
+}
+
+function findFilterMatchAcrossModules(text, modules, datasets, field, explicitCandidates = []) {
+  let bestMatch = null;
+  let bestScore = 0;
+
+  unique(modules)
+    .filter((module) => MODULE_CONFIG[module])
+    .forEach((module) => {
+      const rows = Array.isArray(datasets[module]) ? datasets[module] : [];
+      const key = MODULE_CONFIG[module]?.filterKeys?.[field];
+      if (!key || !rows.length) return;
+
+      const candidates = explicitCandidates.length ? explicitCandidates : [text];
+      candidates.forEach((candidate) => {
+        const matchedValue = findEntityMatch(candidate, rows, key);
+        if (!matchedValue) return;
+
+        const reference = candidate === text ? text : candidate;
+        const score = similarityScore(reference, matchedValue);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = matchedValue;
+        }
+      });
+
+      if (!bestMatch) {
+        const fallbackMatch = findEntityMatch(text, rows, key);
+        if (fallbackMatch) {
+          const score = similarityScore(text, fallbackMatch);
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = fallbackMatch;
+          }
+        }
+      }
+    });
+
+  return bestMatch;
+}
+
+function detectSemanticFilters(text, modules, datasets) {
+  const targetModules = modules?.length ? modules : ["incidents"];
   const filters = [];
+  const seen = new Set();
+  const fieldEntries = [
+    ["service", ["service", "services", "application", "applications", "system", "systems"]],
+    ["group", ["group", "groups", "team", "support team", "assignment group"]],
+    ["site", ["site", "sites", "location", "locations", "country", "office", "region"]],
+    ["division", ["division", "divisions", "ib", "business unit", "branch", "entity"]],
+    ["owner", ["owner", "service owner", "managed by"]],
+    ["classification", ["classification", "service classification", "class"]],
+    ["ci", ["ci", "configuration item", "config item", "asset"]],
+    ["item", ["item", "catalog item", "request item", "request type"]],
+    ["type", ["type", "change type", "category"]],
+    ["user", ["user", "requested for", "requester", "caller", "assignee"]],
+  ];
 
   const priority = detectPriorityFilter(text);
-  if (priority && config.groupKeys.priority) {
-    filters.push({ key: config.groupKeys.priority, value: priority, label: `Priority ${priority}` });
+  if (priority) {
+    filters.push({ field: "priority", value: priority, label: `Priority: ${priority}` });
   }
 
-  [
-    ["service", config.groupKeys.service],
-    ["group", config.groupKeys.group],
-    ["site", config.groupKeys.site],
-    ["item", config.groupKeys.item],
-    ["type", config.groupKeys.type],
-    ["user", config.groupKeys.user],
-  ].forEach(([label, key]) => {
-    if (!key) return;
-    const matchedValue = findEntityMatch(text, rows, key);
+  fieldEntries.forEach(([field, keywords]) => {
+    const explicitCandidates = extractFilterCandidates(text, keywords);
+    const matchedValue = findFilterMatchAcrossModules(text, targetModules, datasets, field, explicitCandidates);
     if (matchedValue) {
-      filters.push({ key, value: matchedValue, label: `${titleCase(label)}: ${matchedValue}` });
+      const token = `${field}:${normalizeText(matchedValue)}`;
+      if (!seen.has(token)) {
+        seen.add(token);
+        filters.push({ field, value: matchedValue, label: `${titleCase(field)}: ${matchedValue}` });
+      }
     }
   });
 
@@ -1036,9 +1350,14 @@ function filterByMetric(rows, module, metric) {
   return rows;
 }
 
-function applyDetectedFilters(rows, filters) {
+function applyDetectedFilters(rows, filters, module = "incidents") {
+  const fieldMap = MODULE_CONFIG[module]?.filterKeys || {};
   return filters.reduce(
-    (scopedRows, filter) => scopedRows.filter((row) => normalizeText(row[filter.key]) === normalizeText(filter.value)),
+    (scopedRows, filter) => {
+      const key = filter.key || fieldMap[filter.field];
+      if (!key) return scopedRows;
+      return scopedRows.filter((row) => normalizeText(row[key]) === normalizeText(filter.value));
+    },
     rows
   );
 }
@@ -1080,6 +1399,59 @@ function makeSingleSeriesChart(rows, module, grouping, chartType, topN) {
     data: chartType === "pie" ? makePieRows(rows, key, topN) : makeBarRows(rows, key, topN),
     label: titleCase(grouping),
   };
+}
+
+function buildOverviewKpis(series) {
+  const total = series.reduce((sum, item) => sum + item.rows.length, 0);
+  const openTotal = series.reduce(
+    (sum, item) => sum + item.rows.filter((row) => !isClosedState(row.state)).length,
+    0
+  );
+
+  return [
+    {
+      label: "Total Records",
+      value: total,
+      note: "Combined ITSM scope for the selected dashboard",
+    },
+    ...series.map((item) => ({
+      label: item.label,
+      value: item.rows.length,
+      note: `${item.rows.filter((row) => !isClosedState(row.state)).length} still open`,
+    })),
+    {
+      label: "Open Items",
+      value: openTotal,
+      note: `${Math.max(total - openTotal, 0)} already closed or completed`,
+    },
+  ].slice(0, 5);
+}
+
+function buildOverviewWidgets(series) {
+  return [
+    {
+      title: "Total volume by module",
+      summary: "Overall distribution of records across the main ITSM modules.",
+      chart: {
+        type: "bar",
+        data: series.map((item) => ({
+          label: item.label,
+          value: item.rows.length,
+        })),
+      },
+    },
+    {
+      title: "Open workload by module",
+      summary: "Remaining active workload to monitor in each ITSM module.",
+      chart: {
+        type: "bar",
+        data: series.map((item) => ({
+          label: item.label,
+          value: item.rows.filter((row) => !isClosedState(row.state)).length,
+        })),
+      },
+    },
+  ];
 }
 
 function formatValue(value) {
@@ -1242,6 +1614,90 @@ function buildSecondaryWidgets(rows, module, primaryGrouping, requestedGroupings
   }));
 }
 
+function buildOverviewResult(intent, datasets) {
+  const modules = Array.isArray(intent?.modules) && intent.modules.length
+    ? intent.modules.filter((module) => MODULE_CONFIG[module])
+    : Object.keys(MODULE_CONFIG);
+  const dateScope = intent?.dateScope || detectDateScope("");
+  const state = intent?.state || "all";
+  const metric = intent?.metric || "count";
+  const filters = Array.isArray(intent?.filters) ? intent.filters : [];
+
+  const series = modules.map((module) => {
+    const config = MODULE_CONFIG[module];
+    let rows = Array.isArray(datasets[module]) ? datasets[module] : [];
+    rows = filterByDateScope(rows, config.defaultDateKey, dateScope);
+    rows = filterByState(rows, state);
+    rows = filterByMetric(rows, module, metric);
+    rows = applyDetectedFilters(rows, filters, module);
+
+    return {
+      module,
+      label: config.label,
+      rows,
+      data: monthlySeries(rows, config.defaultDateKey).map((item) => ({
+        x: item.month,
+        y: item.value,
+      })),
+    };
+  });
+
+  const nonEmptySeries = series.filter((item) => item.rows.length);
+  if (!nonEmptySeries.length) {
+    return {
+      ok: false,
+      answer: "I couldn't build a global dashboard for that scope. Try a broader period or remove some filters.",
+      suggestions: buildRecoverySuggestions(intent),
+      interpretation: intent.interpretation,
+    };
+  }
+
+  const leader = [...nonEmptySeries].sort((left, right) => right.rows.length - left.rows.length)[0];
+
+  return {
+    ok: true,
+    title: intent?.title || `Global ITSM Overview${dateScope?.label ? ` in ${dateScope.label}` : ""}`,
+    answer:
+      intent?.answer ||
+      "I built a global ITSM dashboard that summarizes incidents, requests, and changes in one view.",
+    chart: {
+      type: "multiLine",
+      data: nonEmptySeries.map((item) => ({
+        id: item.label,
+        data: item.data,
+      })),
+    },
+    kpis: buildOverviewKpis(nonEmptySeries),
+    widgets: buildOverviewWidgets(nonEmptySeries),
+    spotlight: {
+      title: "Overview spotlight",
+      body: `${leader.label} currently has the largest visible volume in the selected scope, so it should be reviewed first in the global dashboard.`,
+    },
+    executiveNotes: [
+      `${nonEmptySeries.reduce((sum, item) => sum + item.rows.length, 0)} combined records are included in this overview.`,
+      dateScope?.label ? `The selected period is ${dateScope.label}.` : "The overview uses all available data.",
+      state === "all" ? "The view includes both open and closed records." : `The view is focused on ${state} records only.`,
+      metric !== "count" ? `The dashboard emphasizes the ${titleCase(metric)} metric.` : "The dashboard emphasizes overall operational volume.",
+    ],
+    interpretation: intent.interpretation,
+    followUps: [
+      "Focus on incidents by service",
+      "Show requests by month",
+      "Compare incidents and changes by month",
+      "Show open workload by group",
+    ],
+    summary:
+      intent?.summary?.length
+        ? intent.summary
+        : [
+            `Scope: ${nonEmptySeries.reduce((sum, item) => sum + item.rows.length, 0)} records`,
+            `Modules: ${nonEmptySeries.map((item) => item.label).join(", ")}`,
+            ...(dateScope?.label ? [`Period: ${dateScope.label}`] : []),
+            ...(state !== "all" ? [`State: ${state}`] : []),
+          ],
+  };
+}
+
 function buildSingleModuleResult(intent, datasets) {
   const module = MODULE_CONFIG[intent?.module] ? intent.module : "incidents";
   const config = MODULE_CONFIG[module];
@@ -1258,7 +1714,7 @@ function buildSingleModuleResult(intent, datasets) {
   rows = filterByDateScope(rows, config.defaultDateKey, dateScope);
   rows = filterByState(rows, intent?.state || "all");
   rows = filterByMetric(rows, module, intent?.metric || "count");
-  rows = applyDetectedFilters(rows, filters);
+  rows = applyDetectedFilters(rows, filters, module);
 
   if (!rows.length) {
     return {
@@ -1315,6 +1771,7 @@ function buildComparisonResult(intent, datasets) {
     rows = filterByDateScope(rows, config.defaultDateKey, dateScope);
     rows = filterByState(rows, state);
     rows = filterByMetric(rows, module, metric);
+    rows = applyDetectedFilters(rows, intent?.filters || [], module);
 
     return {
       module,
@@ -1396,11 +1853,16 @@ function buildIntentFromQuery(query, datasets) {
   const text = normalizeQuery(query);
   const moduleDetection = detectModules(text);
   const modules = moduleDetection.modules;
-  const module = modules[0];
+  const overview = [...OVERVIEW_KEYWORDS, ...EXTRA_KEYWORD_GROUPS.overview].some((keyword) => text.includes(keyword));
+  const hasExplicitModule = moduleDetection.explicit;
   const compare = isCompareIntent(text, modules);
+  const module = !hasExplicitModule && overview ? null : modules[0];
+  const effectiveModules = !hasExplicitModule && overview
+    ? Object.keys(MODULE_CONFIG)
+    : modules;
   const groupingDetection = compare
     ? { groupings: ["month"], confidence: 0.9, scores: [] }
-    : detectGroupings(text, module);
+    : detectGroupings(text, module || "incidents");
   const groupings = groupingDetection.groupings;
   const dateScope = detectDateScope(text);
   const stateDetection = detectState(text);
@@ -1408,7 +1870,7 @@ function buildIntentFromQuery(query, datasets) {
 
   const baseIntent = {
     compare,
-    modules,
+    modules: effectiveModules,
     module,
     grouping: groupings[0],
     groupings,
@@ -1420,8 +1882,8 @@ function buildIntentFromQuery(query, datasets) {
     quarter: dateScope.quarter,
     topN: detectTopN(text),
     chart_type: detectChartType(text, groupings[0], compare),
-    filters: compare ? [] : detectModuleFilters(text, module, datasets),
-    overview: [...OVERVIEW_KEYWORDS, ...EXTRA_KEYWORD_GROUPS.overview].some((keyword) => text.includes(keyword)),
+    filters: detectSemanticFilters(text, effectiveModules, datasets),
+    overview,
   };
   const templatedIntent = applyIntentTemplates(baseIntent, text);
   const interpretation = buildInterpretation(templatedIntent, {
@@ -1437,9 +1899,28 @@ function buildIntentFromQuery(query, datasets) {
   };
 }
 
+export function buildAssistantIntentHint(query, datasets) {
+  const intent = buildIntentFromQuery(query, datasets);
+  return {
+    compare: Boolean(intent.compare),
+    module: intent.module,
+    modules: Array.isArray(intent.modules) ? intent.modules : [],
+    grouping: intent.grouping,
+    groupings: Array.isArray(intent.groupings) ? intent.groupings : [],
+    state: intent.state,
+    metric: intent.metric,
+    year: intent.year ?? null,
+    year_range: intent.yearRange ?? null,
+    quarter: intent.quarter ?? null,
+    top_n: intent.topN ?? null,
+    chart_type: intent.chart_type,
+    filters: Array.isArray(intent.filters) ? intent.filters : [],
+  };
+}
+
 function buildDateScopeFromIntent(intent) {
   if (intent?.dateScope) return intent.dateScope;
-  if (!(intent?.year || intent?.quarter || intent?.yearRange)) return detectDateScope("");
+  if (!(intent?.year || intent?.quarter || intent?.yearRange || intent?.year_range)) return detectDateScope("");
 
   return {
     year: intent?.year || null,
@@ -1479,6 +1960,10 @@ export function buildAssistantResultFromIntent(intent, datasets) {
     topN: intent?.topN || intent?.top_n,
   };
 
+  if (normalizedIntent?.overview && (!normalizedIntent?.module || (normalizedIntent?.modules || []).length > 1)) {
+    return buildOverviewResult(normalizedIntent, datasets);
+  }
+
   if (normalizedIntent?.compare) {
     return buildComparisonResult(normalizedIntent, datasets);
   }
@@ -1506,4 +1991,11 @@ export const assistantPromptExamples = [
   "Open changes by group and by type for network",
   "warini dashboard 3la incidents open par mois w par priority",
   "3tini requests dashboard 3la onboarding last 12 months",
+  "warini incidents open by service for 2025",
+  "3tini dashboard requests by month and by group",
+  "compare incidents and changes last 12 months",
+  "ch7al men incidents open andhom sla breach",
+  "warini akther service 3andou backlog requests",
+  "9aren incidents w changes par mois",
+  "3tini synthese globale 3la requests",
 ];

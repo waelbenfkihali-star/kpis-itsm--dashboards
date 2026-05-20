@@ -26,6 +26,7 @@ import { apiFetch, apiFetchJson } from "../../utils/api";
 import ChartLegend from "../analysis/ChartLegend";
 import { getChartColor, renderBarTooltip, renderLineTooltip } from "../analysis/analysisUtils";
 import {
+  buildAssistantIntentHint,
   buildAssistantResult,
   buildAssistantResultFromIntent,
 } from "../../components/insightAssistantUtils";
@@ -57,22 +58,40 @@ function KpiCard({ label, value, note }) {
 
 function InterpretationCard({ interpretation }) {
   if (!interpretation) return null;
+  const groupingText = (interpretation.groupings || []).length
+    ? (interpretation.groupings || []).join(", ")
+    : "default grouping";
+  const filterText = (interpretation.filters || []).length
+    ? (interpretation.filters || []).join(" | ")
+    : "No extra filters";
 
   return (
     <Paper variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
       <Typography variant="subtitle1" fontWeight={700} mb={1}>
-        Offline Interpretation
+        Understood Request
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 1 }}>
+        The assistant understood your request as a <strong>{interpretation.module}</strong> dashboard, focused on <strong>{interpretation.state}</strong> items, using the <strong>{interpretation.metric}</strong> metric, over <strong>{interpretation.period}</strong>.
       </Typography>
       <Typography variant="body2" color="text.secondary">
+        Groupings: {groupingText}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.8 }}>
+        Filters: {filterText}
+      </Typography>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1.2 }}>
+        Confidence: {interpretation.confidence}%
+      </Typography>
+      <Typography variant="body2" sx={{ display: "none" }}>
         Confidence {interpretation.confidence}% • Module: {interpretation.module} • State: {interpretation.state} • Metric: {interpretation.metric} • Period: {interpretation.period}
       </Typography>
       {(interpretation.groupings || []).length ? (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ display: "none" }}>
           Groupings: {(interpretation.groupings || []).join(", ")}
         </Typography>
       ) : null}
       {(interpretation.filters || []).length ? (
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ display: "none" }}>
           Filters: {(interpretation.filters || []).join(" • ")}
         </Typography>
       ) : null}
@@ -297,6 +316,7 @@ function MessageBubble({ role, children }) {
 export default function AssistantDashboard() {
   const location = useLocation();
   const [loadingData, setLoadingData] = React.useState(false);
+  const [aiRefining, setAiRefining] = React.useState(false);
   const [datasets, setDatasets] = React.useState({
     incidents: [],
     requests: [],
@@ -308,13 +328,11 @@ export default function AssistantDashboard() {
       id: 1,
       role: "assistant",
       content:
-        "Describe the dashboard you want in English or French. I will try to build the closest matching result from incidents, requests, and changes.",
+        "Describe the dashboard you want in English, French, or Tunisian Arabic written in Latin letters. For the best result, mention the module, the period, and the grouping, for example: 'Show open incidents by service for 2025' or 'Compare requests and changes by month'.",
     },
   ]);
   const [result, setResult] = React.useState(null);
   const [error, setError] = React.useState("");
-  const [resultMode, setResultMode] = React.useState("idle");
-
   const ensureDataLoaded = React.useCallback(async () => {
     if (datasets.incidents.length || datasets.requests.length || datasets.changes.length) {
       return datasets;
@@ -360,7 +378,19 @@ export default function AssistantDashboard() {
 
       try {
         const loaded = await ensureDataLoaded();
-        let nextResult;
+        const localResult = buildAssistantResult(query, loaded);
+        const localIntentHint = buildAssistantIntentHint(query, loaded);
+        setResult(localResult);
+        setAiRefining(true);
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "assistant",
+            content: `${localResult.answer} Refining the dashboard interpretation...`,
+          },
+        ]);
 
         try {
           const aiResponse = await apiFetchJson("/ai/dashboard-query/", {
@@ -368,25 +398,33 @@ export default function AssistantDashboard() {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ prompt: query }),
+            body: JSON.stringify({
+              prompt: query,
+              hint_intent: localIntentHint,
+            }),
           });
-          nextResult = buildAssistantResultFromIntent(aiResponse.intent, loaded);
-          setResultMode("ai");
-        } catch (aiError) {
-          nextResult = buildAssistantResult(query, loaded);
-          nextResult.answer = `${nextResult.answer} (Local smart mode)`;
-          setResultMode("fallback");
+          const refinedResult = buildAssistantResultFromIntent(aiResponse.intent, loaded);
+          setResult(refinedResult);
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = {
+              ...next[next.length - 1],
+              content: refinedResult.answer,
+            };
+            return next;
+          });
+        } catch {
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = {
+              ...next[next.length - 1],
+              content: `${localResult.answer} Displayed in fast local mode.`,
+            };
+            return next;
+          });
+        } finally {
+          setAiRefining(false);
         }
-
-        setResult(nextResult);
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            role: "assistant",
-            content: nextResult.answer,
-          },
-        ]);
       } catch {
         setMessages((prev) => [
           ...prev,
@@ -428,6 +466,9 @@ export default function AssistantDashboard() {
                   <Typography variant="body2" color="text.secondary">
                     Describe the dashboard you need in your own words
                   </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                    Best format: module + period + grouping + filters. Example: incidents open in 2025 by service for SAP and IB corporate.
+                  </Typography>
                 </Box>
               </Stack>
 
@@ -456,6 +497,14 @@ export default function AssistantDashboard() {
                     </Typography>
                   </Stack>
                 ) : null}
+                {aiRefining ? (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <CircularProgress size={18} />
+                    <Typography variant="body2" color="text.secondary">
+                      Refining with AI...
+                    </Typography>
+                  </Stack>
+                ) : null}
                 {error ? <Typography variant="body2" color="error">{error}</Typography> : null}
               </Stack>
 
@@ -466,7 +515,7 @@ export default function AssistantDashboard() {
                   minRows={2}
                   maxRows={3}
                   label="Describe your dashboard"
-                  placeholder="Compare incidents and requests between 2022 and 2024 by month"
+                  placeholder="Show open incidents in 2025 by service for SAP and IB corporate"
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
                   onKeyDown={(event) => {
