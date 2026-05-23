@@ -1,3 +1,4 @@
+// hna row ta3 dashboard li tben cards w mini charts
 import React from "react";
 import { Stack } from "@mui/material";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
@@ -6,6 +7,7 @@ import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import AutorenewOutlinedIcon from "@mui/icons-material/AutorenewOutlined";
 import Card from "./card";
 
+// hna component Row1 li trender page/component section
 const Row1 = () => {
   return (
     <Stack

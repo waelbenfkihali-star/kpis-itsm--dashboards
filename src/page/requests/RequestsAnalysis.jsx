@@ -1,3 +1,4 @@
+// hna analysis page khusus b requests
 import React, { useMemo } from "react";
 import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -30,6 +31,7 @@ import {
 } from "../analysis/analysisUtils";
 import { buildRequestInsights } from "../analysis/reportInsights";
 
+// hna component KpiCard li trender page/component section
 function KpiCard({ title, value, note }) {
   return (
     <Paper sx={{ p: 2.2, flex: 1, minWidth: 200 }}>
@@ -46,6 +48,7 @@ function KpiCard({ title, value, note }) {
   );
 }
 
+// hna component ChartCard li trender page/component section
 function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   return (
     <Paper sx={{ p: 2, flex: 1, minWidth: 320 }}>
@@ -63,10 +66,12 @@ function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   );
 }
 
+// hna function hasKeyword li tperform helper logic
 function hasKeyword(text, keywords) {
   return keywords.some((keyword) => text.includes(keyword));
 }
 
+// hna component RequestsAnalysis li trender page/component section
 export default function RequestsAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -83,15 +88,21 @@ export default function RequestsAnalysis() {
     [rows]
   );
 
+    // hna function openedMonthly li tperform helper logic
   const openedMonthly = useMemo(() => monthlySeriesInRange(rows, "opened", rows, "opened"), [rows]);
   const openedVsClosed = useMemo(
     () => monthlyDualSeriesInRange(rows, "opened", "closed", "Opened", "Closed", rows, "opened"),
     [rows]
   );
+    // hna function agingStateData li tprepare data values
   const agingStateData = useMemo(() => agingByState(openRows, "opened", "state"), [openRows]);
+    // hna function services li tperform helper logic
   const services = useMemo(() => countBy(rows, "it_service"), [rows]);
+    // hna function groups li tperform helper logic
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
+    // hna function requestedFor li tperform helper logic
   const requestedFor = useMemo(() => countBy(rows, "requested_for"), [rows]);
+    // hna function items li tperform helper logic
   const items = useMemo(() => countBy(rows, "item"), [rows]);
   const serviceMonthly = useMemo(
     () => monthlyBreakdownInRange(rows, "opened", "it_service", 5, "Unknown", rows, "opened"),
@@ -136,11 +147,13 @@ export default function RequestsAnalysis() {
   const total = rows.length;
   const backlog = openRows.length;
   const closed = closedRows.length;
+    // hna function olderThan60 li tperform helper logic
   const olderThan60 = agingStateData.find((item) => item.aging === "> 60 Days")?.total || 0;
   const modernWorkplaceClosed = countWhere(
     closedRows,
     (row) => String(row.it_service || "").toLowerCase().includes("modern workplace")
   );
+    // hna function focusedView li tperform helper logic
   const focusedView = useMemo(() => {
     if (!selectedKpi) return null;
 

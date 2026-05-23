@@ -1,3 +1,4 @@
+// hna form input fields li t3ayet men Kpi form
 import React from "react";
 import { Grid, MenuItem, TextField } from "@mui/material";
 import {
@@ -6,6 +7,7 @@ import {
   KPI_STATUS_OPTIONS,
 } from "./kpiFormConfig";
 
+// hna component KpiFieldsForm li trender page/component section
 export default function KpiFieldsForm({
   form,
   setField,

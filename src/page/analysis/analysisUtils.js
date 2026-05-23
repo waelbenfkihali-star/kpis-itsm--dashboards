@@ -1,3 +1,6 @@
+// hna utils functions li y3awno b analysis w chart data
+// utils functions li y3awno b7al data aggregation w chart building
+// kol function hna tst3ml rows raw li jaou men API w tbedelhom l data ready l charts
 export function countBy(rows, key, fallback = "Unknown") {
   const counts = {};
 
@@ -11,15 +14,18 @@ export function countBy(rows, key, fallback = "Unknown") {
     .sort((a, b) => b.value - a.value);
 }
 
+// hna function li tijib top label men rows b key
 export function topLabel(rows, key, fallback = "Unknown") {
   return countBy(rows, key, fallback)[0]?.label || fallback;
 }
 
+// hna function li tcalculate percent ratio
 export function ratio(part, total) {
   if (!total) return 0;
   return Math.round((part / total) * 100);
 }
 
+// hna function li tparse date string l YYYY-MM
 export function parseDate(value) {
   if (!value) return null;
 
@@ -35,10 +41,12 @@ export function parseDate(value) {
   return `${year}-${month}`;
 }
 
+// hna function li tbuild monthly series data
 export function monthlySeries(rows, key) {
   return monthlySeriesInRange(rows, key, rows);
 }
 
+// hna helper li tbuild range ta3 months men rows
 function buildMonthRange(rows, key) {
   const months = rows
     .map((row) => parseDate(row[key]))
@@ -63,6 +71,7 @@ function buildMonthRange(rows, key) {
   return range;
 }
 
+// hna function li tbuild monthly series fl range specified
 export function monthlySeriesInRange(rows, key, rangeRows = rows, rangeKey = key) {
   const counts = {};
 
@@ -82,10 +91,12 @@ export function monthlySeriesInRange(rows, key, rangeRows = rows, rangeKey = key
   return monthRange.map((month) => ({ month, value: counts[month] || 0 }));
 }
 
+// hna function li tbuild dual series l chart
 export function monthlyDualSeries(rows, firstKey, secondKey, firstLabel, secondLabel) {
   return monthlyDualSeriesInRange(rows, firstKey, secondKey, firstLabel, secondLabel, rows, firstKey);
 }
 
+// hna function li tbuild dual series fl range
 export function monthlyDualSeriesInRange(
   rows,
   firstKey,
@@ -97,6 +108,7 @@ export function monthlyDualSeriesInRange(
 ) {
   const counts = {};
 
+  // hna function touch li tperform helper logic
   function touch(month) {
     if (!month) return null;
     counts[month] = counts[month] || {
@@ -127,10 +139,12 @@ export function monthlyDualSeriesInRange(
   }));
 }
 
+// hna function li tcalculate monthly breakdown by group
 export function monthlyBreakdown(rows, dateKey, groupKey, limit = 5, fallback = "Unknown") {
   return monthlyBreakdownInRange(rows, dateKey, groupKey, limit, fallback, rows, dateKey);
 }
 
+// hna function li tcalculate monthly breakdown fl range
 export function monthlyBreakdownInRange(
   rows,
   dateKey,
@@ -176,6 +190,7 @@ export function monthlyBreakdownInRange(
   };
 }
 
+// hna function li tcalculate average value men rows
 export function average(rows, key, filterFn = null) {
   const scopedRows = typeof filterFn === "function" ? rows.filter(filterFn) : rows;
   const values = scopedRows
@@ -188,10 +203,12 @@ export function average(rows, key, filterFn = null) {
   return Math.round((total / values.length) * 10) / 10;
 }
 
+// hna function li tcounti rows li ymatch predicate
 export function countWhere(rows, predicate) {
   return rows.filter(predicate).length;
 }
 
+// hna function li tcalculate difference fi days men date
 export function diffInDays(value, baseDate = new Date()) {
   if (!value) return null;
   const parsed = new Date(value);
@@ -201,6 +218,7 @@ export function diffInDays(value, baseDate = new Date()) {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
+// hna function li tclassify aging days fl buckets
 export function bucketAging(days) {
   if (days === null || days < 0) return "Not past due";
   if (days < 30) return "< 30 Days";
@@ -208,6 +226,7 @@ export function bucketAging(days) {
   return "> 60 Days";
 }
 
+// hna function li tbuild aging totals by state
 export function agingByState(rows, dateKey, stateKey) {
   const result = {};
 
@@ -226,6 +245,7 @@ export function agingByState(rows, dateKey, stateKey) {
     .map((key) => result[key]);
 }
 
+// hna function li tprepare data format l pie chart
 export function makePieData(items) {
   return items.map((item) => ({
     id: item.label,
@@ -234,6 +254,7 @@ export function makePieData(items) {
   }));
 }
 
+// hna function li tprepare data format l bar chart
 export function makeBarData(items, limit = 8) {
   return items.slice(0, limit).map((item) => ({
     label: item.label,
@@ -241,6 +262,7 @@ export function makeBarData(items, limit = 8) {
   }));
 }
 
+// hna function li tprepare data format l line chart
 export function makeLineData(points, label) {
   return [
     {
@@ -264,10 +286,12 @@ export const CHART_COLORS = [
   "#b86f7a",
 ];
 
+// hna function li tajib color men palette
 export function getChartColor(index = 0) {
   return CHART_COLORS[index % CHART_COLORS.length];
 }
 
+// hna function li tprepare legend items b colors
 export function makeLegendItems(labels = []) {
   return labels.filter(Boolean).map((label, index) => ({
     label,
@@ -275,6 +299,7 @@ export function makeLegendItems(labels = []) {
   }));
 }
 
+// hna function li tgenerate tooltip text l bar chart
 export function renderBarTooltip({ id, value, indexValue, color }) {
   return `
 ${id}: ${indexValue}
@@ -282,6 +307,7 @@ Value: ${value}
 `;
 }
 
+// hna function li tgenerate tooltip text l line chart
 export function renderLineTooltip(point) {
   const payload = point?.point || point;
   const seriesId = payload?.serieId || payload?.serie?.id || "Series";
@@ -295,6 +321,7 @@ Value: ${value}
 `;
 }
 
+// hna function li tgenerate tooltip text l pie chart
 export function renderPieTooltip({ datum }) {
   return `
 ${datum.id}

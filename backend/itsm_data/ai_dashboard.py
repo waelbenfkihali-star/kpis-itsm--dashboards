@@ -2,6 +2,10 @@ import json
 import os
 from urllib import request as urllib_request
 
+# hna l constants li nist3emlouhom bach nfas5ou l intent li yji men assistant
+# MODULES: tri9a mnin n7otouhleh incident/request/change
+# GROUPING_VALUES: dimensioun li n9adrou n9asem bih report
+# FILTER_FIELDS: fields li yjm3ou fihom criteria ta3 filter
 MODULES = ["incidents", "requests", "changes"]
 GROUPING_VALUES = [
     "service",
@@ -163,7 +167,9 @@ AI_INTENT_SCHEMA = {
 }
 
 
+# hna function extract_response_text li tdefine service logic
 def extract_response_text(payload):
+    # n7awlou nkl9aou l text li jabna men response, ya3ni output_text wela output.content
     if isinstance(payload.get("output_text"), str) and payload["output_text"].strip():
         return payload["output_text"]
 
@@ -174,12 +180,18 @@ def extract_response_text(payload):
                 return text
     return ""
 
+# hna function compact_json li tdefine service logic
 
+# hna function compact_json li tdefine service logic
 def compact_json(value):
+    # n9asrou JSON fi line wa7da bach nst3amlouh fi prompt
     return json.dumps(value, ensure_ascii=True, separators=(",", ":"))
+# hna function build_developer_prompt li tdefine service logic
 
 
 def build_developer_prompt(data_context=None, hint_intent=None):
+    # hna nbeny prompt lijib l parser y7awel user request l strict JSON intent
+    # l prompt y3ayet b darja, frensawi, english, w arabizi fil instructions
     context_text = compact_json(data_context or {})
     hint_text = compact_json(hint_intent or {})
     return (
@@ -220,20 +232,29 @@ def build_developer_prompt(data_context=None, hint_intent=None):
         "Never invent data values, extra entities, or unsupported dimensions. "
         f"Intent hint: {hint_text} "
         f"Data context: {context_text}"
+    # hna function normalize_grouping li tdefine service logic
     )
+# hna function normalize_grouping li tdefine service logic
 
+# hna function normalize_grouping li tdefine service logic
 
 def normalize_grouping(value, fallback="service"):
+    # n7awlou grouping li ja tab3a l valid values, w ida machi mawjouda nrdou service
     value = str(value or "").strip().lower()
+    # hna function normalize_module li tdefine service logic
     return value if value in GROUPING_VALUES else fallback
+# hna function normalize_module li tdefine service logic
 
 
 def normalize_module(value):
+    # n7awlou module li ja bl string l wa7da men incidents/requests/changes
     value = str(value or "").strip().lower()
+    # hna function normalize_filters li tdefine service logic
     return value if value in MODULES else None
 
 
 def normalize_filters(filters):
+    # n9adou array ta3 filters: n3awdhom, n7aydou invalid, n5allou duplicates
     normalized = []
     seen = set()
     for item in filters or []:
@@ -254,6 +275,7 @@ def normalize_filters(filters):
             "field": field,
             "value": value,
             "label": label,
+        # hna function normalize_intent li tdefine service logic
         })
     return normalized
 
@@ -347,7 +369,9 @@ def normalize_intent(intent):
         "chart_type": chart_type,
         "filters": normalize_filters(intent.get("filters", [])),
         "title": title,
+        # hna function build_openai_intent li tdefine service logic
         "answer": answer,
+        # hna function build_openai_intent li tdefine service logic
         "summary": summary,
     }
 
@@ -390,8 +414,11 @@ def build_openai_intent(prompt, data_context=None, hint_intent=None):
     content = payload["choices"][0]["message"].get("content", "")
     if not content:
         content = extract_response_text(payload)
+    
     if not content:
+        
         raise RuntimeError("The AI service did not return structured dashboard content.")
+# hna function build_ollama_intent li tdefine service logic
 
     return normalize_intent(json.loads(content))
 
@@ -427,8 +454,11 @@ def build_ollama_intent(prompt, data_context=None, hint_intent=None):
     with urllib_request.urlopen(req, timeout=180) as response:
         payload = json.loads(response.read().decode("utf-8"))
 
+    # hna function build_ai_dashboard_intent li tdefine service logic
     content = payload.get("message", {}).get("content", "")
+    # hna function build_ai_dashboard_intent li tdefine service logic
     if not content:
+        # hna function build_ai_dashboard_intent li tdefine service logic
         raise RuntimeError("Ollama did not return structured dashboard content.")
 
     return normalize_intent(json.loads(content))

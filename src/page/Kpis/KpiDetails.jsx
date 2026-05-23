@@ -1,3 +1,4 @@
+// hna module li ykhdem fil page Kpis/KpiDetails.jsx
 import React, { useEffect, useState } from "react";
 import { Alert, Box, Button, Chip, Grid, Paper, Stack, Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
@@ -6,6 +7,7 @@ import Header from "../../components/Header";
 import { getModuleLabel, getModulePath } from "../analysis/kpiNavigation";
 import { getKpiById } from "./kpiStorage";
 
+// hna component DetailItem li trender page/component section
 const DetailItem = ({ label, value }) => (
   <Paper elevation={1} sx={{ p: 2, borderRadius: "14px", height: "100%" }}>
     <Typography variant="body2" sx={{ color: "text.secondary", mb: 0.5, fontSize: "12px" }}>
@@ -17,6 +19,7 @@ const DetailItem = ({ label, value }) => (
   </Paper>
 );
 
+// hna component KpiDetails li trender page/component section
 export default function KpiDetails() {
   const navigate = useNavigate();
   const { id } = useParams();

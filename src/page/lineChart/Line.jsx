@@ -1,3 +1,4 @@
+// hna component ta3 line chart
 // @ts-nocheck
 import React, { useEffect, useState, useMemo } from "react";
 import { Box, useTheme, Stack, TextField } from "@mui/material";
@@ -9,6 +10,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { apiFetch } from "../../utils/api";
 
+// hna component Line li trender page/component section
 const Line = ({ isDashbord = false }) => {
 
   const theme = useTheme();
@@ -26,6 +28,7 @@ const Line = ({ isDashbord = false }) => {
 
   },[])
 
+    // hna function filtered li tfilter rows/data
   const filtered = useMemo(()=>{
 
     if(!startDate && !endDate) return rawData
@@ -44,6 +47,7 @@ const Line = ({ isDashbord = false }) => {
   },[rawData,startDate,endDate])
 
 
+    // hna function chartData li tprepare/chart render logic
   const chartData = useMemo(()=>{
 
     const incidents = []

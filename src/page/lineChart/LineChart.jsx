@@ -1,8 +1,10 @@
+// hna page line chart example
 import React from "react";
 import { Box } from "@mui/material";
 import Header from "../../components/Header";
 import Line from "./Line";
 
+// hna component LineChart li trender page/component section
 const LineChart = () => {
   return (
     <Box>

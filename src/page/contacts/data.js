@@ -1,3 +1,4 @@
+// hna sample contacts data
 
 export const columns = [
   { field: "id", headerName: "ID", width: 33 },

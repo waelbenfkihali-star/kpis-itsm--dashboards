@@ -1,3 +1,4 @@
+// hna function getModulePath li tqra w troje3 value
 export function getModulePath(moduleName) {
   const value = String(moduleName || "").toLowerCase();
 
@@ -8,6 +9,7 @@ export function getModulePath(moduleName) {
   return "/mykpis";
 }
 
+// hna function getModuleLabel li tqra w troje3 value
 export function getModuleLabel(moduleName) {
   const path = getModulePath(moduleName);
 

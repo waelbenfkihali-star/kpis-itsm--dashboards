@@ -1,3 +1,4 @@
+// hna catalog ta3 default KPI definitions
 export const defaultKpis = [
   {
     id: "inc-01",
@@ -361,7 +362,9 @@ export const defaultKpis = [
   },
 ];
 
+// hna function mergeWithDefaultKpis li tperform helper logic
 export function mergeWithDefaultKpis(customKpis = []) {
+    // hna function byKpiId li tperform helper logic
   const byKpiId = new Map(defaultKpis.map((item) => [item.kpi_id, item]));
 
   customKpis.forEach((item) => {

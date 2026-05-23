@@ -1,3 +1,4 @@
+// hna page profile w update account info
 import React from "react";
 import {
   Alert,
@@ -35,10 +36,12 @@ const AVATAR_PREVIEW_SIZE = 360;
 const AVATAR_FRAME_SIZE = 272;
 const AVATAR_OUTPUT_SIZE = 512;
 
+// hna constants li nsta3mlouhom fl avatar crop w render
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
+// hna function getImageBounds li tqra w troje3 value
 function getImageBounds(imageSize, zoom) {
   const baseScale = Math.max(
     AVATAR_PREVIEW_SIZE / imageSize.width,
@@ -56,6 +59,7 @@ function getImageBounds(imageSize, zoom) {
 }
 
 async function cropAvatarImage(src, cropState) {
+  // n9ra image men source w n9aunch crop state bach n5alli avatar round w nsave data URL
   const image = await new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
@@ -113,6 +117,7 @@ async function cropAvatarImage(src, cropState) {
   return canvas.toDataURL("image/png");
 }
 
+// hna component InfoStat li trender page/component section
 function InfoStat({ title, value, note }) {
   return (
     <Paper sx={{ p: 2.25, flex: 1, minWidth: 180, borderRadius: 4 }}>
@@ -129,6 +134,7 @@ function InfoStat({ title, value, note }) {
   );
 }
 
+// hna component Profile li trender page/component section
 export default function Profile() {
   const theme = useTheme();
   const { currentUser, setCurrentUser, reloadCurrentUser } = useOutletContext();
@@ -195,6 +201,7 @@ export default function Profile() {
       ? "0 24px 64px rgba(2, 6, 23, 0.45)"
       : "0 24px 64px rgba(15, 23, 42, 0.08)";
 
+    // hna function updateProfileField li tperform helper logic
   function updateProfileField(field) {
     return (event) => {
       setProfileForm((prev) => ({
@@ -204,6 +211,7 @@ export default function Profile() {
     };
   }
 
+    // hna function updatePasswordField li tperform helper logic
   function updatePasswordField(field) {
     return (event) => {
       setPasswordForm((prev) => ({
@@ -213,6 +221,7 @@ export default function Profile() {
     };
   }
 
+    // hna function updateAvatarEditor li tperform helper logic
   function updateAvatarEditor(patch) {
     setAvatarEditor((prev) => {
       const next = { ...prev, ...patch };
@@ -230,6 +239,7 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file) return;
 
+        // hna function dataUrl li tprepare data values
     const dataUrl = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(String(reader.result || ""));
@@ -237,6 +247,7 @@ export default function Profile() {
       reader.readAsDataURL(file);
     });
 
+        // hna function imageSize li tperform helper logic
     const imageSize = await new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () =>
@@ -257,11 +268,13 @@ export default function Profile() {
     event.target.value = "";
   }
 
+    // hna function closeAvatarEditor li tperform helper logic
   function closeAvatarEditor() {
     setAvatarEditor((prev) => ({ ...prev, open: false }));
     setDragState(null);
   }
 
+    // hna function startAvatarDrag li tperform helper logic
   function startAvatarDrag(event) {
     event.preventDefault();
     setDragState({
@@ -272,6 +285,7 @@ export default function Profile() {
     });
   }
 
+    // hna function moveAvatarDrag li tperform helper logic
   function moveAvatarDrag(event) {
     if (!dragState) return;
 

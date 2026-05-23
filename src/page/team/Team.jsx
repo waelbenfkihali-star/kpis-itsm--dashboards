@@ -1,3 +1,4 @@
+// hna page manage team w user accounts
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import {
@@ -32,7 +33,9 @@ import Header from "../../components/Header";
 import PageFilters from "../../components/PageFilters";
 import { apiFetchJson } from "../../utils/api";
 
+// hna component Team li trender page/component section
 export default function Team() {
+  // page Manage Team: yjib list ta3 account users w admins, ykhalik tbadel access w t3ayet reset password
   const theme = useTheme();
   const { currentUser, reloadCurrentUser } = useOutletContext();
   const [rows, setRows] = React.useState([]);
@@ -50,7 +53,9 @@ export default function Team() {
 
   const isAdmin = currentUser?.access === "Admin";
 
+    // hna function loadTeam li tload data w troje3 response
   const loadTeam = React.useCallback(async () => {
+    // nfetchiw team members men backend w n7awloublocks set rows
     setLoading(true);
     setError("");
 
@@ -79,6 +84,7 @@ export default function Team() {
   );
   const statusOptions = ["Active", "Disabled"];
 
+    // hna function filteredRows li tfilter rows/data
   const filteredRows = React.useMemo(() => {
     return rows.filter((row) => {
       if (
@@ -108,6 +114,7 @@ export default function Team() {
     [filters]
   );
 
+    // hna function resetFilters li trédoui state / filters l default
   function resetFilters() {
     setFilters({
       search: "",

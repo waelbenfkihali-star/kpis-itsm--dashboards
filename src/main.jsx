@@ -48,6 +48,7 @@ import RequestsAnalysis from "./page/requests/RequestsAnalysis";
 import ChangesAnalysis from "./page/changes/ChangesAnalysis";
 import { getDesignTokens } from "./theme";
 
+// hna root ta3 router: yjma3 routes kullouhom w ykhalik tmchi men page l page
 function RootRouter() {
   const [mode, setMode] = React.useState(
     localStorage.getItem("currentMode") || "light"
@@ -69,7 +70,7 @@ function RootRouter() {
             <Route path="/login" element={<Login setMode={setMode} />} />
 
             {/* APP */}
-
+            {/* hna l routes li msakkra bil auth, ida mach mconnecti ma tnejmch t9ra */}
             <Route
               path="/"
               element={
@@ -94,6 +95,7 @@ function RootRouter() {
 
               <Route path="mykpis" element={<MyKpis />} />
               <Route path="mykpis/:id" element={<KpiDetails />} />
+              {/* hadhouma les pages li m7atouthom 3la role ta3 admin/manager, men ghayr role ma t3addi */}
               <Route path="team" element={<RoleRoute><Team /></RoleRoute>} />
               <Route path="kpiform" element={<RoleRoute><KpiForm /></RoleRoute>} />
               <Route path="editkpi/:id" element={<RoleRoute><EditKpi /></RoleRoute>} />

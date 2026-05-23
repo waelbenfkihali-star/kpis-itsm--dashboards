@@ -16,9 +16,11 @@ const services = [
   { name: "Backup", incidents: 9, x: 850, y: 390, size: 58 },
 ];
 
+// hna function getHexPoints li tqra w troje3 value
 const getHexPoints = (cx, cy, r) => {
   const points = [];
   for (let i = 0; i < 6; i++) {
+        // hna function angle li tperform helper logic
     const angle = (Math.PI / 180) * (60 * i - 30);
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
@@ -27,6 +29,7 @@ const getHexPoints = (cx, cy, r) => {
   return points.join(" ");
 };
 
+// hna function colorByIncidents li tperform helper logic
 const colorByIncidents = (incidents) => {
   if (incidents >= 30) {
     return {
@@ -56,6 +59,7 @@ const colorByIncidents = (incidents) => {
   };
 };
 
+// hna component HexNode li trender page/component section
 const HexNode = ({ service }) => {
   const theme = useTheme();
   const palette = colorByIncidents(service.incidents);
@@ -168,10 +172,13 @@ const HexNode = ({ service }) => {
   );
 };
 
+// hna component Geo li trender page/component section
 const Geo = ({ isDashboard = false }) => {
   const theme = useTheme();
 
+    // hna function totalIncidents li tperform helper logic
   const totalIncidents = services.reduce((sum, s) => sum + s.incidents, 0);
+    // hna function topService li tperform helper logic
   const topService = [...services].sort((a, b) => b.incidents - a.incidents)[0];
 
   return (

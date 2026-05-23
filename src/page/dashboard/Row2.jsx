@@ -1,3 +1,4 @@
+// hna row ta3 dashboard li tben cards w mini charts
 import {
   Box,
   IconButton,
@@ -11,6 +12,7 @@ import React from "react";
 import { DownloadOutlined } from "@mui/icons-material";
 import { Transactions } from "./data";
 
+// hna component Row2 li trender page/component section
 const Row2 = () => {
   const theme = useTheme();
   return (

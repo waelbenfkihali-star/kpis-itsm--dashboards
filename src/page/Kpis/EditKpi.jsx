@@ -1,3 +1,4 @@
+// hna page edit KPI existing
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
@@ -14,6 +15,7 @@ import { KPI_INITIAL_FORM } from "./kpiFormConfig";
 
 import { getKpiById, loadKpis, upsertKpi } from "./kpiStorage";
 
+// hna component EditKpi li trender page/component section
 const EditKpi = () => {
 
   const navigate = useNavigate();
@@ -57,10 +59,12 @@ const EditKpi = () => {
 
   }, [id]);
 
+    // hna function setField li tset field / state value
   function setField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+    // hna function isValid li tfassi boolean condition
   const isValid = useMemo(() => {
     return (
       form.name.trim() !== "" &&
@@ -69,6 +73,7 @@ const EditKpi = () => {
     );
   }, [form]);
 
+    // hna function resetForm li trédoui state / filters l default
   function resetForm() {
     setForm((prev) => ({
       ...prev,
@@ -85,6 +90,7 @@ const EditKpi = () => {
     }));
   }
 
+    // hna function submit li tsubmit form data
   function submit() {
 
     if (!isValid) return;

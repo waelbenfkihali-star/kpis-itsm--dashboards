@@ -1,3 +1,4 @@
+// hna page define KPI form w save
 import React, { useState, useMemo } from "react";
 import {
   Box,
@@ -13,6 +14,7 @@ import KpiFieldsForm from "./KpiFieldsForm";
 import { KPI_INITIAL_FORM } from "./kpiFormConfig";
 import { upsertKpi, validateKpi } from "./kpiStorage";
 
+// page ta3 Define KPI: kif n3aytou bih men sidebar, n3abou form w n7afdou KPI definition
 const KpiForm = () => {
 
   const navigate = useNavigate();
@@ -20,11 +22,14 @@ const KpiForm = () => {
   const [form, setForm] = useState(KPI_INITIAL_FORM);
   const [error, setError] = useState("");
 
+    // hna function setField li tset field / state value
   function setField(key, value) {
+    // update field mta3 form wa nsupprim error ki tbadal
     setError("");
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+    // hna function isValid li tfassi boolean condition
   const isValid = useMemo(() => {
     return (
       form.kpi_id.trim() !== "" &&
@@ -34,11 +39,14 @@ const KpiForm = () => {
     );
   }, [form]);
 
+    // hna function resetForm li trédoui state / filters l default
   function resetForm() {
     setForm(KPI_INITIAL_FORM);
   }
 
+    // hna function submit li tsubmit form data
   function submit() {
+    // l button Save KPI: nvalidiw form w n9aymou Kpi storage
 
     if (!isValid) return;
 

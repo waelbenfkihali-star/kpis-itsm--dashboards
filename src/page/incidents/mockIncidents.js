@@ -1,3 +1,4 @@
+// hna mock data ta3 incidents l testing
 export const MOCK_INCIDENTS = [
   {
     id: 1,

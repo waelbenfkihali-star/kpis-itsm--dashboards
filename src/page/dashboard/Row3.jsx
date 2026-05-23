@@ -1,9 +1,11 @@
+// hna row ta3 dashboard li tben cards w mini charts
 import { Box, Paper, Stack, Typography, useTheme } from "@mui/material";
 import Pie from "../../page/pieChart/pie";
 import React from "react";
 import Bar from "../../page/barChart/bar";
 import Geo from "../../page/geography/geo";
 
+// hna component Row3 li trender page/component section
 const Row3 = () => {
   const theme = useTheme();
   return (

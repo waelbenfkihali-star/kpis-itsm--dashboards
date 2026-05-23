@@ -1,3 +1,4 @@
+// hna page dashboard l utama li tben overview w charts general
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -7,6 +8,8 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+
+// hna page Dashboard principal: tben stats 3amma w charts li ta3 incidents/requests/changes
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import BuildCircleOutlinedIcon from "@mui/icons-material/BuildCircleOutlined";
@@ -31,7 +34,9 @@ import {
   renderLineTooltip,
 } from "../analysis/analysisUtils";
 
+// hna component li tarender card ta3 KPI b icon, title, subtitle, value, w note
 function StatCard({ icon, title, subtitle, value, note }) {
+  // card li tben KPI sghira: title, value, note
   return (
     <Paper sx={{ p: 2.2, flex: 1, minWidth: 220, borderRadius: 3 }}>
       <Stack direction="row" spacing={1.2} alignItems="center" mb={1}>
@@ -51,7 +56,9 @@ function StatCard({ icon, title, subtitle, value, note }) {
   );
 }
 
+// hna component li y7ot chart fel card ma3 title, note, legend, w height fixed
 function DashboardChartCard({ title, note, children, legendItems = [], height = 250, className = "" }) {
+  // chart card li tben chart w legend w title fi dashboard
   return (
     <Paper className={className} sx={{ p: 2, borderRadius: 3 }}>
       <Typography variant="h6" mb={0.5}>
@@ -66,10 +73,13 @@ function DashboardChartCard({ title, note, children, legendItems = [], height = 
   );
 }
 
+// hna helper li troje3 les derniers points men series data b default 6
 function takeLastMonths(points, limit = 6) {
+  // n5thou les derniers points men series, b default 6 mois
   return points.slice(-limit);
 }
 
+// hna helper li t3ayet breakdown object w troje3 les derniers 6 mois min data
 function takeLastBreakdown(breakdown, limit = 6) {
   return {
     keys: breakdown.keys || [],
@@ -77,6 +87,7 @@ function takeLastBreakdown(breakdown, limit = 6) {
   };
 }
 
+// hna helper li t7seb tick values integres l axis chart min values li mawjouda fi chart data
 function buildIntegerTickValues(chart) {
   const values =
     chart.type === "line"
@@ -106,7 +117,9 @@ function buildIntegerTickValues(chart) {
   return ticks;
 }
 
+// hna component Dashboard li trender page/component section
 export default function Dashboard() {
+  // page dashboard l utama, tjib data incidents/requests/changes w tbenha fi charts
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -159,7 +172,9 @@ export default function Dashboard() {
     [changes]
   );
 
+    // hna computed charts array li ykoun men data incidents/requests/changes
   const charts = useMemo(() => {
+        // hna filter requests li mazalin open w opened akther mel 60 yom
     const requestsOlderThan60 = requests.filter((row) => {
       if (["Closed", "Resolved", "Completed"].includes(row.state)) return false;
       if (!row.opened) return false;
@@ -168,6 +183,7 @@ export default function Dashboard() {
       return Date.now() - opened.getTime() > 60 * 24 * 60 * 60 * 1000;
     });
 
+        // hna filter changes li planned_end_date mosh already closed w date mouchyet fel madi
     const pastDueChanges = changes.filter((row) => {
       if (["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)) return false;
       if (!row.planned_end_date) return false;

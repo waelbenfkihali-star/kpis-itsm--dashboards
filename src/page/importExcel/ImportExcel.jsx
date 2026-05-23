@@ -1,3 +1,4 @@
+// hna page import excel l upload ta3 source data
 import React, { useMemo, useState } from "react";
 import {
   Box,
@@ -20,6 +21,7 @@ import Header from "../../components/Header";
 import * as XLSX from "xlsx";
 import { apiFetch } from "../../utils/api";
 
+// hna page Import Excel: yjib xlsx files w y3ayet backend li yimporti data
 function fileExtOk(file) {
   if (!file) return false;
   const name = String(file.name || "").toLowerCase();
@@ -27,6 +29,7 @@ function fileExtOk(file) {
 }
 
 async function readMagicPK(file) {
+  // n9ra llya2men (magic PK) men file bach n7aded bel mawjoud .xlsx
   if (!file) return null;
   const slice = file.slice(0, 2);
   const buf = await slice.arrayBuffer();
@@ -35,6 +38,7 @@ async function readMagicPK(file) {
   return String.fromCharCode(bytes[0], bytes[1]);
 }
 
+// hna function fileInfo li tperform helper logic
 function fileInfo(file) {
   if (!file) return null;
   return {
@@ -47,6 +51,7 @@ function fileInfo(file) {
   };
 }
 
+// hna component ImportExcel li trender page/component section
 export default function ImportExcel() {
 
   const navigate = useNavigate();
@@ -70,6 +75,7 @@ export default function ImportExcel() {
   const disabled =
     loading || (needInc && !inc) || (needReq && !req) || (needChg && !chg);
 
+    // hna function badExt li tperform helper logic
   const badExt = useMemo(() => {
 
     const issues = [];
@@ -87,6 +93,7 @@ export default function ImportExcel() {
 
   }, [needInc, needReq, needChg, inc, req, chg]);
 
+    // hna function previewExcel li tperform helper logic
   function previewExcel(file) {
 
     if (!file) return;
@@ -163,6 +170,7 @@ export default function ImportExcel() {
         body: formData,
       });
 
+            // hna function json li tperform helper logic
       const json = await response.json().catch(() => ({}));
 
       if (!response.ok) {
@@ -199,6 +207,7 @@ export default function ImportExcel() {
     }
   }
 
+    // hna function handleGoToModule li thandle event w tmanage action
   function handleGoToModule() {
 
     if (mode === "incidents") navigate("/incidents");
@@ -208,6 +217,7 @@ export default function ImportExcel() {
 
   }
 
+    // hna function dropFile li tperform helper logic
   function dropFile(e, setFile) {
 
     e.preventDefault();
@@ -375,6 +385,7 @@ export default function ImportExcel() {
   );
 }
 
+// hna component FileCard li trender page/component section
 function FileCard({ title, file, setFile, drop, preview }) {
 
   return (

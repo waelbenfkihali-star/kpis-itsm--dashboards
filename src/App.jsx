@@ -1,3 +1,4 @@
+// hna App shell ta3 frontend: yjma3 TopBar, SideBar, w pages fl Outlet
 import * as React from "react";
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -8,6 +9,7 @@ import SideBar from "./components/SideBar";
 import { Outlet } from "react-router-dom";
 import { fetchCurrentUser } from "./utils/api";
 
+// hna header spacer li ya3mel align ma3 top bar w drawer section
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
@@ -17,6 +19,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 export default function App({ mode, setMode }) {
+  // hna state ta3 sidebar w current user info
   const [open, setOpen] = React.useState(false);
   const [currentUser, setCurrentUser] = React.useState(null);
   const [currentUserLoading, setCurrentUserLoading] = React.useState(true);
@@ -24,6 +27,7 @@ export default function App({ mode, setMode }) {
   const handleDrawerOpen = () => setOpen(true);
   const handleDrawerClose = () => setOpen(false);
 
+  // hna function li tjib data current user men backend w tahotha fl state
   const loadCurrentUser = React.useCallback(() => {
     let active = true;
     setCurrentUserLoading(true);
@@ -50,6 +54,7 @@ export default function App({ mode, setMode }) {
     };
   }, []);
 
+  // hna effect li ycalli loadCurrentUser marra wa7da ida App ybda
   React.useEffect(() => loadCurrentUser(), [loadCurrentUser]);
 
   return (

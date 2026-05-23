@@ -1,4 +1,5 @@
 // @ts-ignore
+// hna page requests list w filter w analyse
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -18,7 +19,9 @@ import DeleteToolbar from "../../components/DeleteToolbar";
 import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
 
+// hna component Requests li trender page/component section
 export default function Requests() {
+  // page requests: yjib liste ta3 requests w ykhalik tsob filters par state/item/service/user
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,6 +48,7 @@ export default function Requests() {
   useEffect(() => {
     apiFetch("/requests/")
       .then(async (res) => {
+                // hna function data li tprepare data values
         const data = await res.json().catch(() => []);
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
         setRows(Array.isArray(data) ? data : []);
@@ -78,6 +82,7 @@ export default function Requests() {
     [rows]
   );
 
+    // hna function filteredRows li tfilter rows/data
   const filteredRows = useMemo(() => {
 
     return rows.filter((r) => {
@@ -139,6 +144,7 @@ export default function Requests() {
     [filters]
   );
 
+    // hna function resetFilters li trédoui state / filters l default
   function resetFilters() {
     setFilters({
       search: "",
@@ -153,11 +159,14 @@ export default function Requests() {
       closedTo: ""
     });
   }
+    // hna function updateFilter li tfilter rows/data
   function updateFilter(key, value) {
     setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
+    // hna function handleAnalyse li thandle event w tmanage action
   function handleAnalyse() {
+        // hna function selectedData li tprepare data values
     const selectedData = filteredRows.filter((row) => selectedIds.includes(row.id));
     navigate("/requests-analysis", { state: { data: selectedData, selectedKpi } });
   }

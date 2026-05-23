@@ -1,7 +1,9 @@
+// hna component card li yest3emel fi dashboard rows
 import React from "react";
 import { Box, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { ResponsivePie } from "@nivo/pie";
 
+// hna component Card li trender page/component section
 const Card = ({ icon, title, subTitle, value, increase, data, scheme }) => {
   const theme = useTheme();
 

@@ -1,3 +1,4 @@
+// hna component ta3 bar chart
 import React, { useEffect, useState, useMemo } from "react";
 import { ResponsiveBar } from "@nivo/bar";
 import { Box, useTheme, Stack, TextField } from "@mui/material";
@@ -9,6 +10,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { apiFetch } from "../../utils/api";
 
+// hna component Bar li trender page/component section
 const Bar = ({ isDashbord = false }) => {
 
   const theme = useTheme();
@@ -26,6 +28,7 @@ const Bar = ({ isDashbord = false }) => {
 
   }, []);
 
+    // hna function filteredData li tfilter rows/data
   const filteredData = useMemo(() => {
 
     if (!startDate && !endDate) return allData;

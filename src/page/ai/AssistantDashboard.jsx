@@ -1,3 +1,4 @@
+// hna page AI assistant li yfassar user request w ybni dashboard intent
 import React from "react";
 import {
   Alert,
@@ -31,6 +32,8 @@ import {
   buildAssistantResultFromIntent,
 } from "../../components/insightAssistantUtils";
 
+// hna page ta3 AI assistant: user yكتبلu request w yji response automatic
+// l page tbedel request ta3 user l intent ta3 dashboard, thot charts w summary
 function KpiCard({ label, value, note }) {
   return (
     <Paper
@@ -56,11 +59,15 @@ function KpiCard({ label, value, note }) {
   );
 }
 
+// hna component InterpretationCard li trender page/component section
 function InterpretationCard({ interpretation }) {
+  // kifech l assistant fham request mta3 user w chnoua l intent li estafaad biha
   if (!interpretation) return null;
+    // hna function groupingText li tperform helper logic
   const groupingText = (interpretation.groupings || []).length
     ? (interpretation.groupings || []).join(", ")
     : "default grouping";
+    // hna function filterText li tfilter rows/data
   const filterText = (interpretation.filters || []).length
     ? (interpretation.filters || []).join(" | ")
     : "No extra filters";
@@ -99,7 +106,9 @@ function InterpretationCard({ interpretation }) {
   );
 }
 
+// hna component SpotlightCard li trender page/component section
 function SpotlightCard({ spotlight }) {
+  // card li tben l insight l mohem li smart assistant 7sebha
   if (!spotlight) return null;
 
   return (
@@ -122,6 +131,7 @@ function SpotlightCard({ spotlight }) {
   );
 }
 
+// hna component ExecutiveNotes li trender page/component section
 function ExecutiveNotes({ notes }) {
   if (!notes?.length) return null;
 
@@ -141,6 +151,7 @@ function ExecutiveNotes({ notes }) {
   );
 }
 
+// hna function buildChartLegend li tbni object/data structure
 function buildChartLegend(chart) {
   if (!chart) return [];
 
@@ -172,6 +183,7 @@ function buildChartLegend(chart) {
   return [];
 }
 
+// hna component DashboardChart li trender page/component section
 function DashboardChart({ chart }) {
   if (!chart) return null;
   const firstPoint = Array.isArray(chart.data) ? chart.data[0] : null;
@@ -184,14 +196,17 @@ function DashboardChart({ chart }) {
       color: lineColor,
     },
   ];
+    // hna function multiLineSeries li tperform helper logic
   const multiLineSeries = (chart.data || []).map((item, index) => ({
     ...item,
     color: item.color || getChartColor(index),
   }));
+    // hna function pieData li tprepare data values
   const pieData = (chart.data || []).map((item, index) => ({
     ...item,
     color: item.color || getChartColor(index),
   }));
+    // hna function barData li tprepare data values
   const barData = (chart.data || []).map((item, index) => ({
     ...item,
     color: item.color || getChartColor(index),
@@ -291,6 +306,7 @@ function DashboardChart({ chart }) {
   );
 }
 
+// hna component MessageBubble li trender page/component section
 function MessageBubble({ role, children }) {
   const isUser = role === "user";
   return (
@@ -313,6 +329,7 @@ function MessageBubble({ role, children }) {
   );
 }
 
+// hna component AssistantDashboard li trender page/component section
 export default function AssistantDashboard() {
   const location = useLocation();
   const [loadingData, setLoadingData] = React.useState(false);
@@ -333,6 +350,7 @@ export default function AssistantDashboard() {
   ]);
   const [result, setResult] = React.useState(null);
   const [error, setError] = React.useState("");
+    // hna function ensureDataLoaded li tprepare data values
   const ensureDataLoaded = React.useCallback(async () => {
     if (datasets.incidents.length || datasets.requests.length || datasets.changes.length) {
       return datasets;

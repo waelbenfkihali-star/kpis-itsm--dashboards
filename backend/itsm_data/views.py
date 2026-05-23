@@ -29,6 +29,7 @@ from .serializers import (
 
 # -------- CLEANING FUNCTIONS --------
 
+# hna function li traji3 distinct values men queryset w field
 def sample_distinct_values(queryset, field_name, limit=5):
     values = (
         queryset.exclude(**{f"{field_name}__isnull": True})
@@ -39,6 +40,8 @@ def sample_distinct_values(queryset, field_name, limit=5):
     return [str(value).strip() for value in values if str(value).strip()]
 
 
+
+# hna function li tabni context data l AI dashboard
 def build_ai_data_context():
     return {
         "modules": {
@@ -67,20 +70,29 @@ def build_ai_data_context():
             "service_owner_means": "owner",
             "ci_means": "configuration item",
         },
+    
     }
 
+
+# hna function li tnayye9 text w tro7ou empty string ila kan null
 def clean_text(value):
     if value is None:
         return ""
     text = str(value).strip()
     if text.lower() in {"nan", "nat", "none", "null"}:
         return ""
+    
     return " ".join(text.split())
 
 
+# hna function li tro7 text w ida khawi tarja3 fallback
+
 def clean_name_like(value, fallback="Unknown"):
+    
     text = clean_text(value)
+    
     return text or fallback
+# hna function li tnormalize state/status l format standard
 
 
 def clean_state(value):
@@ -108,8 +120,11 @@ def clean_state(value):
         "complete": "Completed",
         "completed": "Completed",
         "implemented": "Implemented",
+    
     }
 
+
+    # hna function li tnormalize priority l P1..P4
     return mapping.get(v, v.capitalize())
 
 
@@ -127,35 +142,45 @@ def clean_priority(value):
         "CRITICAL": "P1",
         "HIGH": "P2",
         "MEDIUM": "P3",
+        
         "LOW": "P4",
     }
+
 
     return mapping.get(v, v)
 
 
+
+# hna function li tbadel string l boolean
 def to_bool(value):
     v = str(value).strip().lower()
     return v in ["true", "yes", "y", "1", "major", "oui"]
 
-
+# hna function li tbadel value l integer safe
 def to_int(value):
+    
     try:
         if value in ["", None]:
+           
             return 0
+        
         return int(float(value))
     except Exception:
         return 0
 
+# hna function li tbadel value l float safe
 
 def to_float(value):
+   
     try:
+        #
         if value in ["", None]:
             return 0
         return float(value)
     except Exception:
         return 0
 
-
+# hna function li tnormalize datetime/text l timestamp string
 def normalize_date(value):
     if value in ["", None]:
         return ""
@@ -166,8 +191,11 @@ def normalize_date(value):
     try:
         timestamp = pd.to_datetime(value, errors="coerce", dayfirst=False)
         if pd.isna(timestamp):
+           
             timestamp = pd.to_datetime(value, errors="coerce", dayfirst=True)
+        
         if pd.isna(timestamp):
+            
             return clean_text(value)
         return timestamp.strftime("%Y-%m-%d %H:%M:%S")
     except Exception:
@@ -175,7 +203,7 @@ def normalize_date(value):
 
 
 # -------- READ EXCEL --------
-
+# hna function li tqra Excel sheet w tro7 rows cleaned
 def read_excel_rows(uploaded_file, sheet_name):
     xls = pd.ExcelFile(uploaded_file)
     target = None
@@ -192,14 +220,16 @@ def read_excel_rows(uploaded_file, sheet_name):
 
     # nettoyage pandas
     df = df.drop_duplicates()
+    
     df = df.dropna(how="all")
+    
     df = df.fillna("")
 
     return df.to_dict(orient="records"), target
 
 
 # -------- IMPORT EXCEL --------
-
+# hna endpoint li yimporti incidents/requests/changes men Excel upload
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
 def import_excel(request):
@@ -400,69 +430,101 @@ def import_excel(request):
             },
             status=status.HTTP_200_OK,
         )
+# hna API endpoint li yjib list ta3 incidents
 
     except Exception as e:
+        # hna API endpoint li yjib list ta3 incidents
         return Response(
             {"ok": False, "error": str(e)},
+            # hna API endpoint li yjib list ta3 incidents
             status=status.HTTP_400_BAD_REQUEST,
+        # hna API endpoint li yjib list ta3 requests
         )
 
+# hna API endpoint li yjib list ta3 requests
 
 # -------- API LIST --------
 
+# hna API endpoint li yjib list ta3 requests
+# hna API endpoint li yjib list ta3 changes
 @api_view(["GET"])
 def incidents_list(request):
+    # hna API endpoint li yjib list ta3 changes
     rows = Incident.objects.all().order_by("-id")
     return Response(IncidentSerializer(rows, many=True).data)
+# hna API endpoint li yjib list ta3 changes
 
+# hna API endpoint li yjib detail ta3 incident b number
 
 @api_view(["GET"])
+# hna API endpoint li yjib detail ta3 incident b number
 def requests_list(request):
     rows = Request.objects.all().order_by("-id")
+    # hna API endpoint li yjib detail ta3 incident b number
     return Response(RequestSerializer(rows, many=True).data)
 
 
+# hna API endpoint li yjib detail ta3 request b number
 @api_view(["GET"])
 def changes_list(request):
+    # hna API endpoint li yjib detail ta3 request b number
     rows = Change.objects.all().order_by("-id")
     return Response(ChangeSerializer(rows, many=True).data)
+# hna API endpoint li yjib detail ta3 request b number
 
 
 @api_view(["GET"])
+# hna API endpoint li yjib detail ta3 change b number
 def incident_detail(request, number):
     row = Incident.objects.filter(number=number).first()
+    # hna API endpoint li yjib detail ta3 change b number
     if not row:
         return Response({"detail": "Not found"}, status=404)
     return Response(IncidentSerializer(row).data)
+# hna API endpoint li yjib detail ta3 change b number
 
 
+# hna API endpoint li ymas7 incidents b ids
 @api_view(["GET"])
 def request_detail(request, number):
+    # hna API endpoint li ymas7 incidents b ids
     row = Request.objects.filter(number=number).first()
     if not row:
         return Response({"detail": "Not found"}, status=404)
+    # hna API endpoint li ymas7 incidents b ids
     return Response(RequestSerializer(row).data)
+# hna API endpoint li ymas7 requests b ids
 
 
+# hna API endpoint li ymas7 requests b ids
 @api_view(["GET"])
 def change_detail(request, number):
     row = Change.objects.filter(number=number).first()
+    # hna API endpoint li ymas7 requests b ids
     if not row:
+        # hna API endpoint li ymas7 changes b ids
         return Response({"detail": "Not found"}, status=404)
     return Response(ChangeSerializer(row).data)
+# hna API endpoint li ymas7 changes b ids
 
 
+# hna API endpoint li ymas7 changes b ids
 @api_view(["POST"])
 def delete_incidents(request):
+    # hna endpoint li yjib aggregated monthly stats
     ids = request.data.get("ids", [])
+    # hna endpoint li yjib aggregated monthly stats
     Incident.objects.filter(id__in=ids).delete()
+    # hna endpoint li yjib aggregated monthly stats
     return Response({"deleted": len(ids)})
 
 
 @api_view(["POST"])
 def delete_requests(request):
     ids = request.data.get("ids", [])
+        # hna helper li yextracti YYYY-MM men date string
     Request.objects.filter(id__in=ids).delete()
+        # hna helper li yextracti YYYY-MM men date string
     return Response({"deleted": len(ids)})
 
 
@@ -495,7 +557,9 @@ def monthly_stats(request):
             continue
         data[m]["month"] = m
         data[m]["Incidents"] += 1
+# hna endpoint AI li ybni intent men prompt
 
+    # hna endpoint AI li ybni intent men prompt
     for r in Request.objects.all():
         m = get_month(r.opened)
         if not m:
@@ -520,14 +584,20 @@ def monthly_stats(request):
 def ai_dashboard_query(request):
     prompt = str(request.data.get("prompt", "")).strip()
     hint_intent = request.data.get("hint_intent")
+    # hna endpoint li yjib data ta3 user li mazal logged in
     if not prompt:
         return Response({"detail": "Prompt is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+    # hna endpoint li yjib data ta3 user li mazal logged in
     try:
+        # hna endpoint li youpdate profile ta3 current user
         intent = build_ai_dashboard_intent(prompt, build_ai_data_context(), hint_intent)
+        # hna endpoint li yjib data ta3 user li mazal logged in
         return Response({"ok": True, "intent": intent})
+    # hna endpoint li youpdate profile ta3 current user
     except urllib.error.HTTPError as error:
         try:
+            # hna endpoint li youpdate profile ta3 current user
             payload = json.loads(error.read().decode("utf-8"))
             message = payload.get("error", {}).get("message") or payload.get("detail")
         except Exception:
@@ -536,10 +606,13 @@ def ai_dashboard_query(request):
             {"detail": message or "AI dashboard request failed."},
             status=status.HTTP_502_BAD_GATEWAY,
         )
+    # hna endpoint li tebdel password ta3 current user
     except RuntimeError as error:
         return Response({"detail": str(error)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    # hna endpoint li tebdel password ta3 current user
     except Exception as error:
         return Response({"detail": str(error)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# hna endpoint li tebdel password ta3 current user
 
 
 @api_view(["GET"])
@@ -550,10 +623,13 @@ def current_user(request):
 @api_view(["PATCH"])
 def update_current_user(request):
     serializer = CurrentUserUpdateSerializer(
+        # hna endpoint li yjib team members w ycreate new account ida admin
         instance=request.user,
         data=request.data,
+        # hna endpoint li yjib team members w ycreate new account ida admin
         partial=True,
         context={"request": request},
+    # hna endpoint li yjib team members w ycreate new account ida admin
     )
     serializer.is_valid(raise_exception=True)
     serializer.update(request.user, serializer.validated_data)
@@ -567,8 +643,11 @@ def change_current_user_password(request):
         context={
             "request": request,
             "target_user": request.user,
+            # hna endpoint li tmanage user detail w tdelete user ida admin
             "require_current_password": True,
+        # hna endpoint li tmanage user detail w tdelete user ida admin
         },
+    # hna endpoint li tmanage user detail w tdelete user ida admin
     )
     serializer.is_valid(raise_exception=True)
     serializer.save()
@@ -597,8 +676,11 @@ def team_members(request):
 def team_member_detail(request, user_id):
     if not request.user.is_staff:
         return Response(
+            # hna endpoint li treest password user ida admin
             {"detail": "Only admins can manage team accounts."},
+            # hna endpoint li treest password user ida admin
             status=status.HTTP_403_FORBIDDEN,
+        # hna endpoint li treest password user ida admin
         )
 
     user = get_object_or_404(User, pk=user_id)

@@ -1,3 +1,4 @@
+// hna module li ykhdem fil page dashboard/data.js
 export const data1 = [
   {
     id: "javascript",

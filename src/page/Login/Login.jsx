@@ -1,3 +1,4 @@
+// hna page login w authentication
 import { IconButton, Stack, useTheme } from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -8,9 +9,11 @@ import logo from "../../assets/logo.png";
 import { getApiUrl } from "../../utils/api";
 
 // @ts-ignore
+// hna page login: l form li y5alli user yconnecti w ykhalli token fl localStorage
 export default function Login({ setMode }) {
   const navigate = useNavigate();
   const theme = useTheme();
+    // hna component API_URL li trender page/component section
   const API_URL = useMemo(() => getApiUrl("/auth/token/"), []);
   const isLight = theme.palette.mode === "light";
 
@@ -27,6 +30,7 @@ export default function Login({ setMode }) {
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, sx: 1 });
 
   useEffect(() => {
+        // hna function t li tperform helper logic
     const t = setTimeout(() => setMounted(true), 20);
     return () => clearTimeout(t);
   }, []);
@@ -41,7 +45,9 @@ export default function Login({ setMode }) {
       const r = el.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
+            // hna function dx li tperform helper logic
       const dx = (e.clientX - cx) / (r.width / 2);
+            // hna function dy li tperform helper logic
       const dy = (e.clientY - cy) / (r.height / 2);
 
       setTilt({
@@ -51,6 +57,7 @@ export default function Login({ setMode }) {
       });
     }
 
+        // hna function onLeave li tperform helper logic
     function onLeave() {
       setTilt({ rx: 0, ry: 0, sx: 1 });
     }
@@ -68,6 +75,7 @@ export default function Login({ setMode }) {
   }, []);
 
   async function login() {
+    // request login l backend, n5ou access/refresh tokens wa n7azzinhom fl localStorage
     setLoading(true);
     setError(null);
 
@@ -511,6 +519,7 @@ function Badge({ text }) {
   );
 }
 
+// hna component Spinner li trender page/component section
 function Spinner() {
   return (
     <span
@@ -520,6 +529,7 @@ function Spinner() {
   );
 }
 
+// hna component CheckIcon li trender page/component section
 function CheckIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">

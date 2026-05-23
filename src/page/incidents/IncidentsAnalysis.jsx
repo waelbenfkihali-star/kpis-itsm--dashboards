@@ -1,3 +1,4 @@
+// hna analysis page khusus b incidents
 import React, { useMemo } from "react";
 import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -28,6 +29,7 @@ import {
 } from "../analysis/analysisUtils";
 import { buildIncidentInsights } from "../analysis/reportInsights";
 
+// hna component KpiCard li trender page/component section
 function KpiCard({ title, value, note }) {
   return (
     <Paper sx={{ p: 2.2, flex: 1, minWidth: 200 }}>
@@ -44,6 +46,7 @@ function KpiCard({ title, value, note }) {
   );
 }
 
+// hna component ChartCard li trender page/component section
 function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   return (
     <Paper sx={{ p: 2, flex: 1, minWidth: 320 }}>
@@ -61,10 +64,12 @@ function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   );
 }
 
+// hna function hasKeyword li tperform helper logic
 function hasKeyword(text, keywords) {
   return keywords.some((keyword) => text.includes(keyword));
 }
 
+// hna component IncidentsAnalysis li trender page/component section
 export default function IncidentsAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,6 +81,7 @@ export default function IncidentsAnalysis() {
     () => rows.filter((row) => ["Open", "In Progress", "Pending"].includes(row.state)),
     [rows]
   );
+    // hna function majorRows li tperform helper logic
   const majorRows = useMemo(() => rows.filter((row) => row.is_major), [rows]);
   const closedRows = useMemo(
     () => rows.filter((row) => ["Closed", "Resolved"].includes(row.state)),
@@ -91,8 +97,11 @@ export default function IncidentsAnalysis() {
     [rows]
   );
 
+    // hna function services li tperform helper logic
   const services = useMemo(() => countBy(rows, "affected_service"), [rows]);
+    // hna function sites li tperform helper logic
   const sites = useMemo(() => countBy(rows, "location"), [rows]);
+    // hna function groups li tperform helper logic
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
 
   const columns = [
@@ -129,10 +138,13 @@ export default function IncidentsAnalysis() {
     openBacklogRows,
     (row) => !String(row.responsible_user || "").trim()
   );
+    // hna function slaBreached li tperform helper logic
   const slaBreached = countWhere(rows, (row) => row.sla_breached);
   const avgHandle = average(rows, "duration");
   const avgBusiness = average(rows, "business_duration");
+    // hna function avgMajorResolution li tperform helper logic
   const avgMajorResolution = average(rows, "duration", (row) => row.is_major);
+    // hna function focusedServices li tperform helper logic
   const focusedServices = useMemo(() => countBy(majorRows, "affected_service"), [majorRows]);
   const serviceMonthly = useMemo(
     () => monthlyBreakdownInRange(rows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
@@ -147,6 +159,7 @@ export default function IncidentsAnalysis() {
     [rows]
   );
 
+    // hna function focusedView li tperform helper logic
   const focusedView = useMemo(() => {
     if (!selectedKpi) return null;
 

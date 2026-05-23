@@ -1,3 +1,4 @@
+// hna page list ta3 Kpis li 3andek
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -28,6 +29,7 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { deleteKpiById, loadKpis } from "./kpiStorage";
 import { getModulePath } from "../analysis/kpiNavigation";
 
+// hna component MyKpis li trender page/component section
 const MyKpis = () => {
 
   const navigate = useNavigate();
@@ -50,6 +52,7 @@ const MyKpis = () => {
     setRows(loadKpis());
   }, []);
 
+    // hna function confirmDelete li tperform helper logic
   function confirmDelete() {
 
     const next = deleteKpiById(deleteId);
@@ -93,6 +96,7 @@ const MyKpis = () => {
     [rows]
   );
 
+    // hna function filteredRows li tfilter rows/data
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
       if (
@@ -128,6 +132,7 @@ const MyKpis = () => {
     });
   }, [rows, filters]);
 
+    // hna function activeFilterCount li tperform helper logic
   const activeFilterCount = useMemo(() => {
     return [
       filters.search,
@@ -141,6 +146,7 @@ const MyKpis = () => {
     ].filter(Boolean).length;
   }, [filters]);
 
+    // hna function resetFilters li trédoui state / filters l default
   function resetFilters() {
     setFilters({
       search: "",

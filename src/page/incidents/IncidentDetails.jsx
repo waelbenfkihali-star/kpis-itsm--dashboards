@@ -1,9 +1,11 @@
+// hna page detail ta3 incident wahda
 import React, { useEffect, useState } from "react";
 import { Box, Button, Grid, Paper, Typography, Alert } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../components/Header";
 import { apiFetch } from "../../utils/api";
 
+// hna component DetailItem li trender page/component section
 const DetailItem = ({ label, value }) => (
   <Paper elevation={1} sx={{ p: 2, borderRadius: "14px", height: "100%" }}>
     <Typography variant="body2" sx={{ color: "text.secondary", mb: 0.5, fontSize: "12px" }}>
@@ -15,6 +17,7 @@ const DetailItem = ({ label, value }) => (
   </Paper>
 );
 
+// hna component IncidentDetails li trender page/component section
 export default function IncidentDetails() {
   const navigate = useNavigate();
   const { number } = useParams();
@@ -24,6 +27,7 @@ export default function IncidentDetails() {
   useEffect(() => {
     apiFetch(`/incidents/${encodeURIComponent(number)}/`)
       .then(async (res) => {
+                // hna function data li tprepare data values
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
         setRow(data);
