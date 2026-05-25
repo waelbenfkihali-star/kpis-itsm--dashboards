@@ -1,4 +1,3 @@
-// hna sample data w helper ta3 team list
 
 
 export const rows = [

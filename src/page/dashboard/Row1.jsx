@@ -1,4 +1,4 @@
-// hna row ta3 dashboard li tben cards w mini charts
+// hne row men layout 9dim fil dashboard fih cards wala charts sghar.
 import React from "react";
 import { Stack } from "@mui/material";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
@@ -7,7 +7,7 @@ import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 import AutorenewOutlinedIcon from "@mui/icons-material/AutorenewOutlined";
 import Card from "./card";
 
-// hna component Row1 li trender page/component section
+// hne component Row1: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const Row1 = () => {
   return (
     <Stack

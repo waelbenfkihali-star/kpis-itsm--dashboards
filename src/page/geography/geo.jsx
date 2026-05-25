@@ -1,3 +1,4 @@
+// hne component geographique custom yarsom nodes w zones w ar9am mrbouta bel intichar.
 import React from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 
@@ -16,11 +17,10 @@ const services = [
   { name: "Backup", incidents: 9, x: 850, y: 390, size: 58 },
 ];
 
-// hna function getHexPoints li tqra w troje3 value
+// hne function getHexPoints: ta9ra valeur mocht9a men data l 7aliya.
 const getHexPoints = (cx, cy, r) => {
   const points = [];
   for (let i = 0; i < 6; i++) {
-        // hna function angle li tperform helper logic
     const angle = (Math.PI / 180) * (60 * i - 30);
     const x = cx + r * Math.cos(angle);
     const y = cy + r * Math.sin(angle);
@@ -29,7 +29,7 @@ const getHexPoints = (cx, cy, r) => {
   return points.join(" ");
 };
 
-// hna function colorByIncidents li tperform helper logic
+// hne function colorByIncidents: t3awen ba9i l code fil fichier hedha b logic sghira.
 const colorByIncidents = (incidents) => {
   if (incidents >= 30) {
     return {
@@ -59,7 +59,7 @@ const colorByIncidents = (incidents) => {
   };
 };
 
-// hna component HexNode li trender page/component section
+// hne component HexNode: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const HexNode = ({ service }) => {
   const theme = useTheme();
   const palette = colorByIncidents(service.incidents);
@@ -172,13 +172,11 @@ const HexNode = ({ service }) => {
   );
 };
 
-// hna component Geo li trender page/component section
 const Geo = ({ isDashboard = false }) => {
   const theme = useTheme();
 
-    // hna function totalIncidents li tperform helper logic
+  // hne function totalIncidents: t3awen ba9i l code fil fichier hedha b logic sghira.
   const totalIncidents = services.reduce((sum, s) => sum + s.incidents, 0);
-    // hna function topService li tperform helper logic
   const topService = [...services].sort((a, b) => b.incidents - a.incidents)[0];
 
   return (

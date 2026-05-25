@@ -1,11 +1,10 @@
-// hna page not found message
+// hne page elli tban ki route mahouche mawjoud.
 import React from "react";
 import Typography from "@mui/material/Typography";
 import { Box, useTheme } from "@mui/material";
 
-// hna component NotFound li trender page/component section
+// hne component NotFound: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const NotFound = () => {
-  // page not found: ta3mel render message minimal ida route ma famahech
   const theme = useTheme();
   return (
     <Box>

@@ -1,11 +1,11 @@
-// hna page detail ta3 incident wahda
+// hne page detail mta3 incident wa7da: tjib ticket hasb number w tori informations mta3ha.
 import React, { useEffect, useState } from "react";
 import { Box, Button, Grid, Paper, Typography, Alert } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../components/Header";
 import { apiFetch } from "../../utils/api";
 
-// hna component DetailItem li trender page/component section
+// hne component DetailItem: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const DetailItem = ({ label, value }) => (
   <Paper elevation={1} sx={{ p: 2, borderRadius: "14px", height: "100%" }}>
     <Typography variant="body2" sx={{ color: "text.secondary", mb: 0.5, fontSize: "12px" }}>
@@ -17,7 +17,7 @@ const DetailItem = ({ label, value }) => (
   </Paper>
 );
 
-// hna component IncidentDetails li trender page/component section
+// hne component IncidentDetails: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function IncidentDetails() {
   const navigate = useNavigate();
   const { number } = useParams();
@@ -27,7 +27,7 @@ export default function IncidentDetails() {
   useEffect(() => {
     apiFetch(`/incidents/${encodeURIComponent(number)}/`)
       .then(async (res) => {
-                // hna function data li tprepare data values
+        // hne variable data: data m7adhra lel affichage wala l analyse.
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
         setRow(data);

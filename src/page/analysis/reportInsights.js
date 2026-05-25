@@ -1,12 +1,12 @@
-// hna builder ta3 insights w summary text li yjib men analysis data
+// hne functions tebni jomel summary w insights men l ar9am elli t7asbou fil dashboards.
 import { countBy, countWhere, ratio, topLabel } from "./analysisUtils";
 
-// hna function formatPercent li tperform helper logic
+// hne function formatPercent: t3awen ba9i l code fil fichier hedha b logic sghira.
 function formatPercent(part, total) {
   return `${ratio(part, total)}%`;
 }
 
-// hna function buildDashboardInsights li tbni object/data structure
+// hne function buildDashboardInsights: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 export function buildDashboardInsights({
   incidents,
   requests,
@@ -16,15 +16,15 @@ export function buildDashboardInsights({
   openRequests,
   openChanges,
 }) {
-    // hna function slaBreached li tperform helper logic
+  // hne function slaBreached: t3awen ba9i l code fil fichier hedha b logic sghira.
   const slaBreached = countWhere(incidents, (row) => row.sla_breached);
-    // hna function oldRequests li tperform helper logic
+  // hne function oldRequests: t3awen ba9i l code fil fichier hedha b logic sghira.
   const oldRequests = countWhere(openRequests, (row) => {
     if (!row.opened) return false;
     const opened = new Date(row.opened);
     return !Number.isNaN(opened.getTime()) && Date.now() - opened.getTime() > 60 * 24 * 60 * 60 * 1000;
   });
-    // hna function pastDueChanges li tperform helper logic
+  // hne function pastDueChanges: t3awen ba9i l code fil fichier hedha b logic sghira.
   const pastDueChanges = countWhere(openChanges, (row) => {
     if (!row.planned_end_date) return false;
     const planned = new Date(row.planned_end_date);
@@ -50,7 +50,7 @@ export function buildDashboardInsights({
   };
 }
 
-// hna function buildIncidentInsights li tbni object/data structure
+// hne function buildIncidentInsights: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 export function buildIncidentInsights({
   rows,
   backlog,
@@ -78,7 +78,7 @@ export function buildIncidentInsights({
   };
 }
 
-// hna function buildRequestInsights li tbni object/data structure
+// hne function buildRequestInsights: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 export function buildRequestInsights({
   rows,
   backlog,
@@ -106,7 +106,7 @@ export function buildRequestInsights({
   };
 }
 
-// hna function buildChangeInsights li tbni object/data structure
+// hne function buildChangeInsights: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 export function buildChangeInsights({
   rows,
   open,
@@ -136,7 +136,7 @@ export function buildChangeInsights({
   };
 }
 
-// hna function buildSelectionInsights li tbni object/data structure
+// hne function buildSelectionInsights: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 export function buildSelectionInsights({
   rows,
   statusCounts,

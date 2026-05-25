@@ -1,4 +1,4 @@
-// hna page list ta3 Kpis li 3andek
+// hne page KPI catalog: taffichi KPIs, tfiltrihom, w twassel l user lel module elli mrbout bihom.
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -29,7 +29,7 @@ import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { deleteKpiById, loadKpis } from "./kpiStorage";
 import { getModulePath } from "../analysis/kpiNavigation";
 
-// hna component MyKpis li trender page/component section
+// hne component MyKpis: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const MyKpis = () => {
 
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ const MyKpis = () => {
     setRows(loadKpis());
   }, []);
 
-    // hna function confirmDelete li tperform helper logic
+  // hne function confirmDelete: action ba3d ma l user y2akked men dialog wala warning.
   function confirmDelete() {
 
     const next = deleteKpiById(deleteId);
@@ -96,7 +96,7 @@ const MyKpis = () => {
     [rows]
   );
 
-    // hna function filteredRows li tfilter rows/data
+  // hne function filteredRows: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
       if (
@@ -132,7 +132,7 @@ const MyKpis = () => {
     });
   }, [rows, filters]);
 
-    // hna function activeFilterCount li tperform helper logic
+  // hne function activeFilterCount: t3awen ba9i l code fil fichier hedha b logic sghira.
   const activeFilterCount = useMemo(() => {
     return [
       filters.search,
@@ -146,7 +146,7 @@ const MyKpis = () => {
     ].filter(Boolean).length;
   }, [filters]);
 
-    // hna function resetFilters li trédoui state / filters l default
+  // hne function resetFilters: l form wala l filters l 7ala l aslaya.
   function resetFilters() {
     setFilters({
       search: "",
@@ -285,7 +285,6 @@ const MyKpis = () => {
 
       <Box sx={{ mt: 2 }}>
 
-        {/* Top Bar */}
 
         <Box
           sx={{
@@ -314,7 +313,6 @@ const MyKpis = () => {
 
         </Box>
 
-        {/* Table */}
 
         <PageFilters
           title="KPI Filters"
@@ -447,7 +445,6 @@ const MyKpis = () => {
 
       </Box>
 
-      {/* Delete Dialog */}
 
       <Dialog open={Boolean(deleteId)} onClose={() => setDeleteId(null)}>
 

@@ -1,4 +1,3 @@
-// hna mock data ta3 changes l testing
 export const MOCK_CHANGES = [
   {
     id: 1,

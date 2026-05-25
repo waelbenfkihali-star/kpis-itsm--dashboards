@@ -1,5 +1,5 @@
 // @ts-ignore
-// hna page changes list w filter w analysis
+// hne page changes: fiha tableau, filters, delete, w selection mta3 rows bech yet7alllou.
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -19,9 +19,8 @@ import DeleteToolbar from "../../components/DeleteToolbar";
 import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
 
-// hna component Changes li trender page/component section
+// hne component Changes: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function Changes() {
-  // page changes: ya3ti table ta3 changes w filters w action buttons
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,7 +45,7 @@ export default function Changes() {
   useEffect(() => {
     apiFetch("/changes/")
       .then(async (res) => {
-                // hna function data li tprepare data values
+        // hne variable data: data m7adhra lel affichage wala l analyse.
         const data = await res.json().catch(() => []);
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
         setRows(Array.isArray(data) ? data : []);
@@ -79,7 +78,7 @@ export default function Changes() {
     [rows]
   );
 
-    // hna function filteredRows li tfilter rows/data
+  // hne function filteredRows: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
   const filteredRows = useMemo(() => {
 
     return rows.filter((r) => {
@@ -133,7 +132,7 @@ export default function Changes() {
     [filters]
   );
 
-    // hna function resetFilters li trédoui state / filters l default
+  // hne function resetFilters: l form wala l filters l 7ala l aslaya.
   function resetFilters() {
     setFilters({
       search: "",
@@ -146,14 +145,14 @@ export default function Changes() {
       dateTo: ""
     });
   }
-    // hna function updateFilter li tfilter rows/data
+  // hne function updateFilter: tbadel part men state wala data hasb l ma3loumet jdida.
   function updateFilter(key, value) {
     setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
-    // hna function handleAnalyse li thandle event w tmanage action
+  // hne function handleAnalyse: tet9ad biha actions mta3 l user kif click, change, open, wala close, w ba3dha tbadel state wala navigation.
   function handleAnalyse() {
-        // hna function selectedData li tprepare data values
+    // hne variable selectedData: data m7adhra lel affichage wala l analyse.
     const selectedData = filteredRows.filter((row) => selectedIds.includes(row.id));
     navigate("/changes-analysis", { state: { data: selectedData, selectedKpi } });
   }

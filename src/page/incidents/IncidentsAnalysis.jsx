@@ -1,4 +1,4 @@
-// hna analysis page khusus b incidents
+// hne page analysis mta3 incidents l mokhtarin: tebni KPIs w charts w insights 3lihom.
 import React, { useMemo } from "react";
 import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -29,7 +29,7 @@ import {
 } from "../analysis/analysisUtils";
 import { buildIncidentInsights } from "../analysis/reportInsights";
 
-// hna component KpiCard li trender page/component section
+// hne component KpiCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function KpiCard({ title, value, note }) {
   return (
     <Paper sx={{ p: 2.2, flex: 1, minWidth: 200 }}>
@@ -46,7 +46,7 @@ function KpiCard({ title, value, note }) {
   );
 }
 
-// hna component ChartCard li trender page/component section
+// hne component ChartCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   return (
     <Paper sx={{ p: 2, flex: 1, minWidth: 320 }}>
@@ -64,12 +64,12 @@ function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   );
 }
 
-// hna function hasKeyword li tperform helper logic
+// hne function hasKeyword: t3awen ba9i l code fil fichier hedha b logic sghira.
 function hasKeyword(text, keywords) {
   return keywords.some((keyword) => text.includes(keyword));
 }
 
-// hna component IncidentsAnalysis li trender page/component section
+// hne component IncidentsAnalysis: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function IncidentsAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -81,7 +81,7 @@ export default function IncidentsAnalysis() {
     () => rows.filter((row) => ["Open", "In Progress", "Pending"].includes(row.state)),
     [rows]
   );
-    // hna function majorRows li tperform helper logic
+  // hne variable majorRows: rows l nehayiya elli bech ba3d filters wala selection.
   const majorRows = useMemo(() => rows.filter((row) => row.is_major), [rows]);
   const closedRows = useMemo(
     () => rows.filter((row) => ["Closed", "Resolved"].includes(row.state)),
@@ -97,11 +97,11 @@ export default function IncidentsAnalysis() {
     [rows]
   );
 
-    // hna function services li tperform helper logic
+  // hne function services: t3awen ba9i l code fil fichier hedha b logic sghira.
   const services = useMemo(() => countBy(rows, "affected_service"), [rows]);
-    // hna function sites li tperform helper logic
+  // hne function sites: t3awen ba9i l code fil fichier hedha b logic sghira.
   const sites = useMemo(() => countBy(rows, "location"), [rows]);
-    // hna function groups li tperform helper logic
+  // hne function groups: t3awen ba9i l code fil fichier hedha b logic sghira.
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
 
   const columns = [
@@ -138,13 +138,13 @@ export default function IncidentsAnalysis() {
     openBacklogRows,
     (row) => !String(row.responsible_user || "").trim()
   );
-    // hna function slaBreached li tperform helper logic
+  // hne function slaBreached: t3awen ba9i l code fil fichier hedha b logic sghira.
   const slaBreached = countWhere(rows, (row) => row.sla_breached);
   const avgHandle = average(rows, "duration");
   const avgBusiness = average(rows, "business_duration");
-    // hna function avgMajorResolution li tperform helper logic
+  // hne function avgMajorResolution: t3awen ba9i l code fil fichier hedha b logic sghira.
   const avgMajorResolution = average(rows, "duration", (row) => row.is_major);
-    // hna function focusedServices li tperform helper logic
+  // hne function focusedServices: t3awen ba9i l code fil fichier hedha b logic sghira.
   const focusedServices = useMemo(() => countBy(majorRows, "affected_service"), [majorRows]);
   const serviceMonthly = useMemo(
     () => monthlyBreakdownInRange(rows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
@@ -159,7 +159,7 @@ export default function IncidentsAnalysis() {
     [rows]
   );
 
-    // hna function focusedView li tperform helper logic
+  // hne function focusedView: t3awen ba9i l code fil fichier hedha b logic sghira.
   const focusedView = useMemo(() => {
     if (!selectedKpi) return null;
 

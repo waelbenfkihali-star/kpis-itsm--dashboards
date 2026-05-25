@@ -1,3 +1,4 @@
+// hne no9tet bidayet l frontend: na3mlou theme, n7adrou routes lkol, w nmountiw React app.
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { CssBaseline } from "@mui/material";
@@ -48,7 +49,7 @@ import RequestsAnalysis from "./page/requests/RequestsAnalysis";
 import ChangesAnalysis from "./page/changes/ChangesAnalysis";
 import { getDesignTokens } from "./theme";
 
-// hna root ta3 router: yjma3 routes kullouhom w ykhalik tmchi men page l page
+// hne component RootRouter: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function RootRouter() {
   const [mode, setMode] = React.useState(
     localStorage.getItem("currentMode") || "light"
@@ -65,12 +66,9 @@ function RootRouter() {
         createRoutesFromElements(
           <>
 
-            {/* LOGIN */}
 
             <Route path="/login" element={<Login setMode={setMode} />} />
 
-            {/* APP */}
-            {/* hna l routes li msakkra bil auth, ida mach mconnecti ma tnejmch t9ra */}
             <Route
               path="/"
               element={
@@ -95,7 +93,6 @@ function RootRouter() {
 
               <Route path="mykpis" element={<MyKpis />} />
               <Route path="mykpis/:id" element={<KpiDetails />} />
-              {/* hadhouma les pages li m7atouthom 3la role ta3 admin/manager, men ghayr role ma t3addi */}
               <Route path="team" element={<RoleRoute><Team /></RoleRoute>} />
               <Route path="kpiform" element={<RoleRoute><KpiForm /></RoleRoute>} />
               <Route path="editkpi/:id" element={<RoleRoute><EditKpi /></RoleRoute>} />

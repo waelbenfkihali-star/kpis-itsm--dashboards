@@ -1,4 +1,4 @@
-// hna module li ykhdem fil page form/Form.jsx
+// hne form creation compte jdid: l admin ya3mel user jdid m3a role w password.
 import React from "react";
 import {
   Alert,
@@ -35,7 +35,7 @@ const roleOptions = [
   { value: "User", label: "User" },
 ];
 
-// hna component InfoCard li trender page/component section
+// hne component InfoCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function InfoCard({ icon, title, text }) {
   return (
     <Paper
@@ -58,7 +58,7 @@ function InfoCard({ icon, title, text }) {
   );
 }
 
-// hna component SectionTitle li trender page/component section
+// hne component SectionTitle: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function SectionTitle({ icon, title, subtitle }) {
   return (
     <Box>
@@ -75,7 +75,7 @@ function SectionTitle({ icon, title, subtitle }) {
   );
 }
 
-// hna component Form li trender page/component section
+// hne component Form: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const Form = () => {
   const theme = useTheme();
   const { currentUser } = useOutletContext();
@@ -107,13 +107,13 @@ const Form = () => {
       ? "linear-gradient(145deg, rgba(133,77,14,0.34), rgba(30,64,175,0.24))"
       : "linear-gradient(145deg, rgba(245,158,11,0.12), rgba(59,130,246,0.10))";
 
-    // hna function handleClose li thandle event w tmanage action
+  // hne function handleClose: tet9ad biha actions mta3 l user kif click, change, open, wala close, w ba3dha tbadel state wala navigation.
   const handleClose = (_, reason) => {
     if (reason === "clickaway") return;
     setOpen(false);
   };
 
-    // hna function onSubmit li tperform helper logic
+  // hne function onSubmit: form wala request lel backend w teta3amel m3a success wala error.
   const onSubmit = async (values) => {
     setSaving(true);
     setErrorMessage("");

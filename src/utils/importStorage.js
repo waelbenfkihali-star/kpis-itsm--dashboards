@@ -4,12 +4,14 @@ export const STORAGE_KEYS = {
   changes: "itsm_import_changes",
 };
 
+// hne variable saveImportedData: data m7adhra lel affichage wala l analyse.
 export function saveImportedData(kind, rows) {
   const key = STORAGE_KEYS[kind];
   if (!key) return;
   localStorage.setItem(key, JSON.stringify(Array.isArray(rows) ? rows : []));
 }
 
+// hne function loadImportedData: tchargi data wala context l lazem 9bal ma page taffichi contenu s7i7.
 export function loadImportedData(kind) {
   const key = STORAGE_KEYS[kind];
   if (!key) return [];
@@ -23,22 +25,26 @@ export function loadImportedData(kind) {
   }
 }
 
+// hne variable clearImportedData: data m7adhra lel affichage wala l analyse.
 export function clearImportedData() {
   Object.values(STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
 }
 
+// hne function normalizeBool: twa7ed format mta3 valeur bech ba9i l app yeta3amel ma3aha b souhoula.
 function normalizeBool(value) {
   if (typeof value === "boolean") return value;
   const v = String(value ?? "").trim().toLowerCase();
   return ["true", "yes", "y", "1", "major", "oui"].includes(v);
 }
 
+// hne function normalizeNumber: twa7ed format mta3 valeur bech ba9i l app yeta3amel ma3aha b souhoula.
 function normalizeNumber(value) {
   if (value === null || value === undefined || value === "") return 0;
   const n = Number(value);
   return Number.isNaN(n) ? 0 : n;
 }
 
+// hne variable mapIncidentRows: rows l nehayiya elli bech ba3d filters wala selection.
 export function mapIncidentRows(rows) {
   return (rows || []).map((row, index) => ({
     id: index + 1,
@@ -79,6 +85,7 @@ export function mapIncidentRows(rows) {
   }));
 }
 
+// hne variable mapRequestRows: rows l nehayiya elli bech ba3d filters wala selection.
 export function mapRequestRows(rows) {
   return (rows || []).map((row, index) => ({
     id: index + 1,
@@ -109,6 +116,7 @@ export function mapRequestRows(rows) {
   }));
 }
 
+// hne variable mapChangeRows: rows l nehayiya elli bech ba3d filters wala selection.
 export function mapChangeRows(rows) {
   return (rows || []).map((row, index) => ({
     id: index + 1,

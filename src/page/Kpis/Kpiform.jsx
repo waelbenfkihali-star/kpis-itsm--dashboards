@@ -1,4 +1,4 @@
-// hna page define KPI form w save
+// hne page creation KPI jdid w save mta3ou fil localStorage.
 import React, { useState, useMemo } from "react";
 import {
   Box,
@@ -14,7 +14,7 @@ import KpiFieldsForm from "./KpiFieldsForm";
 import { KPI_INITIAL_FORM } from "./kpiFormConfig";
 import { upsertKpi, validateKpi } from "./kpiStorage";
 
-// page ta3 Define KPI: kif n3aytou bih men sidebar, n3abou form w n7afdou KPI definition
+// hne component KpiForm: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const KpiForm = () => {
 
   const navigate = useNavigate();
@@ -22,14 +22,13 @@ const KpiForm = () => {
   const [form, setForm] = useState(KPI_INITIAL_FORM);
   const [error, setError] = useState("");
 
-    // hna function setField li tset field / state value
+  // hne function setField: t3awen ba9i l code fil fichier hedha b logic sghira.
   function setField(key, value) {
-    // update field mta3 form wa nsupprim error ki tbadal
     setError("");
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-    // hna function isValid li tfassi boolean condition
+  // hne function isValid: true wala false hasb condition mo3ayna fil logic.
   const isValid = useMemo(() => {
     return (
       form.kpi_id.trim() !== "" &&
@@ -39,14 +38,13 @@ const KpiForm = () => {
     );
   }, [form]);
 
-    // hna function resetForm li trédoui state / filters l default
+  // hne function resetForm: l form wala l filters l 7ala l aslaya.
   function resetForm() {
     setForm(KPI_INITIAL_FORM);
   }
 
-    // hna function submit li tsubmit form data
+  // hne function submit: form wala request lel backend w teta3amel m3a success wala error.
   function submit() {
-    // l button Save KPI: nvalidiw form w n9aymou Kpi storage
 
     if (!isValid) return;
 

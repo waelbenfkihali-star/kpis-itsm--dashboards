@@ -1,11 +1,9 @@
-// hna component legend ta3 charts fi analysis pages
+// hne component sghir yaffichi legend mta3 alwen l chart.
 import React from "react";
 import { Box, Stack, Typography } from "@mui/material";
 
-// Component li ya3ti legend ta3 l chart: color swatch w label l kol item
-// items howa array, kol item fih label w color
+// hne component ChartLegend: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function ChartLegend({ items = [] }) {
-  // ida ma fama items, ma nraj3ouch 7aja: ne5fou legend kolou
   if (!items.length) return null;
 
   return (
@@ -18,7 +16,6 @@ export default function ChartLegend({ items = [] }) {
       sx={{ mt: 1.5, rowGap: 1 }}
     >
       {items.map((item) => (
-        // hna na3mlou item wahdou fi legend: color bullet + text
         <Stack
           key={item.label}
           className="chart-legend-item"

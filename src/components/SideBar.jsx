@@ -1,3 +1,4 @@
+// hne menu elli 3al isar: menha l user yitnavigui bin pages mta3 l app w ya3mel logout.
 import React from "react";
 import List from "@mui/material/List";
 import Divider from "@mui/material/Divider";
@@ -28,6 +29,7 @@ import { isAdminUser } from "../auth/roleUtils";
 import myPhoto from "../assets/wael.jpg";
 
 const drawerWidth = 240;
+// hne function openedMixin: t3awen ba9i l code fil fichier hedha b logic sghira.
 const openedMixin = (theme) => ({
   width: drawerWidth,
   transition: theme.transitions.create("width", {
@@ -37,6 +39,7 @@ const openedMixin = (theme) => ({
   overflowX: "hidden",
 });
 
+// hne function closedMixin: t3awen ba9i l code fil fichier hedha b logic sghira.
 const closedMixin = (theme) => ({
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
@@ -67,12 +70,12 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
+// hne component DrawerHeader: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
   padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
   ...theme.mixins.toolbar,
 }));
 
@@ -126,10 +129,12 @@ const supportItems = [
   },
 ];
 
+// hne component SideBar: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const SideBar = ({ open, handleDrawerClose, currentUser }) => {
   let location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
+  // hne function logout: t3awen ba9i l code fil fichier hedha b logic sghira.
   const logout = () => {
   localStorage.removeItem("access");
   localStorage.removeItem("refresh");

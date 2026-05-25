@@ -1,4 +1,4 @@
-// hna component ta3 pie chart
+// hne component mta3 pie chart l mosta3mel fil page demo.
 import React, { useEffect, useState, useMemo } from "react";
 import { ResponsivePie } from "@nivo/pie";
 import { Box, useTheme, Stack, TextField } from "@mui/material";
@@ -9,7 +9,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { apiFetch } from "../../utils/api";
 
-// hna component Pie li trender page/component section
 const Pie = ({ isDashbord = false }) => {
 
   const theme = useTheme();
@@ -27,7 +26,7 @@ const Pie = ({ isDashbord = false }) => {
 
   },[])
 
-    // hna function filtered li tfilter rows/data
+  // hne function filtered: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
   const filtered = useMemo(()=>{
 
     if(!startDate && !endDate) return incidents
@@ -45,7 +44,7 @@ const Pie = ({ isDashbord = false }) => {
 
   },[incidents,startDate,endDate])
 
-    // hna function pieData li tprepare data values
+  // hne variable pieData: data m7adhra lel affichage wala l analyse.
   const pieData = useMemo(()=>{
 
     const counter = {}
@@ -68,7 +67,7 @@ const Pie = ({ isDashbord = false }) => {
 
   },[filtered])
 
-    // hna function total li tperform helper logic
+  // hne function total: t3awen ba9i l code fil fichier hedha b logic sghira.
   const total = pieData.reduce((a,b)=>a+b.value,0)
 
   return(

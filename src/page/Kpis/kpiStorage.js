@@ -1,4 +1,4 @@
-// hna storage helper li y7adhhir Kpis fl localStorage
+// hne logic stockage mta3 KPIs fil localStorage: load, validate, update, delete, w merge m3a default KPIs.
 import { defaultKpis, mergeWithDefaultKpis } from "./kpiCatalog";
 
 const KEY = "kpis";
@@ -6,7 +6,7 @@ const DELETED_KEY = "kpis_deleted";
 const CATALOG_VERSION_KEY = "kpis_catalog_version";
 const CATALOG_VERSION = "2026-03-15-inc-req-chg";
 
-// hna function loadDeletedIds li tload data w troje3 response
+// hne function loadDeletedIds: tchargi data wala context l lazem 9bal ma page taffichi contenu s7i7.
 function loadDeletedIds() {
   try {
     return JSON.parse(localStorage.getItem(DELETED_KEY) || "[]");
@@ -15,12 +15,12 @@ function loadDeletedIds() {
   }
 }
 
-// hna function saveDeletedIds li tperform helper logic
+// hne function saveDeletedIds: t3awen ba9i l code fil fichier hedha b logic sghira.
 function saveDeletedIds(ids) {
   localStorage.setItem(DELETED_KEY, JSON.stringify(ids));
 }
 
-// hna function syncCatalogVersion li tperform helper logic
+// hne function syncCatalogVersion: t3awen ba9i l code fil fichier hedha b logic sghira.
 function syncCatalogVersion() {
   const savedVersion = localStorage.getItem(CATALOG_VERSION_KEY);
 
@@ -30,7 +30,7 @@ function syncCatalogVersion() {
   }
 }
 
-// hna function loadKpis li tload data w troje3 response
+// hne function loadKpis: tchargi data wala context l lazem 9bal ma page taffichi contenu s7i7.
 export function loadKpis() {
   syncCatalogVersion();
 
@@ -44,12 +44,12 @@ export function loadKpis() {
   }
 }
 
-// hna function saveKpis li tperform helper logic
+// hne function saveKpis: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function saveKpis(list) {
   localStorage.setItem(KEY, JSON.stringify(list));
 }
 
-// hna function validateKpi li tperform helper logic
+// hne function validateKpi: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function validateKpi(form) {
   const current = loadKpis();
   const kpiId = String(form.kpi_id || "").trim();
@@ -59,7 +59,7 @@ export function validateKpi(form) {
     return "Veuillez renseigner tous les champs obligatoires : KPI ID, nom, propriétaire et module.";
   }
 
-    // hna function duplicateKpiId li tperform helper logic
+  // hne function duplicateKpiId: t3awen ba9i l code fil fichier hedha b logic sghira.
   const duplicateKpiId = current.find((item) =>
     String(item.kpi_id || "").trim().toLowerCase() === kpiId.toLowerCase() &&
     String(item.id) !== String(form.id)
@@ -68,7 +68,7 @@ export function validateKpi(form) {
     return `Échec de l’ajout du KPI : l’identifiant KPI "${kpiId}" est déjà utilisé.`;
   }
 
-    // hna function duplicateName li tperform helper logic
+  // hne function duplicateName: t3awen ba9i l code fil fichier hedha b logic sghira.
   const duplicateName = current.find((item) =>
     String(item.name || "").trim().toLowerCase() === name.toLowerCase() &&
     String(item.id) !== String(form.id)
@@ -84,10 +84,10 @@ export function validateKpi(form) {
   return "";
 }
 
-// hna function upsertKpi li tperform helper logic
+// hne function upsertKpi: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function upsertKpi(kpi) {
   const list = loadKpis();
-    // hna function idx li tperform helper logic
+  // hne function idx: t3awen ba9i l code fil fichier hedha b logic sghira.
   const idx = list.findIndex((x) => String(x.id) === String(kpi.id));
   if (idx >= 0) list[idx] = kpi;
   else list.push(kpi);
@@ -95,12 +95,12 @@ export function upsertKpi(kpi) {
   saveKpis(list);
 }
 
-// hna function deleteKpiById li tperform helper logic
+// hne function deleteKpiById: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function deleteKpiById(id) {
   const current = loadKpis();
-    // hna function deleted li tperform helper logic
+  // hne function deleted: t3awen ba9i l code fil fichier hedha b logic sghira.
   const deleted = current.find((x) => String(x.id) === String(id));
-    // hna function list li tperform helper logic
+  // hne function list: t3awen ba9i l code fil fichier hedha b logic sghira.
   const list = current.filter((x) => String(x.id) !== String(id));
   if (deleted?.kpi_id) {
     const deletedIds = new Set(loadDeletedIds());
@@ -111,7 +111,7 @@ export function deleteKpiById(id) {
   return list;
 }
 
-// hna function getKpiById li tqra w troje3 value
+// hne function getKpiById: ta9ra valeur mocht9a men data l 7aliya.
 export function getKpiById(id) {
   return loadKpis().find((x) => String(x.id) === String(id)) || null;
 }

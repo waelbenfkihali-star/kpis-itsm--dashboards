@@ -1,4 +1,4 @@
-// hna component ta3 bar chart
+// hne component mta3 bar chart l mosta3mel fil page demo.
 import React, { useEffect, useState, useMemo } from "react";
 import { ResponsiveBar } from "@nivo/bar";
 import { Box, useTheme, Stack, TextField } from "@mui/material";
@@ -10,7 +10,6 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { apiFetch } from "../../utils/api";
 
-// hna component Bar li trender page/component section
 const Bar = ({ isDashbord = false }) => {
 
   const theme = useTheme();
@@ -28,7 +27,7 @@ const Bar = ({ isDashbord = false }) => {
 
   }, []);
 
-    // hna function filteredData li tfilter rows/data
+  // hne function filteredData: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
   const filteredData = useMemo(() => {
 
     if (!startDate && !endDate) return allData;

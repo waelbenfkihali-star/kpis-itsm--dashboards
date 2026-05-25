@@ -1,10 +1,10 @@
-// hna page geography li tben map w service regions
+// hne page geography view elli taffichi nadhra joughrafiya 3al services wala incidents.
 import React from "react";
 import { Box } from "@mui/material";
 import Geo from "./geo";
 import Header from "../../components/Header";
 
-// hna component Geography li trender page/component section
+// hne component Geography: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const Geography = () => {
   return (
     <Box>

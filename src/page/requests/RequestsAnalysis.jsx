@@ -1,4 +1,4 @@
-// hna analysis page khusus b requests
+// hne page analysis mta3 requests l mokhtarin: tebni KPIs w charts w insights 3lihom.
 import React, { useMemo } from "react";
 import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -31,7 +31,7 @@ import {
 } from "../analysis/analysisUtils";
 import { buildRequestInsights } from "../analysis/reportInsights";
 
-// hna component KpiCard li trender page/component section
+// hne component KpiCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function KpiCard({ title, value, note }) {
   return (
     <Paper sx={{ p: 2.2, flex: 1, minWidth: 200 }}>
@@ -48,7 +48,7 @@ function KpiCard({ title, value, note }) {
   );
 }
 
-// hna component ChartCard li trender page/component section
+// hne component ChartCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   return (
     <Paper sx={{ p: 2, flex: 1, minWidth: 320 }}>
@@ -66,12 +66,12 @@ function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   );
 }
 
-// hna function hasKeyword li tperform helper logic
+// hne function hasKeyword: t3awen ba9i l code fil fichier hedha b logic sghira.
 function hasKeyword(text, keywords) {
   return keywords.some((keyword) => text.includes(keyword));
 }
 
-// hna component RequestsAnalysis li trender page/component section
+// hne component RequestsAnalysis: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function RequestsAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,21 +88,21 @@ export default function RequestsAnalysis() {
     [rows]
   );
 
-    // hna function openedMonthly li tperform helper logic
+  // hne function openedMonthly: t3awen ba9i l code fil fichier hedha b logic sghira.
   const openedMonthly = useMemo(() => monthlySeriesInRange(rows, "opened", rows, "opened"), [rows]);
   const openedVsClosed = useMemo(
     () => monthlyDualSeriesInRange(rows, "opened", "closed", "Opened", "Closed", rows, "opened"),
     [rows]
   );
-    // hna function agingStateData li tprepare data values
+  // hne variable agingStateData: data m7adhra lel affichage wala l analyse.
   const agingStateData = useMemo(() => agingByState(openRows, "opened", "state"), [openRows]);
-    // hna function services li tperform helper logic
+  // hne function services: t3awen ba9i l code fil fichier hedha b logic sghira.
   const services = useMemo(() => countBy(rows, "it_service"), [rows]);
-    // hna function groups li tperform helper logic
+  // hne function groups: t3awen ba9i l code fil fichier hedha b logic sghira.
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
-    // hna function requestedFor li tperform helper logic
+  // hne function requestedFor: t3awen ba9i l code fil fichier hedha b logic sghira.
   const requestedFor = useMemo(() => countBy(rows, "requested_for"), [rows]);
-    // hna function items li tperform helper logic
+  // hne function items: t3awen ba9i l code fil fichier hedha b logic sghira.
   const items = useMemo(() => countBy(rows, "item"), [rows]);
   const serviceMonthly = useMemo(
     () => monthlyBreakdownInRange(rows, "opened", "it_service", 5, "Unknown", rows, "opened"),
@@ -147,13 +147,13 @@ export default function RequestsAnalysis() {
   const total = rows.length;
   const backlog = openRows.length;
   const closed = closedRows.length;
-    // hna function olderThan60 li tperform helper logic
+  // hne function olderThan60: t3awen ba9i l code fil fichier hedha b logic sghira.
   const olderThan60 = agingStateData.find((item) => item.aging === "> 60 Days")?.total || 0;
   const modernWorkplaceClosed = countWhere(
     closedRows,
     (row) => String(row.it_service || "").toLowerCase().includes("modern workplace")
   );
-    // hna function focusedView li tperform helper logic
+  // hne function focusedView: t3awen ba9i l code fil fichier hedha b logic sghira.
   const focusedView = useMemo(() => {
     if (!selectedKpi) return null;
 

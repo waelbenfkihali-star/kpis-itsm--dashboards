@@ -1,4 +1,5 @@
-// hna function getModulePath li tqra w troje3 value
+// hne helpers ywaslou module esmou b route s7i7a w label mnasba.
+// hne function getModulePath: ta9ra valeur mocht9a men data l 7aliya.
 export function getModulePath(moduleName) {
   const value = String(moduleName || "").toLowerCase();
 
@@ -9,7 +10,7 @@ export function getModulePath(moduleName) {
   return "/mykpis";
 }
 
-// hna function getModuleLabel li tqra w troje3 value
+// hne function getModuleLabel: ta9ra valeur mocht9a men data l 7aliya.
 export function getModuleLabel(moduleName) {
   const path = getModulePath(moduleName);
 

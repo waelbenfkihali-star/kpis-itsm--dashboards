@@ -1,4 +1,4 @@
-// hna catalog ta3 default KPI definitions
+// hne default KPI catalog elli l app tebda bih men louel.
 export const defaultKpis = [
   {
     id: "inc-01",
@@ -362,9 +362,9 @@ export const defaultKpis = [
   },
 ];
 
-// hna function mergeWithDefaultKpis li tperform helper logic
+// hne function mergeWithDefaultKpis: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function mergeWithDefaultKpis(customKpis = []) {
-    // hna function byKpiId li tperform helper logic
+  // hne function byKpiId: t3awen ba9i l code fil fichier hedha b logic sghira.
   const byKpiId = new Map(defaultKpis.map((item) => [item.kpi_id, item]));
 
   customKpis.forEach((item) => {

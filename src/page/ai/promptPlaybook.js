@@ -1,3 +1,4 @@
+// hne exemples prompts y3awnou l user kifach yotlob dashboard men AI.
 export const promptPlaybook = [
   {
     title: "English Trends",

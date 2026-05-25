@@ -1,3 +1,4 @@
+// hne l bar elli fou9: menha l user y7ell sidebar, ybadel theme, w yodkhel lel profile.
 import { Avatar, Box, IconButton, Stack, Toolbar, Typography, styled, useTheme } from "@mui/material";
 import React from "react";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -32,11 +33,13 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
+// hne function actionButtonSx: t3awen ba9i l code fil fichier hedha b logic sghira.
 const actionButtonSx = (theme) => ({
   border: `1px solid ${theme.palette.divider}`,
   borderRadius: 2,
 });
 
+// hne component TopBar: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
   const theme = useTheme();
   const navigate = useNavigate();

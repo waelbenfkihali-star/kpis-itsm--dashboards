@@ -1,4 +1,4 @@
-// hna module li ykhdem fil page dashboard/data.js
+// hne data static lel demo fil dashboard l 9dim.
 export const data1 = [
   {
     id: "javascript",

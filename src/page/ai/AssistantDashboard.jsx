@@ -1,4 +1,4 @@
-// hna page AI assistant li yfassar user request w ybni dashboard intent
+// hne page AI dashboard builder: l user yekteb prompt b language 3adiya, w l app y7awlou l KPIs w charts w summary.
 import React from "react";
 import {
   Alert,
@@ -32,8 +32,7 @@ import {
   buildAssistantResultFromIntent,
 } from "../../components/insightAssistantUtils";
 
-// hna page ta3 AI assistant: user yكتبلu request w yji response automatic
-// l page tbedel request ta3 user l intent ta3 dashboard, thot charts w summary
+// hne component KpiCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function KpiCard({ label, value, note }) {
   return (
     <Paper
@@ -59,15 +58,12 @@ function KpiCard({ label, value, note }) {
   );
 }
 
-// hna component InterpretationCard li trender page/component section
+// hne component InterpretationCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function InterpretationCard({ interpretation }) {
-  // kifech l assistant fham request mta3 user w chnoua l intent li estafaad biha
   if (!interpretation) return null;
-    // hna function groupingText li tperform helper logic
   const groupingText = (interpretation.groupings || []).length
     ? (interpretation.groupings || []).join(", ")
     : "default grouping";
-    // hna function filterText li tfilter rows/data
   const filterText = (interpretation.filters || []).length
     ? (interpretation.filters || []).join(" | ")
     : "No extra filters";
@@ -106,9 +102,8 @@ function InterpretationCard({ interpretation }) {
   );
 }
 
-// hna component SpotlightCard li trender page/component section
+// hne component SpotlightCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function SpotlightCard({ spotlight }) {
-  // card li tben l insight l mohem li smart assistant 7sebha
   if (!spotlight) return null;
 
   return (
@@ -131,7 +126,7 @@ function SpotlightCard({ spotlight }) {
   );
 }
 
-// hna component ExecutiveNotes li trender page/component section
+// hne component ExecutiveNotes: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function ExecutiveNotes({ notes }) {
   if (!notes?.length) return null;
 
@@ -151,7 +146,7 @@ function ExecutiveNotes({ notes }) {
   );
 }
 
-// hna function buildChartLegend li tbni object/data structure
+// hne function buildChartLegend: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildChartLegend(chart) {
   if (!chart) return [];
 
@@ -183,7 +178,7 @@ function buildChartLegend(chart) {
   return [];
 }
 
-// hna component DashboardChart li trender page/component section
+// hne component DashboardChart: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function DashboardChart({ chart }) {
   if (!chart) return null;
   const firstPoint = Array.isArray(chart.data) ? chart.data[0] : null;
@@ -196,17 +191,17 @@ function DashboardChart({ chart }) {
       color: lineColor,
     },
   ];
-    // hna function multiLineSeries li tperform helper logic
+  // hne variable multiLineSeries: series wajda lel chart.
   const multiLineSeries = (chart.data || []).map((item, index) => ({
     ...item,
     color: item.color || getChartColor(index),
   }));
-    // hna function pieData li tprepare data values
+  // hne variable pieData: data m7adhra lel affichage wala l analyse.
   const pieData = (chart.data || []).map((item, index) => ({
     ...item,
     color: item.color || getChartColor(index),
   }));
-    // hna function barData li tprepare data values
+  // hne variable barData: data m7adhra lel affichage wala l analyse.
   const barData = (chart.data || []).map((item, index) => ({
     ...item,
     color: item.color || getChartColor(index),
@@ -306,7 +301,7 @@ function DashboardChart({ chart }) {
   );
 }
 
-// hna component MessageBubble li trender page/component section
+// hne component MessageBubble: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function MessageBubble({ role, children }) {
   const isUser = role === "user";
   return (
@@ -329,7 +324,7 @@ function MessageBubble({ role, children }) {
   );
 }
 
-// hna component AssistantDashboard li trender page/component section
+// hne component AssistantDashboard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function AssistantDashboard() {
   const location = useLocation();
   const [loadingData, setLoadingData] = React.useState(false);
@@ -350,7 +345,7 @@ export default function AssistantDashboard() {
   ]);
   const [result, setResult] = React.useState(null);
   const [error, setError] = React.useState("");
-    // hna function ensureDataLoaded li tprepare data values
+  // hne function ensureDataLoaded: t3awen ba9i l code fil fichier hedha b logic sghira.
   const ensureDataLoaded = React.useCallback(async () => {
     if (datasets.incidents.length || datasets.requests.length || datasets.changes.length) {
       return datasets;

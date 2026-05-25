@@ -1,19 +1,18 @@
-// hna module API helper li ykhdem b backend ta3 Django
-// ykhalina nsebtiw requests b headers mta3 auth w refresh token
+// hne helpers mta3 l API: nabniw links, n3adiw token fil headers, na3mlou refresh session, w nmasikou errors.
 const API_BASE = "http://localhost:8001/api";
 let refreshPromise = null;
 
-// hna function li tjib URL kamel men base w path
+// hne function getApiUrl: ta9ra valeur mocht9a men data l 7aliya.
 export function getApiUrl(path = "") {
   return `${API_BASE}${path}`;
 }
 
-// hna function li tjib access token men localStorage
+// hne function getAuthToken: ta9ra valeur mocht9a men data l 7aliya.
 export function getAuthToken() {
   return localStorage.getItem("access");
 }
 
-// hna function li tjam3 headers mta3 request w token ida mawjouda
+// hne function getAuthHeaders: ta9ra valeur mocht9a men data l 7aliya.
 export function getAuthHeaders(extraHeaders = {}) {
   const token = getAuthToken();
 
@@ -23,14 +22,13 @@ export function getAuthHeaders(extraHeaders = {}) {
   };
 }
 
-// hna function li tnahi tokens w tarj3i user l login ki session tkharb
+// hne function clearAuthAndRedirect: t3awen ba9i l code fil fichier hedha b logic sghira.
 function clearAuthAndRedirect() {
   localStorage.removeItem("access");
   localStorage.removeItem("refresh");
   window.location.replace("/login");
 }
 
-// hna function li tjarrab trefreshi access token b refresh token
 async function refreshAccessToken() {
   const refresh = localStorage.getItem("refresh");
 
@@ -51,7 +49,6 @@ async function refreshAccessToken() {
     throw new Error(data?.detail || data?.error || "Token refresh failed.");
   }
 
-  // hna n7afdou token jdida fl localStorage
   localStorage.setItem("access", data.access);
   if (data.refresh) {
     localStorage.setItem("refresh", data.refresh);
@@ -60,9 +57,9 @@ async function refreshAccessToken() {
   return data.access;
 }
 
-// hna function li tb3ath request l backend b token w tmanage refresh automatiquement
 export async function apiFetch(path, options = {}) {
   const { headers, ...rest } = options;
+  // hne function doFetch: t3awen ba9i l code fil fichier hedha b logic sghira.
   const doFetch = () =>
     fetch(getApiUrl(path), {
       ...rest,
@@ -92,7 +89,6 @@ export async function apiFetch(path, options = {}) {
   return response;
 }
 
-// hna function li tjib JSON response w tro7 error message iza response ghalet
 export async function apiFetchJson(path, options = {}) {
   const response = await apiFetch(path, options);
   const text = await response.text();
@@ -106,7 +102,7 @@ export async function apiFetchJson(path, options = {}) {
   return data;
 }
 
-// hna function li tjib data user l current authenticated user
+// hne function fetchCurrentUser: tjib data men backend w ha b format tnajem l page ou.
 export function fetchCurrentUser() {
   return apiFetchJson("/auth/me/");
 }

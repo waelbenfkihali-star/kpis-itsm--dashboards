@@ -1,4 +1,4 @@
-// hna row ta3 dashboard li tben cards w mini charts
+// hne row theni men layout 9dim fil dashboard fih cards wala charts sghar.
 import {
   Box,
   IconButton,
@@ -12,7 +12,7 @@ import React from "react";
 import { DownloadOutlined } from "@mui/icons-material";
 import { Transactions } from "./data";
 
-// hna component Row2 li trender page/component section
+// hne component Row2: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const Row2 = () => {
   const theme = useTheme();
   return (

@@ -1,6 +1,5 @@
-// hna utils functions li y3awno b analysis w chart data
-// utils functions li y3awno b7al data aggregation w chart building
-// kol function hna tst3ml rows raw li jaou men API w tbedelhom l data ready l charts
+// hne utilities mta3 analysis: t7seb monthly series, counts, breakdowns, legends, w tooltips mta3 charts.
+// hne function countBy: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function countBy(rows, key, fallback = "Unknown") {
   const counts = {};
 
@@ -14,18 +13,18 @@ export function countBy(rows, key, fallback = "Unknown") {
     .sort((a, b) => b.value - a.value);
 }
 
-// hna function li tijib top label men rows b key
+// hne variable topLabel: label wejiz lel affichage fil UI.
 export function topLabel(rows, key, fallback = "Unknown") {
   return countBy(rows, key, fallback)[0]?.label || fallback;
 }
 
-// hna function li tcalculate percent ratio
+// hne function ratio: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function ratio(part, total) {
   if (!total) return 0;
   return Math.round((part / total) * 100);
 }
 
-// hna function li tparse date string l YYYY-MM
+// hne function parseDate: tfasser input w t7awlou l data mafhouma lel code.
 export function parseDate(value) {
   if (!value) return null;
 
@@ -41,12 +40,12 @@ export function parseDate(value) {
   return `${year}-${month}`;
 }
 
-// hna function li tbuild monthly series data
+// hne variable monthlySeries: series wajda lel chart.
 export function monthlySeries(rows, key) {
   return monthlySeriesInRange(rows, key, rows);
 }
 
-// hna helper li tbuild range ta3 months men rows
+// hne function buildMonthRange: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildMonthRange(rows, key) {
   const months = rows
     .map((row) => parseDate(row[key]))
@@ -71,7 +70,7 @@ function buildMonthRange(rows, key) {
   return range;
 }
 
-// hna function li tbuild monthly series fl range specified
+// hne function monthlySeriesInRange: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function monthlySeriesInRange(rows, key, rangeRows = rows, rangeKey = key) {
   const counts = {};
 
@@ -91,12 +90,12 @@ export function monthlySeriesInRange(rows, key, rangeRows = rows, rangeKey = key
   return monthRange.map((month) => ({ month, value: counts[month] || 0 }));
 }
 
-// hna function li tbuild dual series l chart
+// hne variable monthlyDualSeries: series wajda lel chart.
 export function monthlyDualSeries(rows, firstKey, secondKey, firstLabel, secondLabel) {
   return monthlyDualSeriesInRange(rows, firstKey, secondKey, firstLabel, secondLabel, rows, firstKey);
 }
 
-// hna function li tbuild dual series fl range
+// hne function monthlyDualSeriesInRange: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function monthlyDualSeriesInRange(
   rows,
   firstKey,
@@ -108,7 +107,7 @@ export function monthlyDualSeriesInRange(
 ) {
   const counts = {};
 
-  // hna function touch li tperform helper logic
+  // hne function touch: t3awen ba9i l code fil fichier hedha b logic sghira.
   function touch(month) {
     if (!month) return null;
     counts[month] = counts[month] || {
@@ -139,12 +138,12 @@ export function monthlyDualSeriesInRange(
   }));
 }
 
-// hna function li tcalculate monthly breakdown by group
+// hne function monthlyBreakdown: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function monthlyBreakdown(rows, dateKey, groupKey, limit = 5, fallback = "Unknown") {
   return monthlyBreakdownInRange(rows, dateKey, groupKey, limit, fallback, rows, dateKey);
 }
 
-// hna function li tcalculate monthly breakdown fl range
+// hne function monthlyBreakdownInRange: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function monthlyBreakdownInRange(
   rows,
   dateKey,
@@ -190,7 +189,7 @@ export function monthlyBreakdownInRange(
   };
 }
 
-// hna function li tcalculate average value men rows
+// hne function average: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function average(rows, key, filterFn = null) {
   const scopedRows = typeof filterFn === "function" ? rows.filter(filterFn) : rows;
   const values = scopedRows
@@ -199,16 +198,17 @@ export function average(rows, key, filterFn = null) {
 
   if (!values.length) return 0;
 
+  // hne function total: t3awen ba9i l code fil fichier hedha b logic sghira.
   const total = values.reduce((sum, value) => sum + value, 0);
   return Math.round((total / values.length) * 10) / 10;
 }
 
-// hna function li tcounti rows li ymatch predicate
+// hne function countWhere: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function countWhere(rows, predicate) {
   return rows.filter(predicate).length;
 }
 
-// hna function li tcalculate difference fi days men date
+// hne function diffInDays: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function diffInDays(value, baseDate = new Date()) {
   if (!value) return null;
   const parsed = new Date(value);
@@ -218,7 +218,7 @@ export function diffInDays(value, baseDate = new Date()) {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
-// hna function li tclassify aging days fl buckets
+// hne function bucketAging: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function bucketAging(days) {
   if (days === null || days < 0) return "Not past due";
   if (days < 30) return "< 30 Days";
@@ -226,7 +226,7 @@ export function bucketAging(days) {
   return "> 60 Days";
 }
 
-// hna function li tbuild aging totals by state
+// hne function agingByState: t3awen ba9i l code fil fichier hedha b logic sghira.
 export function agingByState(rows, dateKey, stateKey) {
   const result = {};
 
@@ -245,7 +245,7 @@ export function agingByState(rows, dateKey, stateKey) {
     .map((key) => result[key]);
 }
 
-// hna function li tprepare data format l pie chart
+// hne function makePieData: t7adher data b format mnasba lel affichage wala l analyse.
 export function makePieData(items) {
   return items.map((item) => ({
     id: item.label,
@@ -254,7 +254,7 @@ export function makePieData(items) {
   }));
 }
 
-// hna function li tprepare data format l bar chart
+// hne function makeBarData: t7adher data b format mnasba lel affichage wala l analyse.
 export function makeBarData(items, limit = 8) {
   return items.slice(0, limit).map((item) => ({
     label: item.label,
@@ -262,7 +262,7 @@ export function makeBarData(items, limit = 8) {
   }));
 }
 
-// hna function li tprepare data format l line chart
+// hne function makeLineData: t7adher data b format mnasba lel affichage wala l analyse.
 export function makeLineData(points, label) {
   return [
     {
@@ -286,12 +286,12 @@ export const CHART_COLORS = [
   "#b86f7a",
 ];
 
-// hna function li tajib color men palette
+// hne function getChartColor: ta9ra valeur mocht9a men data l 7aliya.
 export function getChartColor(index = 0) {
   return CHART_COLORS[index % CHART_COLORS.length];
 }
 
-// hna function li tprepare legend items b colors
+// hne function makeLegendItems: t7adher data b format mnasba lel affichage wala l analyse.
 export function makeLegendItems(labels = []) {
   return labels.filter(Boolean).map((label, index) => ({
     label,
@@ -299,7 +299,7 @@ export function makeLegendItems(labels = []) {
   }));
 }
 
-// hna function li tgenerate tooltip text l bar chart
+// hne function renderBarTooltip: contenu fil UI.
 export function renderBarTooltip({ id, value, indexValue, color }) {
   return `
 ${id}: ${indexValue}
@@ -307,7 +307,7 @@ Value: ${value}
 `;
 }
 
-// hna function li tgenerate tooltip text l line chart
+// hne function renderLineTooltip: contenu fil UI.
 export function renderLineTooltip(point) {
   const payload = point?.point || point;
   const seriesId = payload?.serieId || payload?.serie?.id || "Series";
@@ -321,7 +321,7 @@ Value: ${value}
 `;
 }
 
-// hna function li tgenerate tooltip text l pie chart
+// hne function renderPieTooltip: contenu fil UI.
 export function renderPieTooltip({ datum }) {
   return `
 ${datum.id}

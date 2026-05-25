@@ -1,44 +1,41 @@
+# hne serializers mta3 DRF: y7adhrou data 5arja lel frontend w yet7a99ou men data de5la men requests.
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from .models import Change, Incident, Request, UserProfile
 
 
-# hna class IncidentSerializer li tdefine model/w service
+# hne class IncidentSerializer: tamthel structure wala behavior fil backend.
 class IncidentSerializer(serializers.ModelSerializer):
-        # hna class Meta li tdefine model/w service
+    # hne class Meta: tamthel structure wala behavior fil backend.
     class Meta:
         model = Incident
         fields = "__all__"
 
-# hna class RequestSerializer li tdefine model/w service
 
-    # hna class Meta li tdefine model/w service
+# hne class RequestSerializer: tamthel structure wala behavior fil backend.
 class RequestSerializer(serializers.ModelSerializer):
-        # hna class Meta li tdefine model/w service
+    # hne class Meta: tamthel structure wala behavior fil backend.
     class Meta:
         model = Request
         fields = "__all__"
-# hna class ChangeSerializer li tdefine model/w service
 
-    # hna class Meta li tdefine model/w service
 
-    # hna class Meta li tdefine model/w service
+# hne class ChangeSerializer: tamthel structure wala behavior fil backend.
 class ChangeSerializer(serializers.ModelSerializer):
+    # hne class Meta: tamthel structure wala behavior fil backend.
     class Meta:
         model = Change
-        # hna class TeamMemberSerializer li tdefine model/w service
         fields = "__all__"
-# hna class TeamMemberSerializer li tdefine model/w service
 
 
+# hne class TeamMemberSerializer: tamthel structure wala behavior fil backend.
 class TeamMemberSerializer(serializers.ModelSerializer):
-        # hna class Meta li tdefine model/w service
     access = serializers.SerializerMethodField()
-        # hna class Meta li tdefine model/w service
     full_name = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
 
+    # hne class Meta: tamthel structure wala behavior fil backend.
     class Meta:
         model = User
         fields = [
@@ -48,51 +45,43 @@ class TeamMemberSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "full_name",
-                # hna function get_access li tdefine service logic
             "avatar",
             "is_active",
-                # hna function get_full_name li tdefine service logic
             "access",
         ]
-    # hna function get_access li tdefine service logic
 
-            # hna function get_full_name li tdefine service logic
-        # hna function get_avatar li tdefine service logic
+    # hne function get_access: t3awen fil logic mta3 backend dakhil hedha l fichier.
     def get_access(self, obj):
         return "Admin" if (obj.is_staff or obj.is_superuser) else "User"
 
-        # hna function get_avatar li tdefine service logic
+    # hne function get_full_name: t3awen fil logic mta3 backend dakhil hedha l fichier.
     def get_full_name(self, obj):
-        # hna class TeamMemberCreateSerializer li tdefine model/w service
         full_name = f"{obj.first_name} {obj.last_name}".strip()
         return full_name or obj.username
 
-    # hna class TeamMemberCreateSerializer li tdefine model/w service
+    # hne function get_avatar: t3awen fil logic mta3 backend dakhil hedha l fichier.
     def get_avatar(self, obj):
         profile, _ = UserProfile.objects.get_or_create(user=obj)
-        # hna class TeamMemberCreateSerializer li tdefine model/w service
         return profile.avatar
 
-    # hna function validate_username li tdefine service logic
 
+# hne class TeamMemberCreateSerializer: tamthel structure wala behavior fil backend.
 class TeamMemberCreateSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
-        # hna function validate_username li tdefine service logic
     email = serializers.EmailField(required=False, allow_blank=True)
     first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
-        # hna function create li tdefine service logic
     last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     password = serializers.CharField(write_only=True, min_length=8, style={"input_type": "password"})
-        # hna function create li tdefine service logic
     access = serializers.ChoiceField(choices=["Admin", "User"])
 
+    # hne function validate_username: t3awen fil logic mta3 backend dakhil hedha l fichier.
     def validate_username(self, value):
-            # hna function create li tdefine service logic
         username = value.strip()
         if User.objects.filter(username__iexact=username).exists():
             raise serializers.ValidationError("A user with this username already exists.")
         return username
 
+    # hne function create: t3awen fil logic mta3 backend dakhil hedha l fichier.
     def create(self, validated_data):
         access = validated_data.pop("access")
         password = validated_data.pop("password")
@@ -100,85 +89,74 @@ class TeamMemberCreateSerializer(serializers.Serializer):
             username=validated_data["username"],
             email=validated_data.get("email", "").strip(),
             first_name=validated_data.get("first_name", "").strip(),
-            # hna class CurrentUserUpdateSerializer li tdefine model/w service
             last_name=validated_data.get("last_name", "").strip(),
             is_staff=access == "Admin",
             is_superuser=access == "Admin",
-            # hna class CurrentUserUpdateSerializer li tdefine model/w service
             is_active=True,
         )
         user.set_password(password)
-            # hna function validate_username li tdefine service logic
         user.save()
         UserProfile.objects.get_or_create(user=user)
         return user
-    # hna function validate_username li tdefine service logic
 
 
+# hne class CurrentUserUpdateSerializer: tamthel structure wala behavior fil backend.
 class CurrentUserUpdateSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
-        # hna function update li tdefine service logic
     email = serializers.EmailField(required=False, allow_blank=True)
     first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
-        # hna function update li tdefine service logic
     last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     avatar = serializers.CharField(required=False, allow_blank=True)
 
+    # hne function validate_username: t3awen fil logic mta3 backend dakhil hedha l fichier.
     def validate_username(self, value):
         username = value.strip()
-            # hna function update li tdefine service logic
         user = self.context["request"].user
         exists = User.objects.filter(username__iexact=username).exclude(pk=user.pk).exists()
         if exists:
             raise serializers.ValidationError("A user with this username already exists.")
         return username
 
+    # hne function update: tbadel resource mawjouda hasb data l msada9 3liha.
     def update(self, instance, validated_data):
-        # hna class PasswordChangeSerializer li tdefine model/w service
         instance.username = validated_data["username"]
         instance.email = validated_data.get("email", "").strip()
         instance.first_name = validated_data.get("first_name", "").strip()
-            # hna function validate li tdefine service logic
         instance.last_name = validated_data.get("last_name", "").strip()
         instance.save()
 
         profile, _ = UserProfile.objects.get_or_create(user=instance)
         if "avatar" in validated_data:
-                # hna function validate li tdefine service logic
             profile.avatar = validated_data.get("avatar", "")
             profile.save(update_fields=["avatar"])
 
-            # hna function save li tdefine service logic
         return instance
 
-    # hna function validate li tdefine service logic
 
+# hne class PasswordChangeSerializer: tamthel structure wala behavior fil backend.
 class PasswordChangeSerializer(serializers.Serializer):
     current_password = serializers.CharField(required=False, allow_blank=True, write_only=True)
-        # hna function save li tdefine service logic
     new_password = serializers.CharField(min_length=8, write_only=True)
-# hna class TeamMemberAdminUpdateSerializer li tdefine model/w service
 
+    # hne function validate: t3awen fil logic mta3 backend dakhil hedha l fichier.
     def validate(self, attrs):
         target_user = self.context["target_user"]
         require_current = self.context.get("require_current_password", False)
-# hna class TeamMemberAdminUpdateSerializer li tdefine model/w service
 
         if require_current and not target_user.check_password(attrs.get("current_password", "")):
-                # hna function update li tdefine service logic
             raise serializers.ValidationError({"current_password": "Current password is incorrect."})
 
         return attrs
-    # hna function update li tdefine service logic
 
+    # hne function save: t3awen fil logic mta3 backend dakhil hedha l fichier.
     def save(self, **kwargs):
         user = self.context["target_user"]
         user.set_password(self.validated_data["new_password"])
         user.save(update_fields=["password"])
         return user
 
-    # hna function update li tdefine service logic
 
+# hne class TeamMemberAdminUpdateSerializer: tamthel structure wala behavior fil backend.
 class TeamMemberAdminUpdateSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
@@ -186,6 +164,7 @@ class TeamMemberAdminUpdateSerializer(serializers.Serializer):
     access = serializers.ChoiceField(choices=["Admin", "User"], required=False)
     is_active = serializers.BooleanField(required=False)
 
+    # hne function update: tbadel resource mawjouda hasb data l msada9 3liha.
     def update(self, instance, validated_data):
         if "first_name" in validated_data:
             instance.first_name = validated_data["first_name"].strip()

@@ -1,4 +1,4 @@
-// hna page login w authentication
+// hne page login: l user yodkhel username/password, w ila s7a7 l app y5azen access w refresh tokens.
 import { IconButton, Stack, useTheme } from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -8,12 +8,11 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { getApiUrl } from "../../utils/api";
 
-// @ts-ignore
-// hna page login: l form li y5alli user yconnecti w ykhalli token fl localStorage
+// hne component Login: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function Login({ setMode }) {
   const navigate = useNavigate();
   const theme = useTheme();
-    // hna component API_URL li trender page/component section
+  // hne component API_URL: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
   const API_URL = useMemo(() => getApiUrl("/auth/token/"), []);
   const isLight = theme.palette.mode === "light";
 
@@ -30,7 +29,7 @@ export default function Login({ setMode }) {
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, sx: 1 });
 
   useEffect(() => {
-        // hna function t li tperform helper logic
+    // hne function t: t3awen ba9i l code fil fichier hedha b logic sghira.
     const t = setTimeout(() => setMounted(true), 20);
     return () => clearTimeout(t);
   }, []);
@@ -39,15 +38,13 @@ export default function Login({ setMode }) {
     const el = cardRef.current;
     if (!el) return;
 
-    // @ts-ignore
+    // hne function onMove: t3awen ba9i l code fil fichier hedha b logic sghira.
     function onMove(e) {
       // @ts-ignore
       const r = el.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
-            // hna function dx li tperform helper logic
       const dx = (e.clientX - cx) / (r.width / 2);
-            // hna function dy li tperform helper logic
       const dy = (e.clientY - cy) / (r.height / 2);
 
       setTilt({
@@ -57,7 +54,7 @@ export default function Login({ setMode }) {
       });
     }
 
-        // hna function onLeave li tperform helper logic
+    // hne function onLeave: t3awen ba9i l code fil fichier hedha b logic sghira.
     function onLeave() {
       setTilt({ rx: 0, ry: 0, sx: 1 });
     }
@@ -75,7 +72,6 @@ export default function Login({ setMode }) {
   }, []);
 
   async function login() {
-    // request login l backend, n5ou access/refresh tokens wa n7azzinhom fl localStorage
     setLoading(true);
     setError(null);
 
@@ -451,12 +447,12 @@ export default function Login({ setMode }) {
   );
 }
 
-// @ts-ignore
+// hne function clamp: t3awen ba9i l code fil fichier hedha b logic sghira.
 function clamp(min, max, v) {
   return Math.max(min, Math.min(max, v));
 }
 
-// @ts-ignore
+// hne component Field: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function Field({ label, right, children, isLight }) {
   return (
     <div>
@@ -474,7 +470,7 @@ function Field({ label, right, children, isLight }) {
   );
 }
 
-// @ts-ignore
+// hne component Stat: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function Stat({ label, value }) {
   const theme = useTheme();
   const isLight = theme.palette.mode === "light";
@@ -500,7 +496,7 @@ function Stat({ label, value }) {
   );
 }
 
-// @ts-ignore
+// hne component Badge: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function Badge({ text }) {
   const theme = useTheme();
   const isLight = theme.palette.mode === "light";
@@ -519,7 +515,7 @@ function Badge({ text }) {
   );
 }
 
-// hna component Spinner li trender page/component section
+// hne component Spinner: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function Spinner() {
   return (
     <span
@@ -529,7 +525,7 @@ function Spinner() {
   );
 }
 
-// hna component CheckIcon li trender page/component section
+// hne component CheckIcon: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function CheckIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">

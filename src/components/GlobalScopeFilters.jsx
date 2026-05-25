@@ -1,7 +1,9 @@
+// hne component mouchterek lel filters l 3amma kif search, dates, w options okhra.
 import React from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import PageFilters from "./PageFilters";
 
+// hne component GlobalScopeFilters: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function GlobalScopeFilters({
   title,
   activeCount,

@@ -1,4 +1,4 @@
-// hna page manage team w user accounts
+// hne page team management: taffichi les comptes lkol w tkhallel admin ybadel access, status, password, wala yfasakh account.
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import {
@@ -33,9 +33,8 @@ import Header from "../../components/Header";
 import PageFilters from "../../components/PageFilters";
 import { apiFetchJson } from "../../utils/api";
 
-// hna component Team li trender page/component section
+// hne component Team: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function Team() {
-  // page Manage Team: yjib list ta3 account users w admins, ykhalik tbadel access w t3ayet reset password
   const theme = useTheme();
   const { currentUser, reloadCurrentUser } = useOutletContext();
   const [rows, setRows] = React.useState([]);
@@ -53,9 +52,8 @@ export default function Team() {
 
   const isAdmin = currentUser?.access === "Admin";
 
-    // hna function loadTeam li tload data w troje3 response
+  // hne function loadTeam: tchargi data wala context l lazem 9bal ma page taffichi contenu s7i7.
   const loadTeam = React.useCallback(async () => {
-    // nfetchiw team members men backend w n7awloublocks set rows
     setLoading(true);
     setError("");
 
@@ -84,7 +82,7 @@ export default function Team() {
   );
   const statusOptions = ["Active", "Disabled"];
 
-    // hna function filteredRows li tfilter rows/data
+  // hne function filteredRows: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
   const filteredRows = React.useMemo(() => {
     return rows.filter((row) => {
       if (
@@ -114,7 +112,7 @@ export default function Team() {
     [filters]
   );
 
-    // hna function resetFilters li trédoui state / filters l default
+  // hne function resetFilters: l form wala l filters l 7ala l aslaya.
   function resetFilters() {
     setFilters({
       search: "",

@@ -1,5 +1,5 @@
 // @ts-ignore
-// hna page incidents list w filter w analyse
+// hne page incidents: fiha tableau, filters, delete, w selection mta3 rows bech yet7alllou.
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -21,9 +21,8 @@ import DeleteToolbar from "../../components/DeleteToolbar";
 import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
 
-// hna component Incidents li trender page/component section
+// hne component Incidents: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function Incidents() {
-  // page incidents: yjib liste ta3 incidents, y5alli user ya3mel filtering, selection, export
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,7 +49,7 @@ export default function Incidents() {
     apiFetch("/incidents/")
       .then(async (res) => {
 
-                // hna function data li tprepare data values
+        // hne variable data: data m7adhra lel affichage wala l analyse.
         const data = await res.json().catch(() => []);
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
 
@@ -82,7 +81,7 @@ export default function Incidents() {
     [rows]
   );
 
-    // hna function filteredRows li tfilter rows/data
+  // hne function filteredRows: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
   const filteredRows = useMemo(() => {
 
     return rows.filter((r) => {
@@ -132,10 +131,10 @@ export default function Incidents() {
     [filters, dateFrom, dateTo]
   );
 
-    // hna function handleAnalyse li thandle event w tmanage action
+  // hne function handleAnalyse: tet9ad biha actions mta3 l user kif click, change, open, wala close, w ba3dha tbadel state wala navigation.
   function handleAnalyse() {
 
-            // hna function selectedData li tprepare data values
+      // hne variable selectedData: data m7adhra lel affichage wala l analyse.
       const selectedData = filteredRows.filter((r) =>
       selectedIds.includes(r.id)
     );
@@ -146,7 +145,7 @@ export default function Incidents() {
 
   }
 
-    // hna function resetFilters li trédoui state / filters l default
+  // hne function resetFilters: l form wala l filters l 7ala l aslaya.
   function resetFilters() {
     setFilters({
       search: "",
@@ -158,7 +157,7 @@ export default function Incidents() {
     setDateFrom("");
     setDateTo("");
   }
-    // hna function updateFilter li tfilter rows/data
+  // hne function updateFilter: tbadel part men state wala data hasb l ma3loumet jdida.
   function updateFilter(key, value) {
     if (key === "dateFrom") {
       setDateFrom(value);
@@ -171,7 +170,7 @@ export default function Incidents() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
-    // hna function columns li tperform helper logic
+  // hne variable columns: ta3ref columns mta3 DataGrid w kol colonne chnia tori.
   const columns = useMemo(() => [
 
     { field: "number", headerName: "Incident ID", flex: 1, minWidth: 140 },
@@ -274,7 +273,6 @@ export default function Incidents() {
 
       {err ? <Alert severity="error" sx={{ mb: 2 }}>{err}</Alert> : null}
 
-      {/* Delete + Analyse bar */}
 
       <Box
         sx={{
@@ -304,7 +302,6 @@ export default function Incidents() {
 
       </Box>
 
-      {/* Filters */}
 
       <GlobalScopeFilters
         title="Incident Filters"
@@ -340,6 +337,7 @@ export default function Incidents() {
           disableRowSelectionOnClick
           slots={{ toolbar: GridToolbar }}
           onRowSelectionModelChange={(ids) => setSelectedIds(ids)}
+          /* hne click 3la ay sater yehez l user l saf7et details mta3 l incident hedheka. */
           onRowClick={(params) =>
             navigate(`/incidents/${params.row.number}`)
           }

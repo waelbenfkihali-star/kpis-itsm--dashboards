@@ -1,4 +1,4 @@
-// hna analysis page khusus b changes
+// hne page analysis mta3 changes l mokhtarin: tebni KPIs w charts w insights 3lihom.
 import React, { useMemo } from "react";
 import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -29,7 +29,7 @@ import {
 } from "../analysis/analysisUtils";
 import { buildChangeInsights } from "../analysis/reportInsights";
 
-// hna component KpiCard li trender page/component section
+// hne component KpiCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function KpiCard({ title, value, note }) {
   return (
     <Paper sx={{ p: 2.2, flex: 1, minWidth: 200 }}>
@@ -46,7 +46,7 @@ function KpiCard({ title, value, note }) {
   );
 }
 
-// hna component ChartCard li trender page/component section
+// hne component ChartCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   return (
     <Paper sx={{ p: 2, flex: 1, minWidth: 320 }}>
@@ -64,12 +64,12 @@ function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   );
 }
 
-// hna function hasKeyword li tperform helper logic
+// hne function hasKeyword: t3awen ba9i l code fil fichier hedha b logic sghira.
 function hasKeyword(text, keywords) {
   return keywords.some((keyword) => text.includes(keyword));
 }
 
-// hna component ChangesAnalysis li trender page/component section
+// hne component ChangesAnalysis: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function ChangesAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -77,19 +77,19 @@ export default function ChangesAnalysis() {
   const rows = Array.isArray(location.state?.data) ? location.state.data : [];
   const selectedKpi = location.state?.selectedKpi || null;
 
-    // hna function openedMonthly li tperform helper logic
+  // hne function openedMonthly: t3awen ba9i l code fil fichier hedha b logic sghira.
   const openedMonthly = useMemo(() => monthlySeriesInRange(rows, "opened", rows, "opened"), [rows]);
   const openedVsClosed = useMemo(
     () => monthlyDualSeriesInRange(rows, "opened", "closed", "Opened", "Closed", rows, "opened"),
     [rows]
   );
-    // hna function services li tperform helper logic
+  // hne function services: t3awen ba9i l code fil fichier hedha b logic sghira.
   const services = useMemo(() => countBy(rows, "affected_service"), [rows]);
-    // hna function groups li tperform helper logic
+  // hne function groups: t3awen ba9i l code fil fichier hedha b logic sghira.
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
-    // hna function states li tperform helper logic
+  // hne function states: t3awen ba9i l code fil fichier hedha b logic sghira.
   const states = useMemo(() => countBy(rows, "state"), [rows]);
-    // hna function types li tperform helper logic
+  // hne function types: t3awen ba9i l code fil fichier hedha b logic sghira.
   const types = useMemo(() => countBy(rows, "type"), [rows]);
   const serviceMonthly = useMemo(
     () => monthlyBreakdownInRange(rows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
@@ -133,7 +133,7 @@ export default function ChangesAnalysis() {
   }
 
   const total = rows.length;
-    // hna function critical li tperform helper logic
+  // hne function critical: t3awen ba9i l code fil fichier hedha b logic sghira.
   const critical = countWhere(rows, (row) => row.priority === "P1");
   const open = countWhere(
     rows,
@@ -154,7 +154,7 @@ export default function ChangesAnalysis() {
       diffInDays(row.planned_end_date, new Date()) !== null &&
       diffInDays(row.planned_end_date, new Date()) > 0
   );
-    // hna function focusedView li tperform helper logic
+  // hne function focusedView: t3awen ba9i l code fil fichier hedha b logic sghira.
   const focusedView = useMemo(() => {
     if (!selectedKpi) return null;
 

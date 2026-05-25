@@ -3,6 +3,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+# hne class Migration: tamthel structure wala behavior fil backend.
 class Migration(migrations.Migration):
 
     dependencies = [

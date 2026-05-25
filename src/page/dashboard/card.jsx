@@ -1,9 +1,9 @@
-// hna component card li yest3emel fi dashboard rows
+// hne card component 9dim ken yetesta3mel fil dashboard l 9dim.
 import React from "react";
 import { Box, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { ResponsivePie } from "@nivo/pie";
 
-// hna component Card li trender page/component section
+// hne component Card: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const Card = ({ icon, title, subTitle, value, increase, data, scheme }) => {
   const theme = useTheme();
 

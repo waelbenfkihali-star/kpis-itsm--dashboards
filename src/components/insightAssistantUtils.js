@@ -1,3 +1,4 @@
+// hne local logic mta3 AI dashboard: yfasser prompt, y7adher data, w ybni result local 9bal refinement men backend.
 import {
   countBy,
   countWhere,
@@ -655,6 +656,7 @@ const MONTH_ALIASES = {
   decembre: 12,
 };
 
+// hne function normalizeText: twa7ed format mta3 valeur bech ba9i l app yeta3amel ma3aha b souhoula.
 function normalizeText(value) {
   return String(value || "")
     .toLowerCase()
@@ -665,6 +667,7 @@ function normalizeText(value) {
     .trim();
 }
 
+// hne function normalizeQuery: twa7ed format mta3 valeur bech ba9i l app yeta3amel ma3aha b souhoula.
 function normalizeQuery(value) {
   let text = normalizeText(value)
     .replace(/\b3and\b/g, "have")
@@ -688,6 +691,7 @@ function normalizeQuery(value) {
   return text.replace(/\s+/g, " ").trim();
 }
 
+// hne function titleCase: t3awen ba9i l code fil fichier hedha b logic sghira.
 function titleCase(value) {
   return String(value || "")
     .split(" ")
@@ -696,34 +700,41 @@ function titleCase(value) {
     .join(" ");
 }
 
+// hne function isClosedState: true wala false hasb condition mo3ayna fil logic.
 function isClosedState(value) {
   return ["closed", "resolved", "completed", "implemented"].includes(normalizeText(value));
 }
 
+// hne function parseDateValue: tfasser input w t7awlou l data mafhouma lel code.
 function parseDateValue(value) {
   if (!value) return null;
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+// hne function endOfMonth: t3awen ba9i l code fil fichier hedha b logic sghira.
 function endOfMonth(year, monthIndex) {
   return new Date(year, monthIndex + 1, 0, 23, 59, 59, 999);
 }
 
+// hne function monthsAgo: t3awen ba9i l code fil fichier hedha b logic sghira.
 function monthsAgo(count, baseDate = new Date()) {
   return new Date(baseDate.getFullYear(), baseDate.getMonth() - count, 1);
 }
 
+// hne function daysAgo: t3awen ba9i l code fil fichier hedha b logic sghira.
 function daysAgo(count, baseDate = new Date()) {
   const next = new Date(baseDate);
   next.setDate(next.getDate() - count);
   return next;
 }
 
+// hne function unique: t3awen ba9i l code fil fichier hedha b logic sghira.
 function unique(items) {
   return [...new Set(items.filter(Boolean))];
 }
 
+// hne function tokenize: t3awen ba9i l code fil fichier hedha b logic sghira.
 function tokenize(value) {
   return normalizeText(value)
     .split(" ")
@@ -731,12 +742,14 @@ function tokenize(value) {
     .filter((token) => token.length >= 2);
 }
 
+// hne function levenshtein: t3awen ba9i l code fil fichier hedha b logic sghira.
 function levenshtein(left, right) {
   const a = String(left || "");
   const b = String(right || "");
   if (!a) return b.length;
   if (!b) return a.length;
 
+  // hne function matrix: t3awen ba9i l code fil fichier hedha b logic sghira.
   const matrix = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
   for (let i = 0; i <= a.length; i += 1) matrix[i][0] = i;
   for (let j = 0; j <= b.length; j += 1) matrix[0][j] = j;
@@ -755,6 +768,7 @@ function levenshtein(left, right) {
   return matrix[a.length][b.length];
 }
 
+// hne function similarityScore: t3awen ba9i l code fil fichier hedha b logic sghira.
 function similarityScore(left, right) {
   const a = normalizeText(left);
   const b = normalizeText(right);
@@ -766,6 +780,7 @@ function similarityScore(left, right) {
   return 1 - distance / Math.max(a.length, b.length);
 }
 
+// hne function keywordScore: t3awen ba9i l code fil fichier hedha b logic sghira.
 function keywordScore(text, keywords = []) {
   return keywords.reduce((score, keyword) => {
     const normalizedKeyword = normalizeText(keyword);
@@ -774,7 +789,9 @@ function keywordScore(text, keywords = []) {
 
     const textTokens = tokenize(text);
     const keywordTokens = tokenize(normalizedKeyword);
+    // hne function fuzzyHits: t3awen ba9i l code fil fichier hedha b logic sghira.
     const fuzzyHits = keywordTokens.reduce((sum, keywordToken) => {
+      // hne function best: t3awen ba9i l code fil fichier hedha b logic sghira.
       const best = textTokens.reduce((bestScore, token) => Math.max(bestScore, similarityScore(token, keywordToken)), 0);
       return sum + (best >= 0.88 ? best : 0);
     }, 0);
@@ -783,10 +800,12 @@ function keywordScore(text, keywords = []) {
   }, 0);
 }
 
+// hne function normalizedConfidence: twa7ed format mta3 valeur bech ba9i l app yeta3amel ma3aha b souhoula.
 function normalizedConfidence(rawScore, baseline = 1) {
   return Math.max(0.25, Math.min(0.99, rawScore / baseline));
 }
 
+// hne function detectModules: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectModules(text) {
   const scoredModules = Object.entries(MODULE_CONFIG)
     .map(([key, config]) => ({
@@ -817,10 +836,12 @@ function detectModules(text) {
   };
 }
 
+// hne function detectAllYears: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectAllYears(text) {
   return [...text.matchAll(/\b(20\d{2})\b/g)].map((match) => Number(match[1]));
 }
 
+// hne function detectQuarter: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectQuarter(text) {
   const quarterMatch =
     text.match(/\bq([1-4])\b/) ||
@@ -830,6 +851,7 @@ function detectQuarter(text) {
   return Number(quarterMatch[1]);
 }
 
+// hne function detectTopN: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectTopN(text) {
   const topMatch =
     text.match(/\b(top|first|best)\s+(\d{1,2})\b/) ||
@@ -841,6 +863,7 @@ function detectTopN(text) {
   return limitMatch ? Math.max(1, Math.min(Number(limitMatch[2]), 20)) : 8;
 }
 
+// hne function detectGroupings: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectGroupings(text, module) {
   const available = MODULE_CONFIG[module].groupKeys;
   const scored = Object.entries(GROUP_KEYWORDS)
@@ -850,6 +873,7 @@ function detectGroupings(text, module) {
       score: keywordScore(text, keywords),
     }))
     .sort((left, right) => right.score - left.score);
+  // hne function detected: t3awen ba9i l code fil fichier hedha b logic sghira.
   const detected = scored.filter((item) => item.score > 0).map((item) => item.key);
 
   if (!detected.length) {
@@ -875,6 +899,7 @@ function detectGroupings(text, module) {
   };
 }
 
+// hne function detectState: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectState(text) {
   const openScore = keywordScore(text, [...STATE_KEYWORDS.open, ...EXTRA_KEYWORD_GROUPS.open]);
   const closedScore = keywordScore(text, [...STATE_KEYWORDS.closed, ...EXTRA_KEYWORD_GROUPS.closed]);
@@ -883,6 +908,7 @@ function detectState(text) {
   return { value: "all", confidence: 0.4 };
 }
 
+// hne function detectMetric: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectMetric(text) {
   const scored = Object.entries(METRIC_KEYWORDS)
     .map(([key, keywords]) => ({
@@ -901,16 +927,19 @@ function detectMetric(text) {
   };
 }
 
+// hne function isCompareIntent: true wala false hasb condition mo3ayna fil logic.
 function isCompareIntent(text, modules) {
   return modules.length > 1 || EXTRA_KEYWORD_GROUPS.compare.some((keyword) => text.includes(keyword)) || /\bcontre|between|compare moi|compare me\b/.test(text);
 }
 
+// hne function detectChartType: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectChartType(text, grouping, compare) {
   if (compare || grouping === "month") return "line";
   if (PIE_KEYWORDS.some((keyword) => text.includes(normalizeText(keyword)))) return "pie";
   return "bar";
 }
 
+// hne function buildInterpretation: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildInterpretation(intent, detection) {
   const moduleLabel = intent.overview && (!intent.module || intent.compare)
     ? "global overview"
@@ -939,6 +968,7 @@ function buildInterpretation(intent, detection) {
   };
 }
 
+// hne function buildFollowUps: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildFollowUps(intent) {
   const moduleLabel = intent.compare ? "comparison" : MODULE_CONFIG[intent.module]?.label?.toLowerCase() || "dashboard";
   const primaryGrouping = intent.groupings?.[0] || intent.grouping || "service";
@@ -952,6 +982,7 @@ function buildFollowUps(intent) {
   ]).slice(0, 4);
 }
 
+// hne function buildRecoverySuggestions: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildRecoverySuggestions(intent) {
   const targetModule = intent.compare ? "modules" : MODULE_CONFIG[intent.module]?.label?.toLowerCase() || "items";
   return [
@@ -961,6 +992,7 @@ function buildRecoverySuggestions(intent) {
   ];
 }
 
+// hne function applyIntentTemplates: t3awen ba9i l code fil fichier hedha b logic sghira.
 function applyIntentTemplates(baseIntent, text) {
   for (const template of INTENT_TEMPLATES) {
     if (template.terms.every((term) => text.includes(term))) {
@@ -970,6 +1002,7 @@ function applyIntentTemplates(baseIntent, text) {
   return baseIntent;
 }
 
+// hne function detectDateScope: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectDateScope(text) {
   const years = detectAllYears(text);
   const quarter = detectQuarter(text);
@@ -1086,7 +1119,9 @@ function detectDateScope(text) {
     };
   }
 
+  // hne function monthKeys: t3awen ba9i l code fil fichier hedha b logic sghira.
   const monthKeys = Object.keys(MONTH_ALIASES).sort((left, right) => right.length - left.length);
+  // hne function monthName: t3awen ba9i l code fil fichier hedha b logic sghira.
   const monthName = monthKeys.find((monthKey) => new RegExp(`\\b${monthKey}\\b`).test(text));
   if (monthName) {
     const monthIndex = MONTH_ALIASES[monthName] - 1;
@@ -1146,15 +1181,18 @@ function detectDateScope(text) {
   };
 }
 
+// hne function extractDistinctValues: t3awen ba9i l code fil fichier hedha b logic sghira.
 function extractDistinctValues(rows, key) {
   return [...new Set(rows.map((row) => String(row?.[key] || "").trim()).filter(Boolean))];
 }
 
+// hne function findEntityMatch: t3awen ba9i l code fil fichier hedha b logic sghira.
 function findEntityMatch(text, rows, key) {
   const values = extractDistinctValues(rows, key)
     .filter((value) => normalizeText(value).length >= 2)
     .sort((left, right) => right.length - left.length);
 
+  // hne function directMatch: t3awen ba9i l code fil fichier hedha b logic sghira.
   const directMatch = values.find((value) => {
     const normalizedValue = normalizeText(value);
     return normalizedValue && text.includes(normalizedValue);
@@ -1190,11 +1228,13 @@ function findEntityMatch(text, rows, key) {
   return bestScore >= 0.82 ? bestMatch : null;
 }
 
+// hne function detectPriorityFilter: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectPriorityFilter(text) {
   const match = text.match(/\bp([1-4])\b/);
   return match ? `P${match[1]}` : null;
 }
 
+// hne function extractFilterCandidates: t3awen ba9i l code fil fichier hedha b logic sghira.
 function extractFilterCandidates(text, keywords = []) {
   const escaped = keywords
     .map((keyword) => keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
@@ -1225,12 +1265,14 @@ function extractFilterCandidates(text, keywords = []) {
   return unique(candidates).slice(0, 4);
 }
 
+// hne function collectRowsForModules: t3awen ba9i l code fil fichier hedha b logic sghira.
 function collectRowsForModules(modules, datasets) {
   return unique(modules)
     .filter((module) => MODULE_CONFIG[module])
     .flatMap((module) => Array.isArray(datasets[module]) ? datasets[module] : []);
 }
 
+// hne function findFilterMatchAcrossModules: t3awen ba9i l code fil fichier hedha b logic sghira.
 function findFilterMatchAcrossModules(text, modules, datasets, field, explicitCandidates = []) {
   let bestMatch = null;
   let bestScore = 0;
@@ -1270,6 +1312,7 @@ function findFilterMatchAcrossModules(text, modules, datasets, field, explicitCa
   return bestMatch;
 }
 
+// hne function detectSemanticFilters: t3awen ba9i l code fil fichier hedha b logic sghira.
 function detectSemanticFilters(text, modules, datasets) {
   const targetModules = modules?.length ? modules : ["incidents"];
   const filters = [];
@@ -1307,6 +1350,7 @@ function detectSemanticFilters(text, modules, datasets) {
   return filters;
 }
 
+// hne function filterByDateScope: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
 function filterByDateScope(rows, dateKey, dateScope) {
   if (!dateScope?.startDate && !dateScope?.endDate && !dateScope?.quarter) return rows;
 
@@ -1321,6 +1365,7 @@ function filterByDateScope(rows, dateKey, dateScope) {
   });
 }
 
+// hne function filterByState: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
 function filterByState(rows, state) {
   if (state === "open") {
     return rows.filter((row) => !isClosedState(row.state));
@@ -1331,6 +1376,7 @@ function filterByState(rows, state) {
   return rows;
 }
 
+// hne function filterByMetric: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
 function filterByMetric(rows, module, metric) {
   if (metric === "major" && module === "incidents") {
     return rows.filter((row) => row.is_major || normalizeText(row.priority) === "p1");
@@ -1350,6 +1396,7 @@ function filterByMetric(rows, module, metric) {
   return rows;
 }
 
+// hne function applyDetectedFilters: t3awen ba9i l code fil fichier hedha b logic sghira.
 function applyDetectedFilters(rows, filters, module = "incidents") {
   const fieldMap = MODULE_CONFIG[module]?.filterKeys || {};
   return filters.reduce(
@@ -1362,6 +1409,7 @@ function applyDetectedFilters(rows, filters, module = "incidents") {
   );
 }
 
+// hne function makeBarRows: t7adher data b format mnasba lel affichage wala l analyse.
 function makeBarRows(rows, key, limit = 8) {
   return countBy(rows, key)
     .slice(0, limit)
@@ -1371,6 +1419,7 @@ function makeBarRows(rows, key, limit = 8) {
     }));
 }
 
+// hne function makePieRows: t7adher data b format mnasba lel affichage wala l analyse.
 function makePieRows(rows, key, limit = 8) {
   return countBy(rows, key)
     .slice(0, limit)
@@ -1381,6 +1430,7 @@ function makePieRows(rows, key, limit = 8) {
     }));
 }
 
+// hne function makeSingleSeriesChart: t7adher data b format mnasba lel affichage wala l analyse.
 function makeSingleSeriesChart(rows, module, grouping, chartType, topN) {
   const key = MODULE_CONFIG[module].groupKeys[grouping];
   if (grouping === "month") {
@@ -1401,7 +1451,9 @@ function makeSingleSeriesChart(rows, module, grouping, chartType, topN) {
   };
 }
 
+// hne function buildOverviewKpis: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildOverviewKpis(series) {
+  // hne function total: t3awen ba9i l code fil fichier hedha b logic sghira.
   const total = series.reduce((sum, item) => sum + item.rows.length, 0);
   const openTotal = series.reduce(
     (sum, item) => sum + item.rows.filter((row) => !isClosedState(row.state)).length,
@@ -1427,6 +1479,7 @@ function buildOverviewKpis(series) {
   ].slice(0, 5);
 }
 
+// hne function buildOverviewWidgets: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildOverviewWidgets(series) {
   return [
     {
@@ -1454,11 +1507,13 @@ function buildOverviewWidgets(series) {
   ];
 }
 
+// hne function formatValue: t3awen ba9i l code fil fichier hedha b logic sghira.
 function formatValue(value) {
   if (typeof value === "number") return value.toLocaleString();
   return String(value ?? "-");
 }
 
+// hne function buildTopInsight: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildTopInsight(rows, module, grouping, metric) {
   const config = MODULE_CONFIG[module];
   if (!rows.length) {
@@ -1504,9 +1559,12 @@ function buildTopInsight(rows, module, grouping, metric) {
   };
 }
 
+// hne function buildExecutiveNotes: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildExecutiveNotes(rows, module, grouping, state, metric) {
   const config = MODULE_CONFIG[module];
+  // hne function openCount: t3awen ba9i l code fil fichier hedha b logic sghira.
   const openCount = rows.filter((row) => !isClosedState(row.state)).length;
+  // hne function closedCount: t3awen ba9i l code fil fichier hedha b logic sghira.
   const closedCount = rows.filter((row) => isClosedState(row.state)).length;
   const topDriver = topLabel(rows, config.groupKeys[grouping] || config.groupKeys.service || config.groupKeys.group, "-");
 
@@ -1522,9 +1580,12 @@ function buildExecutiveNotes(rows, module, grouping, state, metric) {
   ];
 }
 
+// hne function makeKpis: t7adher data b format mnasba lel affichage wala l analyse.
 function makeKpis(rows, module, metric, grouping) {
   const config = MODULE_CONFIG[module];
+  // hne function openCount: t3awen ba9i l code fil fichier hedha b logic sghira.
   const openCount = rows.filter((row) => !isClosedState(row.state)).length;
+  // hne function closedCount: t3awen ba9i l code fil fichier hedha b logic sghira.
   const closedCount = rows.filter((row) => isClosedState(row.state)).length;
   const keyForTop = config.groupKeys[grouping] || config.groupKeys.service || config.groupKeys.group;
   const metricCount =
@@ -1576,6 +1637,7 @@ function makeKpis(rows, module, metric, grouping) {
   return cards;
 }
 
+// hne function summarizeScope: t3awen ba9i l code fil fichier hedha b logic sghira.
 function summarizeScope({ rows, module, grouping, dateScope, metric, filters, state }) {
   const bits = [`Scope: ${rows.length} ${MODULE_CONFIG[module].label.toLowerCase()}`];
   if (dateScope?.label) bits.push(`Period: ${dateScope.label}`);
@@ -1589,9 +1651,11 @@ function summarizeScope({ rows, module, grouping, dateScope, metric, filters, st
   return bits;
 }
 
+// hne function buildTitle: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildTitle({ module, grouping, dateScope, state, metric, filters, compare }) {
   const stateLabel = state !== "all" ? `${titleCase(state)} ` : "";
   const metricLabel = metric !== "count" ? `${titleCase(metric)} ` : "";
+  // hne function filterLabel: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
   const filterLabel = filters?.length ? ` for ${filters.map((filter) => filter.value).join(", ")}` : "";
   const timeLabel = dateScope?.label ? ` in ${dateScope.label}` : "";
 
@@ -1600,6 +1664,7 @@ function buildTitle({ module, grouping, dateScope, state, metric, filters, compa
   return `${stateLabel}${metricLabel}${MODULE_CONFIG[module].label} by ${titleCase(grouping)}${timeLabel}${filterLabel}`;
 }
 
+// hne function buildSecondaryWidgets: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildSecondaryWidgets(rows, module, primaryGrouping, requestedGroupings, topN) {
   const candidates = unique([
     ...requestedGroupings.filter((grouping) => grouping !== primaryGrouping),
@@ -1614,6 +1679,7 @@ function buildSecondaryWidgets(rows, module, primaryGrouping, requestedGroupings
   }));
 }
 
+// hne function buildOverviewResult: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildOverviewResult(intent, datasets) {
   const modules = Array.isArray(intent?.modules) && intent.modules.length
     ? intent.modules.filter((module) => MODULE_CONFIG[module])
@@ -1623,6 +1689,7 @@ function buildOverviewResult(intent, datasets) {
   const metric = intent?.metric || "count";
   const filters = Array.isArray(intent?.filters) ? intent.filters : [];
 
+  // hne variable series: series wajda lel chart.
   const series = modules.map((module) => {
     const config = MODULE_CONFIG[module];
     let rows = Array.isArray(datasets[module]) ? datasets[module] : [];
@@ -1642,6 +1709,7 @@ function buildOverviewResult(intent, datasets) {
     };
   });
 
+  // hne variable nonEmptySeries: series wajda lel chart.
   const nonEmptySeries = series.filter((item) => item.rows.length);
   if (!nonEmptySeries.length) {
     return {
@@ -1698,6 +1766,7 @@ function buildOverviewResult(intent, datasets) {
   };
 }
 
+// hne function buildSingleModuleResult: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildSingleModuleResult(intent, datasets) {
   const module = MODULE_CONFIG[intent?.module] ? intent.module : "incidents";
   const config = MODULE_CONFIG[module];
@@ -1758,13 +1827,16 @@ function buildSingleModuleResult(intent, datasets) {
   };
 }
 
+// hne function buildComparisonResult: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildComparisonResult(intent, datasets) {
   const modules = Array.isArray(intent.modules) && intent.modules.length ? intent.modules : ["incidents", "requests"];
+  // hne function filteredModules: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
   const filteredModules = modules.filter((module) => MODULE_CONFIG[module]).slice(0, 3);
   const dateScope = intent?.dateScope || detectDateScope("");
   const state = intent?.state || "all";
   const metric = intent?.metric || "count";
 
+  // hne variable series: series wajda lel chart.
   const series = filteredModules.map((module) => {
     const config = MODULE_CONFIG[module];
     let rows = Array.isArray(datasets[module]) ? datasets[module] : [];
@@ -1849,6 +1921,7 @@ function buildComparisonResult(intent, datasets) {
   };
 }
 
+// hne function buildIntentFromQuery: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildIntentFromQuery(query, datasets) {
   const text = normalizeQuery(query);
   const moduleDetection = detectModules(text);
@@ -1899,6 +1972,7 @@ function buildIntentFromQuery(query, datasets) {
   };
 }
 
+// hne function buildAssistantIntentHint: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 export function buildAssistantIntentHint(query, datasets) {
   const intent = buildIntentFromQuery(query, datasets);
   return {
@@ -1918,6 +1992,7 @@ export function buildAssistantIntentHint(query, datasets) {
   };
 }
 
+// hne function buildDateScopeFromIntent: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 function buildDateScopeFromIntent(intent) {
   if (intent?.dateScope) return intent.dateScope;
   if (!(intent?.year || intent?.quarter || intent?.yearRange || intent?.year_range)) return detectDateScope("");
@@ -1946,6 +2021,7 @@ function buildDateScopeFromIntent(intent) {
   };
 }
 
+// hne function buildAssistantResultFromIntent: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 export function buildAssistantResultFromIntent(intent, datasets) {
   const normalizedIntent = {
     ...intent,
@@ -1971,6 +2047,7 @@ export function buildAssistantResultFromIntent(intent, datasets) {
   return buildSingleModuleResult(normalizedIntent, datasets);
 }
 
+// hne function buildAssistantResult: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
 export function buildAssistantResult(query, datasets) {
   const text = normalizeQuery(query);
   if (!text.trim()) {

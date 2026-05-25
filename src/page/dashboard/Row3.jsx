@@ -1,11 +1,11 @@
-// hna row ta3 dashboard li tben cards w mini charts
+// hne row theleth men layout 9dim fil dashboard fih cards wala charts sghar.
 import { Box, Paper, Stack, Typography, useTheme } from "@mui/material";
 import Pie from "../../page/pieChart/pie";
 import React from "react";
 import Bar from "../../page/barChart/bar";
 import Geo from "../../page/geography/geo";
 
-// hna component Row3 li trender page/component section
+// hne component Row3: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const Row3 = () => {
   const theme = useTheme();
   return (

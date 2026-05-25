@@ -1,4 +1,4 @@
-// hna config w initial values ta3 KPI form
+// hne config mta3 KPI form: initial values w options l thabtin.
 export const KPI_INITIAL_FORM = {
   id: "",
   kpi_id: "",

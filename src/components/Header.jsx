@@ -1,3 +1,4 @@
+// hne component mouchterek lel title w subtitle mta3 kol page.
 import React from 'react';
 import { Box, Typography, useTheme } from "@mui/material";
 

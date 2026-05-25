@@ -1,4 +1,4 @@
-// hna page edit KPI existing
+// hne page modification KPI mawjouda 9bal w update mta3ha fil stockage local.
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
@@ -15,7 +15,7 @@ import { KPI_INITIAL_FORM } from "./kpiFormConfig";
 
 import { getKpiById, loadKpis, upsertKpi } from "./kpiStorage";
 
-// hna component EditKpi li trender page/component section
+// hne component EditKpi: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const EditKpi = () => {
 
   const navigate = useNavigate();
@@ -59,12 +59,12 @@ const EditKpi = () => {
 
   }, [id]);
 
-    // hna function setField li tset field / state value
+  // hne function setField: t3awen ba9i l code fil fichier hedha b logic sghira.
   function setField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-    // hna function isValid li tfassi boolean condition
+  // hne function isValid: true wala false hasb condition mo3ayna fil logic.
   const isValid = useMemo(() => {
     return (
       form.name.trim() !== "" &&
@@ -73,7 +73,7 @@ const EditKpi = () => {
     );
   }, [form]);
 
-    // hna function resetForm li trédoui state / filters l default
+  // hne function resetForm: l form wala l filters l 7ala l aslaya.
   function resetForm() {
     setForm((prev) => ({
       ...prev,
@@ -90,7 +90,7 @@ const EditKpi = () => {
     }));
   }
 
-    // hna function submit li tsubmit form data
+  // hne function submit: form wala request lel backend w teta3amel m3a success wala error.
   function submit() {
 
     if (!isValid) return;

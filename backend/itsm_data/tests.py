@@ -1,3 +1,4 @@
+# hne tests backend bech net2akdou elli APIs l ra2isiya tekhdem kif ma .
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -5,9 +6,9 @@ from rest_framework.test import APITestCase
 from .models import UserProfile
 
 
-# hna class TeamApiTests li tdefine model/w service
+# hne class TeamApiTests: tamthel structure wala behavior fil backend.
 class TeamApiTests(APITestCase):
-        # hna function setUp li tdefine service logic
+    # hne function setUp: t3awen fil logic mta3 backend dakhil hedha l fichier.
     def setUp(self):
         self.admin = User.objects.create_user(
             username="wael",
@@ -22,9 +23,8 @@ class TeamApiTests(APITestCase):
             password="StrongPass123!",
             first_name="Ritha",
         )
-    # hna function test_me_returns_authenticated_user li tdefine service logic
 
-        # hna function test_me_returns_authenticated_user li tdefine service logic
+    # hne test test_me_returns_authenticated_user: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_me_returns_authenticated_user(self):
         self.client.force_authenticate(user=self.admin)
 
@@ -32,10 +32,9 @@ class TeamApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["username"], "wael")
-            # hna function test_team_list_returns_existing_accounts li tdefine service logic
         self.assertEqual(response.data["access"], "Admin")
-    # hna function test_team_list_returns_existing_accounts li tdefine service logic
 
+    # hne test test_team_list_returns_existing_accounts: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_team_list_returns_existing_accounts(self):
         self.client.force_authenticate(user=self.user)
 
@@ -43,12 +42,10 @@ class TeamApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         usernames = [row["username"] for row in response.data]
-            # hna function test_admin_can_create_admin_account li tdefine service logic
         self.assertIn("wael", usernames)
-            # hna function test_admin_can_create_admin_account li tdefine service logic
         self.assertIn("ritha", usernames)
-    # hna function test_admin_can_create_admin_account li tdefine service logic
 
+    # hne test test_admin_can_create_admin_account: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_admin_can_create_admin_account(self):
         self.client.force_authenticate(user=self.admin)
 
@@ -66,13 +63,11 @@ class TeamApiTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-            # hna function test_non_admin_cannot_create_account li tdefine service logic
         created = User.objects.get(username="newadmin")
-            # hna function test_non_admin_cannot_create_account li tdefine service logic
         self.assertTrue(created.is_staff)
-            # hna function test_non_admin_cannot_create_account li tdefine service logic
         self.assertTrue(created.is_superuser)
 
+    # hne test test_non_admin_cannot_create_account: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_non_admin_cannot_create_account(self):
         self.client.force_authenticate(user=self.user)
 
@@ -83,14 +78,12 @@ class TeamApiTests(APITestCase):
                 "password": "StrongPass123!",
                 "access": "User",
             },
-                # hna function test_user_can_update_own_profile li tdefine service logic
             format="json",
-            # hna function test_user_can_update_own_profile li tdefine service logic
         )
-    # hna function test_user_can_update_own_profile li tdefine service logic
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    # hne test test_user_can_update_own_profile: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_user_can_update_own_profile(self):
         self.client.force_authenticate(user=self.user)
 
@@ -106,15 +99,13 @@ class TeamApiTests(APITestCase):
             format="json",
         )
 
-            # hna function test_admin_can_deactivate_and_reset_password li tdefine service logic
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-            # hna function test_admin_can_deactivate_and_reset_password li tdefine service logic
         self.user.refresh_from_db()
-            # hna function test_admin_can_deactivate_and_reset_password li tdefine service logic
         profile = UserProfile.objects.get(user=self.user)
         self.assertEqual(self.user.username, "ritha.updated")
         self.assertEqual(profile.avatar, "data:image/png;base64,abc123")
 
+    # hne test test_admin_can_deactivate_and_reset_password: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_admin_can_deactivate_and_reset_password(self):
         self.client.force_authenticate(user=self.admin)
 

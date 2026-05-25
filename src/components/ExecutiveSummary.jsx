@@ -1,3 +1,4 @@
+// hne bloc summary sghir ya3ti fekra 3la aham points 9bal ma l user ychouf charts.
 import React from "react";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
@@ -19,6 +20,7 @@ const sectionMeta = {
   },
 };
 
+// hne component ExecutiveSummary: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function ExecutiveSummary({ sections = {} }) {
   const ordered = ["highlights", "risks", "actions"]
     .map((key) => ({

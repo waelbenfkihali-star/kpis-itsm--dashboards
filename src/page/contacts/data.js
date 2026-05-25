@@ -1,5 +1,5 @@
-// hna sample contacts data
 
+// hne sample data mta3 contacts.
 export const columns = [
   { field: "id", headerName: "ID", width: 33 },
   { field: "registrarId", headerName: "Registrar ID" },

@@ -1,8 +1,9 @@
+# hne models l asasiya fil Django elli tamthel incidents w requests w changes w profile mta3 user.
 from django.contrib.auth.models import User
 from django.db import models
 
 
-# hna class Incident li tdefine model/w service
+# hne class Incident: tamthel structure wala behavior fil backend.
 class Incident(models.Model):
     number = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)
@@ -34,16 +35,13 @@ class Incident(models.Model):
     service_request = models.CharField(max_length=255, blank=True, null=True)
     is_major = models.BooleanField(default=False)
     sla_breached = models.BooleanField(default=False)
-    # hna function __str__ li tdefine service logic
 
-        # hna function __str__ li tdefine service logic
+    # hne __str__: esm ma9rou2 w sahl lel fahm wa9t nesta3mlou object hedha fil logs wala admin.
     def __str__(self):
         return self.number or f"Incident {self.pk}"
-# hna class Request li tdefine model/w service
 
-# hna class Request li tdefine model/w service
 
-# hna class Request li tdefine model/w service
+# hne class Request: tamthel structure wala behavior fil backend.
 class Request(models.Model):
     count = models.IntegerField(default=0)
     number = models.CharField(max_length=100, blank=True, null=True)
@@ -67,19 +65,15 @@ class Request(models.Model):
     resolve_time = models.CharField(max_length=100, blank=True, null=True)
     service_classification = models.CharField(max_length=255, blank=True, null=True)
     closed = models.CharField(max_length=100, blank=True, null=True)
-        # hna function __str__ li tdefine service logic
     closed_by = models.CharField(max_length=255, blank=True, null=True)
     it_service = models.CharField(max_length=255, blank=True, null=True)
-    # hna function __str__ li tdefine service logic
 
-        # hna function __str__ li tdefine service logic
-    # hna class Change li tdefine model/w service
+    # hne __str__: esm ma9rou2 w sahl lel fahm wa9t nesta3mlou object hedha fil logs wala admin.
     def __str__(self):
-        # hna class Change li tdefine model/w service
         return self.number or f"Request {self.pk}"
-# hna class Change li tdefine model/w service
 
 
+# hne class Change: tamthel structure wala behavior fil backend.
 class Change(models.Model):
     count = models.IntegerField(default=0)
     number = models.CharField(max_length=100, blank=True, null=True)
@@ -101,26 +95,21 @@ class Change(models.Model):
     responsible_user = models.CharField(max_length=255, blank=True, null=True)
     location_division = models.CharField(max_length=255, blank=True, null=True)
     service_classification = models.CharField(max_length=255, blank=True, null=True)
-        # hna function __str__ li tdefine service logic
     risk = models.CharField(max_length=100, blank=True, null=True)
     category = models.CharField(max_length=100, blank=True, null=True)
-        # hna function __str__ li tdefine service logic
     close_code = models.CharField(max_length=255, blank=True, null=True)
-    # hna class UserProfile li tdefine model/w service
     close_notes = models.TextField(blank=True, null=True)
 
-    # hna class UserProfile li tdefine model/w service
+    # hne __str__: esm ma9rou2 w sahl lel fahm wa9t nesta3mlou object hedha fil logs wala admin.
     def __str__(self):
-            # hna function __str__ li tdefine service logic
         return self.number or f"Change {self.pk}"
-    # hna class UserProfile li tdefine model/w service
-    # hna function __str__ li tdefine service logic
 
 
-    # hna function __str__ li tdefine service logic
+# hne class UserProfile: tamthel structure wala behavior fil backend.
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     avatar = models.TextField(blank=True, default="")
 
+    # hne __str__: esm ma9rou2 w sahl lel fahm wa9t nesta3mlou object hedha fil logs wala admin.
     def __str__(self):
         return f"Profile for {self.user.username}"

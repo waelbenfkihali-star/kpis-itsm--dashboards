@@ -1,11 +1,11 @@
-// hna page contacts w list ta3 contacts
+// hne page contacts fil partie demo/admin.
 import React from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { Box, Typography } from "@mui/material";
 import { columns, rows } from "./data";
 import Header from "../../components/Header";
 
-// hna component Contacts li trender page/component section
+// hne component Contacts: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const Contacts = () => {
   return (
     <Box>

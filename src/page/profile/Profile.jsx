@@ -1,4 +1,4 @@
-// hna page profile w update account info
+// hne page profile: l user ynajem ybadel ma3loumetou, password, w avatar.
 import React from "react";
 import {
   Alert,
@@ -36,12 +36,12 @@ const AVATAR_PREVIEW_SIZE = 360;
 const AVATAR_FRAME_SIZE = 272;
 const AVATAR_OUTPUT_SIZE = 512;
 
-// hna constants li nsta3mlouhom fl avatar crop w render
+// hne function clamp: t3awen ba9i l code fil fichier hedha b logic sghira.
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-// hna function getImageBounds li tqra w troje3 value
+// hne function getImageBounds: ta9ra valeur mocht9a men data l 7aliya.
 function getImageBounds(imageSize, zoom) {
   const baseScale = Math.max(
     AVATAR_PREVIEW_SIZE / imageSize.width,
@@ -59,7 +59,7 @@ function getImageBounds(imageSize, zoom) {
 }
 
 async function cropAvatarImage(src, cropState) {
-  // n9ra image men source w n9aunch crop state bach n5alli avatar round w nsave data URL
+  // hne function image: t3awen ba9i l code fil fichier hedha b logic sghira.
   const image = await new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
@@ -117,7 +117,7 @@ async function cropAvatarImage(src, cropState) {
   return canvas.toDataURL("image/png");
 }
 
-// hna component InfoStat li trender page/component section
+// hne component InfoStat: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function InfoStat({ title, value, note }) {
   return (
     <Paper sx={{ p: 2.25, flex: 1, minWidth: 180, borderRadius: 4 }}>
@@ -134,7 +134,7 @@ function InfoStat({ title, value, note }) {
   );
 }
 
-// hna component Profile li trender page/component section
+// hne component Profile: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function Profile() {
   const theme = useTheme();
   const { currentUser, setCurrentUser, reloadCurrentUser } = useOutletContext();
@@ -201,7 +201,7 @@ export default function Profile() {
       ? "0 24px 64px rgba(2, 6, 23, 0.45)"
       : "0 24px 64px rgba(15, 23, 42, 0.08)";
 
-    // hna function updateProfileField li tperform helper logic
+  // hne function updateProfileField: tbadel part men state wala data hasb l ma3loumet jdida.
   function updateProfileField(field) {
     return (event) => {
       setProfileForm((prev) => ({
@@ -211,7 +211,7 @@ export default function Profile() {
     };
   }
 
-    // hna function updatePasswordField li tperform helper logic
+  // hne function updatePasswordField: tbadel part men state wala data hasb l ma3loumet jdida.
   function updatePasswordField(field) {
     return (event) => {
       setPasswordForm((prev) => ({
@@ -221,7 +221,7 @@ export default function Profile() {
     };
   }
 
-    // hna function updateAvatarEditor li tperform helper logic
+  // hne function updateAvatarEditor: tbadel part men state wala data hasb l ma3loumet jdida.
   function updateAvatarEditor(patch) {
     setAvatarEditor((prev) => {
       const next = { ...prev, ...patch };
@@ -239,7 +239,7 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-        // hna function dataUrl li tprepare data values
+    // hne function dataUrl: t3awen ba9i l code fil fichier hedha b logic sghira.
     const dataUrl = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(String(reader.result || ""));
@@ -247,7 +247,7 @@ export default function Profile() {
       reader.readAsDataURL(file);
     });
 
-        // hna function imageSize li tperform helper logic
+    // hne function imageSize: t3awen ba9i l code fil fichier hedha b logic sghira.
     const imageSize = await new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () =>
@@ -268,13 +268,13 @@ export default function Profile() {
     event.target.value = "";
   }
 
-    // hna function closeAvatarEditor li tperform helper logic
+  // hne function closeAvatarEditor: t3awen ba9i l code fil fichier hedha b logic sghira.
   function closeAvatarEditor() {
     setAvatarEditor((prev) => ({ ...prev, open: false }));
     setDragState(null);
   }
 
-    // hna function startAvatarDrag li tperform helper logic
+  // hne function startAvatarDrag: t3awen ba9i l code fil fichier hedha b logic sghira.
   function startAvatarDrag(event) {
     event.preventDefault();
     setDragState({
@@ -285,7 +285,7 @@ export default function Profile() {
     });
   }
 
-    // hna function moveAvatarDrag li tperform helper logic
+  // hne function moveAvatarDrag: t3awen ba9i l code fil fichier hedha b logic sghira.
   function moveAvatarDrag(event) {
     if (!dragState) return;
 

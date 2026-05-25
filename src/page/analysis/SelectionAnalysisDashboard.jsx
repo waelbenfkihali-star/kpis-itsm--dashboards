@@ -1,10 +1,8 @@
-// hna page analysis generique li tben dashboard men rows selected
+// hne dashboard generic lel analysis: ye5ou rows mokhtarin men ay module w yaffichi KPIs w charts w detail grid.
 import React, { useMemo } from "react";
 import { Alert, Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 
-// hna page analysis generique li tst3ml data men kulle module
-// SelectionAnalysisDashboard ybni charts w kpis w insights men rows li selected
 import { ResponsiveBar } from "@nivo/bar";
 import { ResponsiveLine } from "@nivo/line";
 import { ResponsivePie } from "@nivo/pie";
@@ -22,7 +20,7 @@ import {
 } from "./analysisUtils";
 import { buildSelectionInsights } from "./reportInsights";
 
-// hna component KpiCard li trender page/component section
+// hne component KpiCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function KpiCard({ label, value, helper }) {
   return (
     <Paper sx={{ p: 2.2, flex: 1, minWidth: 180 }}>
@@ -39,7 +37,7 @@ function KpiCard({ label, value, helper }) {
   );
 }
 
-// hna component ChartCard li trender page/component section
+// hne component ChartCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 function ChartCard({ title, children, height = 320 }) {
   return (
     <Paper sx={{ p: 2, flex: 1, minWidth: 320 }}>
@@ -51,7 +49,7 @@ function ChartCard({ title, children, height = 320 }) {
   );
 }
 
-// hna component SelectionAnalysisDashboard li trender page/component section
+// hne component SelectionAnalysisDashboard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function SelectionAnalysisDashboard({
   title,
   subtitle,
@@ -70,13 +68,13 @@ export default function SelectionAnalysisDashboard({
   const theme = useTheme();
   const rows = Array.isArray(location.state?.data) ? location.state.data : [];
 
-    // hna function statusCounts li tperform helper logic
+  // hne variable statusCounts: counts m7soubin men data l 7aliya.
   const statusCounts = useMemo(() => countBy(rows, statusKey), [rows, statusKey]);
-    // hna function primaryCounts li tperform helper logic
+  // hne variable primaryCounts: counts m7soubin men data l 7aliya.
   const primaryCounts = useMemo(() => countBy(rows, primaryBreakdownKey), [rows, primaryBreakdownKey]);
-    // hna function secondaryCounts li tperform helper logic
+  // hne variable secondaryCounts: counts m7soubin men data l 7aliya.
   const secondaryCounts = useMemo(() => countBy(rows, secondaryBreakdownKey), [rows, secondaryBreakdownKey]);
-    // hna function monthlyCounts li tperform helper logic
+  // hne variable monthlyCounts: counts m7soubin men data l 7aliya.
   const monthlyCounts = useMemo(() => monthlySeries(rows, dateKey), [rows, dateKey]);
   const insights = useMemo(
     () => (typeof insightBuilder === "function" ? insightBuilder(rows) : []),

@@ -1,6 +1,8 @@
+// hne wrapper lel filters fi ay page: fih title, reset, w count mta3 filters l mef3lin.
 import React, { useState } from "react";
 import { Paper, Stack, Button, Typography, Collapse, Chip } from "@mui/material";
 
+// hne component PageFilters: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function PageFilters({
   title = "Filters",
   activeCount = 0,
