@@ -1,4 +1,4 @@
-// hne no9tet bidayet l frontend: na3mlou theme, n7adrou routes lkol, w nmountiw React app.
+// hne  bidayet l frontend: na3mlou theme, n7adrou routes lkol, w nmountiw React app.
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { CssBaseline } from "@mui/material";
@@ -23,10 +23,6 @@ import Team from "./page/team/Team";
 import Form from "./page/form/Form";
 import FAQ from "./page/faq/FAQ";
 import Profile from "./page/profile/Profile";
-import BarChart from "./page/barChart/BarChart";
-import PieChart from "./page/pieChart/PieChart";
-import LineChart from "./page/lineChart/LineChart";
-import Geography from "./page/geography/Geography";
 import NotFound from "./page/notFound/NotFound";
 import AssistantDashboard from "./page/ai/AssistantDashboard";
 
@@ -49,8 +45,9 @@ import RequestsAnalysis from "./page/requests/RequestsAnalysis";
 import ChangesAnalysis from "./page/changes/ChangesAnalysis";
 import { getDesignTokens } from "./theme";
 
-// hne component RootRouter: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne RootRouter: fih theme mta3 l app w routes lkol mta3 frontend.
 function RootRouter() {
+  // hne n5aznou mode mta3 theme: ken mawjoud fi localStorage nesta3mlou, sinon n7ottou light par défaut.
   const [mode, setMode] = React.useState(
     localStorage.getItem("currentMode") || "light"
   );
@@ -102,11 +99,6 @@ function RootRouter() {
               <Route path="form" element={<RoleRoute><Form /></RoleRoute>} />
               <Route path="faq" element={<FAQ />} />
 
-              <Route path="bar" element={<RoleRoute><BarChart /></RoleRoute>} />
-              <Route path="pie" element={<RoleRoute><PieChart /></RoleRoute>} />
-              <Route path="line" element={<RoleRoute><LineChart /></RoleRoute>} />
-              <Route path="geography" element={<RoleRoute><Geography /></RoleRoute>} />
-
               <Route path="*" element={<NotFound />} />
 
             </Route>
@@ -125,6 +117,7 @@ function RootRouter() {
   );
 }
 
+// @ts-ignore
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <RootRouter />

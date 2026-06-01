@@ -1,4 +1,4 @@
-// hne toolbar mouchterek lel delete: menou l user yfasakh selected rows wala lkol.
+// hne toolbar mouchterek lel delete: menou l user ynajem yfasakh rows selected wala yfasakh lkol.
 import React, { useState } from "react";
 import {
   Button,
@@ -12,7 +12,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import { apiFetch } from "../utils/api";
 
-// hne component DeleteToolbar: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne component DeleteToolbar: yaffichi boutons mta3 delete w popup mta3 confirmation.
 export default function DeleteToolbar({
   selectedIds,
   setSelectedIds,
@@ -23,7 +23,7 @@ export default function DeleteToolbar({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // hne function deleteSelected: t3awen ba9i l code fil fichier hedha b logic sghira.
+  // hne deleteSelected: tfasakh ken les rows eli l user selectionnehom.
   const deleteSelected = async () => {
     setLoading(true);
 
@@ -49,12 +49,12 @@ export default function DeleteToolbar({
     setLoading(false);
   };
 
-  // hne function deleteAll: t3awen ba9i l code fil fichier hedha b logic sghira.
+  // hne deleteAll: tfasakh les rows lkol eli mawjouda fil tableau.
   const deleteAll = async () => {
     setLoading(true);
 
     try {
-      // hne function ids: t3awen ba9i l code fil fichier hedha b logic sghira.
+      // hne njibou ids mta3 rows lkol bch naba3thouhom lel backend.
       const ids = rows.map((r) => r.id);
 
       const res = await apiFetch(api, {
@@ -122,7 +122,7 @@ export default function DeleteToolbar({
       </Dialog>
 
       {loading && (
-        /* hne spinner sghir yban wa9t backend mazal 9a3ed yemsa7. */
+        /* hne spinner sghir yban wa9t l delete mazelt tekhdem fil backend. */
         <Stack alignItems="center" sx={{ mt: 1 }}>
           <CircularProgress size={24} />
         </Stack>

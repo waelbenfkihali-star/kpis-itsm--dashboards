@@ -1,4 +1,4 @@
-// hne component mouchterek lel title w subtitle mta3 kol page.
+// hne component mouchterek lel header mta3 kol page: yaffichi title w subtitle.
 import React from 'react';
 import { Box, Typography, useTheme } from "@mui/material";
 

@@ -1,4 +1,4 @@
-// hne page FAQ bech tfasser kifach l app tekhdem w ajwiba 3la as2ila mta3 l users.
+// hna page FAQ li t3ti explanations 3la workflow
 import React from "react";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -9,6 +9,7 @@ import { Alert, Box, Chip, Paper, Stack } from "@mui/material";
 
 import Header from "../../components/Header";
 
+// hna page FAQ: t3ti user explanation 3la workflow ta3 application
 const sections = [
   {
     id: "login",
@@ -54,11 +55,12 @@ const sections = [
   },
 ];
 
-// hne component FAQ: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hna component FAQ li trender page/component section
 const FAQ = () => {
+  // page FAQ li fih accordions w explanations 3la login, team, import, KPI, dashboards
   const [expanded, setExpanded] = React.useState("login");
 
-  // hne function handleChange: tet9ad biha actions mta3 l user kif click, change, open, wala close, w ba3dha tbadel state wala navigation.
+  // hna function handleChange li thandle event w tmanage action
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
   };

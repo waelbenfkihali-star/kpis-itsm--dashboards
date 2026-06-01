@@ -1,9 +1,9 @@
-// hne component mouchterek lel filters l 3amma kif search, dates, w options okhra.
+// hne component mouchterek lel filters: fih search, status, service, group, dates w ynajem yezid filters okhrin bel children.
 import React from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import PageFilters from "./PageFilters";
 
-// hne component GlobalScopeFilters: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne GlobalScopeFilters component: yaffichi bloc filters 3am ynajem yet3awed fi barcha pages.
 export default function GlobalScopeFilters({
   title,
   activeCount,

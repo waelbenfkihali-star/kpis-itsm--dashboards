@@ -1,9 +1,9 @@
-# hne models l asasiya fil Django elli tamthel incidents w requests w changes w profile mta3 user.
+# hne models l asasiya: kol class hne tmathel table fil database mta3 l app
 from django.contrib.auth.models import User
 from django.db import models
 
 
-# hne class Incident: tamthel structure wala behavior fil backend.
+# hne model Incident: fih structure mta3 ticket incident kifach tet5azen fil database
 class Incident(models.Model):
     number = models.CharField(max_length=100, blank=True, null=True)
     state = models.CharField(max_length=100, blank=True, null=True)
@@ -36,12 +36,12 @@ class Incident(models.Model):
     is_major = models.BooleanField(default=False)
     sla_breached = models.BooleanField(default=False)
 
-    # hne __str__: esm ma9rou2 w sahl lel fahm wa9t nesta3mlou object hedha fil logs wala admin.
+    # hne __str__ yraja3 esm ma9rou2 lel incident bach yban sahl fil admin wela logs
     def __str__(self):
         return self.number or f"Incident {self.pk}"
 
 
-# hne class Request: tamthel structure wala behavior fil backend.
+# hne model Request: fih structure mta3 request ticket kifach tet5azen fil database
 class Request(models.Model):
     count = models.IntegerField(default=0)
     number = models.CharField(max_length=100, blank=True, null=True)
@@ -68,12 +68,11 @@ class Request(models.Model):
     closed_by = models.CharField(max_length=255, blank=True, null=True)
     it_service = models.CharField(max_length=255, blank=True, null=True)
 
-    # hne __str__: esm ma9rou2 w sahl lel fahm wa9t nesta3mlou object hedha fil logs wala admin.
     def __str__(self):
         return self.number or f"Request {self.pk}"
 
 
-# hne class Change: tamthel structure wala behavior fil backend.
+# hne model Change: fih structure mta3 change ticket kifach tet5azen fil database
 class Change(models.Model):
     count = models.IntegerField(default=0)
     number = models.CharField(max_length=100, blank=True, null=True)
@@ -100,16 +99,37 @@ class Change(models.Model):
     close_code = models.CharField(max_length=255, blank=True, null=True)
     close_notes = models.TextField(blank=True, null=True)
 
-    # hne __str__: esm ma9rou2 w sahl lel fahm wa9t nesta3mlou object hedha fil logs wala admin.
     def __str__(self):
         return self.number or f"Change {self.pk}"
 
 
-# hne class UserProfile: tamthel structure wala behavior fil backend.
+# hne model KpiDefinition: fih definition mta3 KPI bach tet5azen fil database.
+class KpiDefinition(models.Model):
+    kpi_id = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=255)
+    owner = models.CharField(max_length=255)
+    module = models.CharField(max_length=100)
+    dimension = models.CharField(max_length=255, blank=True, default="")
+    target = models.CharField(max_length=255, blank=True, default="")
+    frequency = models.CharField(max_length=100, blank=True, default="")
+    unit = models.CharField(max_length=100, blank=True, default="")
+    formula = models.TextField(blank=True, default="")
+    source = models.CharField(max_length=255, blank=True, default="")
+    status = models.CharField(max_length=100, blank=True, default="Active")
+    description = models.TextField(blank=True, default="")
+    is_default = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.kpi_id or f"KPI {self.pk}"
+
+
+# hne model UserProfile: table zeyda marbouta b user bach n5aznou avatar w ay info profile 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     avatar = models.TextField(blank=True, default="")
 
-    # hne __str__: esm ma9rou2 w sahl lel fahm wa9t nesta3mlou object hedha fil logs wala admin.
     def __str__(self):
         return f"Profile for {self.user.username}"

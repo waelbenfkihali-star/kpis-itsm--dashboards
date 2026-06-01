@@ -1,8 +1,8 @@
-// hne header mta3 print/export bech report yodhher mnadhem.
+// hne header mta3 print/export: yaffichi titre, subtitle, scope w date bch report yodhher mnadhem fel PDF.
 import React from "react";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 
-// hne function formatPrintDate: t3awen ba9i l code fil fichier hedha b logic sghira.
+// hne formatPrintDate: tformatili date b tari9a ma9rouya, b date w wa9t.
 function formatPrintDate(value) {
   return new Intl.DateTimeFormat("en-GB", {
     dateStyle: "long",
@@ -10,7 +10,7 @@ function formatPrintDate(value) {
   }).format(value);
 }
 
-// hne component PrintReportHeader: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne PrintReportHeader component: yaffichi header mta3 report 9bal content mta3 dashboard wala PDF.
 export default function PrintReportHeader({
   reportTitle,
   reportSubtitle,

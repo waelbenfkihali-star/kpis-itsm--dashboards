@@ -1,11 +1,11 @@
-// hne page detail mta3 incident wa7da: tjib ticket hasb number w tori informations mta3ha.
+// hne page details mta3 incident wa7da: njibouha men backend hasb number w nwarriw  infos mta3ha.
 import React, { useEffect, useState } from "react";
 import { Box, Button, Grid, Paper, Typography, Alert } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../../components/Header";
 import { apiFetch } from "../../utils/api";
 
-// hne component DetailItem: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne bloc sghir ywarri field wa7ed: label fou9 w valeur ta7tou.
 const DetailItem = ({ label, value }) => (
   <Paper elevation={1} sx={{ p: 2, borderRadius: "14px", height: "100%" }}>
     <Typography variant="body2" sx={{ color: "text.secondary", mb: 0.5, fontSize: "12px" }}>
@@ -17,19 +17,24 @@ const DetailItem = ({ label, value }) => (
   </Paper>
 );
 
-// hne component IncidentDetails: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne component principal mta3 saf7et details mta3 incident.
 export default function IncidentDetails() {
   const navigate = useNavigate();
+  // hne njibou incident number men route, kif /incidents/INC001 
   const { number } = useParams();
+  // hne n5aznou incident men backend.
   const [row, setRow] = useState(null);
+  // hne n5aznou message d'erreur ken fetch details tfachel.
   const [err, setErr] = useState("");
 
+  // hne ki page tethall, notlbou incident details men backend 7aseb number route.
   useEffect(() => {
     apiFetch(`/incidents/${encodeURIComponent(number)}/`)
       .then(async (res) => {
-        // hne variable data: data m7adhra lel affichage wala l analyse.
+        // hne n9raw response JSON, w ken parse tfachel nraj3ou object fare8.
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
+        // hne n7otou incident details fi state bech tta3radh fil page.
         setRow(data);
       })
       .catch((e) => setErr(String(e.message || e)));
@@ -55,8 +60,9 @@ export default function IncidentDetails() {
 
   return (
     <Box>
+      {/* hne header mta3 page: ywarri number mta3 incident w status/priority fou9. */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Header title={`INCIDENT ${row.number}`} subTitle={`${row.state || "-"} • ${row.priority || "-"}`} />
+        <Header title={`INCIDENT ${row.number}`} subTitle={`${row.state || "-"}  ${row.priority || "-"}`} />
         <Button variant="outlined" onClick={() => navigate("/incidents")}>Back</Button>
       </Box>
 

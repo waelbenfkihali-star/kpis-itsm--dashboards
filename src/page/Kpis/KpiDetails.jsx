@@ -24,12 +24,30 @@ export default function KpiDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [row, setRow] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    setRow(getKpiById(id));
+    let active = true;
+
+    (async () => {
+      try {
+        const next = await getKpiById(id);
+        if (!active) return;
+        setRow(next);
+        setNotFound(false);
+      } catch {
+        if (!active) return;
+        setRow(null);
+        setNotFound(true);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
   }, [id]);
 
-  if (!row) {
+  if (notFound) {
     return (
       <Box>
         <Header title="KPI DETAILS" subTitle="KPI not found" />
@@ -39,6 +57,14 @@ export default function KpiDetails() {
         <Button variant="outlined" onClick={() => navigate("/mykpis")}>
           Back
         </Button>
+      </Box>
+    );
+  }
+
+  if (!row) {
+    return (
+      <Box>
+        <Header title="KPI DETAILS" subTitle="Loading..." />
       </Box>
     );
   }

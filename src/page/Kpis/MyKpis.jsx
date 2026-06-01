@@ -35,6 +35,8 @@ const MyKpis = () => {
   const navigate = useNavigate();
 
   const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [filters, setFilters] = useState({
     search: "",
     kpiIds: [],
@@ -49,15 +51,39 @@ const MyKpis = () => {
   const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
-    setRows(loadKpis());
+    let active = true;
+
+    (async () => {
+      try {
+        const list = await loadKpis();
+        if (!active) return;
+        setRows(list);
+        setError("");
+      } catch (e) {
+        if (!active) return;
+        setError(String(e.message || e));
+      } finally {
+        if (!active) return;
+        setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   // hne function confirmDelete: action ba3d ma l user y2akked men dialog wala warning.
-  function confirmDelete() {
+  async function confirmDelete() {
 
-    const next = deleteKpiById(deleteId);
-    setRows(next);
-    setDeleteId(null);
+    try {
+      const next = await deleteKpiById(deleteId);
+      setRows(next);
+      setDeleteId(null);
+    } catch (e) {
+      setError(String(e.message || e));
+      setDeleteId(null);
+    }
 
   }
 
@@ -283,6 +309,12 @@ const MyKpis = () => {
         subTitle="Manage your KPI definitions"
       />
 
+      {error ? (
+        <Typography color="error" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
+      ) : null}
+
       <Box sx={{ mt: 2 }}>
 
 
@@ -410,6 +442,7 @@ const MyKpis = () => {
           <DataGrid
           rows={filteredRows}
           columns={columns}
+          loading={loading}
 
           checkboxSelection
           disableRowSelectionOnClick

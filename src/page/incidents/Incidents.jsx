@@ -1,5 +1,5 @@
 // @ts-ignore
-// hne page incidents: fiha tableau, filters, delete, w selection mta3 rows bech yet7alllou.
+// hne page incidents: taffichi tableau mta3 incidents, filters, delete, selection, w analyse.
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -21,18 +21,28 @@ import DeleteToolbar from "../../components/DeleteToolbar";
 import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
 
-// hne component Incidents: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne component mta3 incidents: yjib data men backend w yaffichiha fi tableau.
 export default function Incidents() {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  // hne nchofo ken fama KPI jey mel page okhra bech na3mlou analyse 3lih.
   const selectedKpi = location.state?.selectedKpi || null;
 
+  // hne n5aznou incidents elli jeyin men backend.
   const [rows, setRows] = useState([]);
+
+  // hne n3arfou ken data mazelt tetcharga walla lÃ©.
   const [loading, setLoading] = useState(true);
+
+  // hne n5aznou error message ken request tfachel.
   const [err, setErr] = useState("");
+
+  // hne n5aznou ids mta3 rows elli l user selectionnehom.
   const [selectedIds, setSelectedIds] = useState([]);
 
+  // hne n5aznou filters mta3 recherche, status, priority, service w group.
   const [filters, setFilters] = useState({
     search: "",
     states: [],
@@ -41,18 +51,21 @@ export default function Incidents() {
     groups: []
   });
 
+  // hne filters mta3 date dÃ©but w date fin.
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
   useEffect(() => {
 
+    // hne n3aytou lel backend bech njibou liste mta3 incidents.
     apiFetch("/incidents/")
       .then(async (res) => {
 
-        // hne variable data: data m7adhra lel affichage wala l analyse.
+        // hne n9raw response JSON, w ken fama mochkel nraj3ou tableau feragh.
         const data = await res.json().catch(() => []);
         if (!res.ok) throw new Error(data?.detail || `HTTP ${res.status}`);
 
+        // hne n7ottou data fi rows ken response tableau.
         setRows(Array.isArray(data) ? data : []);
 
       })
@@ -61,30 +74,35 @@ export default function Incidents() {
 
   }, []);
 
+  // hne n5arjou liste unique mta3 states bech Ù†Ø³ØªØ¹Ù…Ù„ÙˆÙ‡Ø§ fi filter.
   const stateOptions = useMemo(
     () => [...new Set(rows.map((r) => r.state).filter(Boolean))],
     [rows]
   );
 
+  // hne n5arjou liste unique mta3 priorities.
   const priorityOptions = useMemo(
     () => [...new Set(rows.map((r) => r.priority).filter(Boolean))],
     [rows]
   );
 
+  // hne n5arjou liste unique mta3 services.
   const serviceOptions = useMemo(
     () => [...new Set(rows.map((r) => r.affected_service).filter(Boolean))],
     [rows]
   );
 
+  // hne n5arjou liste unique mta3 responsible groups.
   const groupOptions = useMemo(
     () => [...new Set(rows.map((r) => r.responsible_group).filter(Boolean))],
     [rows]
   );
 
-  // hne function filteredRows: t5arrej kan rows wala data elli yjew ma3a filters l moufa3lin taw.
+  // hne nfiltriw incidents Ø­Ø³Ø¨ filters elli l user 7atthom.
   const filteredRows = useMemo(() => {
 
     return rows.filter((r) => {
+      // hne search ylawwej fi kol les champs mta3 incident.
       if (
         filters.search &&
         !Object.values(r).some((value) =>
@@ -93,21 +111,27 @@ export default function Incidents() {
       )
         return false;
 
+      // hne filter Ø­Ø³Ø¨ state.
       if (filters.states.length && !filters.states.includes(r.state))
         return false;
 
+      // hne filter Ø­Ø³Ø¨ priority.
       if (filters.priorities.length && !filters.priorities.includes(r.priority))
         return false;
 
+      // hne filter Ø­Ø³Ø¨ affected service.
       if (filters.services.length && !filters.services.includes(r.affected_service))
         return false;
 
+      // hne filter Ø­Ø³Ø¨ responsible group.
       if (filters.groups.length && !filters.groups.includes(r.responsible_group))
         return false;
 
+      // hne filter date from.
       if (dateFrom && new Date(r.opened) < new Date(dateFrom))
         return false;
 
+      // hne filter date to.
       if (dateTo && new Date(r.opened) > new Date(dateTo))
         return false;
 
@@ -117,6 +141,7 @@ export default function Incidents() {
 
   }, [rows, filters, dateFrom, dateTo]);
 
+  // hne n7esbou 9addeh men filter activÃ© taw.
   const activeFilterCount = useMemo(
     () =>
       [
@@ -131,11 +156,11 @@ export default function Incidents() {
     [filters, dateFrom, dateTo]
   );
 
-  // hne function handleAnalyse: tet9ad biha actions mta3 l user kif click, change, open, wala close, w ba3dha tbadel state wala navigation.
+  // hne ki l user yclicki Analyse, ne5dhou rows sÃ©lectionnÃ©s w nemchiw lel page analysis.
   function handleAnalyse() {
 
-      // hne variable selectedData: data m7adhra lel affichage wala l analyse.
-      const selectedData = filteredRows.filter((r) =>
+    // hne n5arjou data elli l user sÃ©lectionnÃ©ha bark.
+    const selectedData = filteredRows.filter((r) =>
       selectedIds.includes(r.id)
     );
 
@@ -145,7 +170,7 @@ export default function Incidents() {
 
   }
 
-  // hne function resetFilters: l form wala l filters l 7ala l aslaya.
+  // hne nraj3ou filters lkol lel initial state.
   function resetFilters() {
     setFilters({
       search: "",
@@ -157,7 +182,8 @@ export default function Incidents() {
     setDateFrom("");
     setDateTo("");
   }
-  // hne function updateFilter: tbadel part men state wala data hasb l ma3loumet jdida.
+
+  // hne nbaddlou filter mou3ayen Ø­Ø³Ø¨ key elli jeya.
   function updateFilter(key, value) {
     if (key === "dateFrom") {
       setDateFrom(value);
@@ -170,7 +196,7 @@ export default function Incidents() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
-  // hne variable columns: ta3ref columns mta3 DataGrid w kol colonne chnia tori.
+  // hne na3rfou columns mta3 tableau w chnia kol colonne taffichi.
   const columns = useMemo(() => [
 
     { field: "number", headerName: "Incident ID", flex: 1, minWidth: 140 },
@@ -182,6 +208,7 @@ export default function Incidents() {
       minWidth: 130,
       renderCell: (params) => {
 
+        // hne nbadlou couleur mta3 status Ø­Ø³Ø¨ valeur.
         const value = String(params.value || "");
         let color = "default";
 
@@ -337,7 +364,7 @@ export default function Incidents() {
           disableRowSelectionOnClick
           slots={{ toolbar: GridToolbar }}
           onRowSelectionModelChange={(ids) => setSelectedIds(ids)}
-          /* hne click 3la ay sater yehez l user l saf7et details mta3 l incident hedheka. */
+          // hne ki l user yclicki 3la row, nemchiw lel details mta3 incident hedheka.
           onRowClick={(params) =>
             navigate(`/incidents/${params.row.number}`)
           }

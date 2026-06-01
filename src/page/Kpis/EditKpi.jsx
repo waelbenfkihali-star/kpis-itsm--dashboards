@@ -24,39 +24,56 @@ const EditKpi = () => {
   const [notFound, setNotFound] = useState(false);
 
   const [form, setForm] = useState(KPI_INITIAL_FORM);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    let kpi = getKpiById(id);
+    let active = true;
 
-    if (!kpi) {
-      const list = loadKpis();
-      kpi = list.find((x) => String(x.id) === String(id)) || null;
-    }
+    (async () => {
+      try {
+        let kpi = await getKpiById(id);
 
-    if (!kpi) {
-      setNotFound(true);
-      return;
-    }
+        if (!kpi) {
+          const list = await loadKpis();
+          kpi = list.find((x) => String(x.id) === String(id)) || null;
+        }
 
-    setNotFound(false);
+        if (!active) return;
 
-    setForm({
-      ...KPI_INITIAL_FORM,
-      id: kpi.id,
-      kpi_id: kpi.kpi_id || "",
-      name: kpi.name || "",
-      owner: kpi.owner || "",
-      module: kpi.module || "",
-      dimension: kpi.dimension || "",
-      target: kpi.target || "",
-      frequency: kpi.frequency || "",
-      unit: kpi.unit || "",
-      formula: kpi.formula || "",
-      source: kpi.source || "",
-      status: kpi.status || "Active",
-      description: kpi.description || "",
-    });
+        if (!kpi) {
+          setNotFound(true);
+          return;
+        }
 
+        setNotFound(false);
+        setError("");
+
+        setForm({
+          ...KPI_INITIAL_FORM,
+          id: kpi.id,
+          kpi_id: kpi.kpi_id || "",
+          name: kpi.name || "",
+          owner: kpi.owner || "",
+          module: kpi.module || "",
+          dimension: kpi.dimension || "",
+          target: kpi.target || "",
+          frequency: kpi.frequency || "",
+          unit: kpi.unit || "",
+          formula: kpi.formula || "",
+          source: kpi.source || "",
+          status: kpi.status || "Active",
+          description: kpi.description || "",
+        });
+      } catch {
+        if (!active) return;
+        setNotFound(true);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   // hne function setField: t3awen ba9i l code fil fichier hedha b logic sghira.
@@ -91,13 +108,19 @@ const EditKpi = () => {
   }
 
   // hne function submit: form wala request lel backend w teta3amel m3a success wala error.
-  function submit() {
+  async function submit() {
 
-    if (!isValid) return;
+    if (!isValid || saving) return;
 
-    upsertKpi(form);
-
-    navigate("/MyKpis");
+    try {
+      setSaving(true);
+      await upsertKpi(form);
+      navigate("/MyKpis");
+    } catch (e) {
+      setError(String(e.message || e));
+    } finally {
+      setSaving(false);
+    }
 
   }
 
@@ -109,6 +132,12 @@ const EditKpi = () => {
         title="EDIT KPI"
         subTitle={`Editing KPI: ${form.kpi_id || id}`}
       />
+
+      {error ? (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      ) : null}
 
       {notFound ? (
 
@@ -153,9 +182,9 @@ const EditKpi = () => {
             <Button
               variant="contained"
               onClick={submit}
-              disabled={!isValid}
+              disabled={!isValid || saving}
             >
-              Save Changes
+              {saving ? "Saving..." : "Save Changes"}
             </Button>
 
             <Button

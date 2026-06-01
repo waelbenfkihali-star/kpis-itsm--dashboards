@@ -1,4 +1,4 @@
-// hne page analysis mta3 incidents l mokhtarin: tebni KPIs w charts w insights 3lihom.
+// hne page analysis mta3 incidents elli tselectaw: tebni KPIs w charts w summary 3la nafs scope
 import React, { useMemo } from "react";
 import { Box, Button, Chip, Paper, Stack, Typography, useTheme } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -29,7 +29,7 @@ import {
 } from "../analysis/analysisUtils";
 import { buildIncidentInsights } from "../analysis/reportInsights";
 
-// hne component KpiCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne card sghira nwarriw fiha KPI wa7da b titre w valeur w note sghira ken fama
 function KpiCard({ title, value, note }) {
   return (
     <Paper sx={{ p: 2.2, flex: 1, minWidth: 200 }}>
@@ -46,7 +46,7 @@ function KpiCard({ title, value, note }) {
   );
 }
 
-// hne component ChartCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne container mta3 chart: y7ot titre w note w legend w chart fi card wa7da mratba
 function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   return (
     <Paper sx={{ p: 2, flex: 1, minWidth: 320 }}>
@@ -64,25 +64,29 @@ function ChartCard({ title, note, children, height = 320, legendItems = [] }) {
   );
 }
 
-// hne function hasKeyword: t3awen ba9i l code fil fichier hedha b logic sghira.
+// hne helper ychouf ken text fih ay kelma men keywords bach nfahmou  l KPI fil fallback
 function hasKeyword(text, keywords) {
   return keywords.some((keyword) => text.includes(keyword));
 }
 
-// hne component IncidentsAnalysis: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne component : ta9ra selection jeya men page incidents w tbni dashboard 3liha
 export default function IncidentsAnalysis() {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  // hne rows houma incidents elli tba3thou men page incidents ba3d ma l user dhrab Analyse
   const rows = Array.isArray(location.state?.data) ? location.state.data : [];
+  // hne ken l analyse jeya men KPI mo3ayna, n5aznaha bach nbadlou vue 
   const selectedKpi = location.state?.selectedKpi || null;
 
+  // hne n5arjou incidents elli mazelou open/in progress/pending bach n7asbou backlog
   const openBacklogRows = useMemo(
     () => rows.filter((row) => ["Open", "In Progress", "Pending"].includes(row.state)),
     [rows]
   );
-  // hne variable majorRows: rows l nehayiya elli bech ba3d filters wala selection.
+  // hne n5arjou incidents major bark bach KPIs w charts ali tab3ithom tkoun parfait 
   const majorRows = useMemo(() => rows.filter((row) => row.is_major), [rows]);
+  // hne njibou incidents elli tsakrou wala t7allou bach na9arnouhom m3a opened
   const closedRows = useMemo(
     () => rows.filter((row) => ["Closed", "Resolved"].includes(row.state)),
     [rows]
@@ -92,18 +96,18 @@ export default function IncidentsAnalysis() {
     () => monthlySeriesInRange(openBacklogRows, "opened", rows, "opened"),
     [openBacklogRows, rows]
   );
+  // hne comparaison par mois bin incidents elli tsakrou wali t7alou
   const openVsClosedMonthly = useMemo(
     () => monthlyDualSeriesInRange(rows, "opened", "resolved", "Opened", "Resolved", rows, "opened"),
     [rows]
   );
 
-  // hne function services: t3awen ba9i l code fil fichier hedha b logic sghira.
+  // hne repartition 7aseb service bach nesta3mlaha fel charts wl highlights
   const services = useMemo(() => countBy(rows, "affected_service"), [rows]);
-  // hne function sites: t3awen ba9i l code fil fichier hedha b logic sghira.
   const sites = useMemo(() => countBy(rows, "location"), [rows]);
-  // hne function groups: t3awen ba9i l code fil fichier hedha b logic sghira.
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
 
+  // hne columns mta3 tableau louta elli ywarri nafs rows elli analysis ma3moula 3lihom
   const columns = [
     { field: "number", headerName: "Incident ID", flex: 1, minWidth: 140 },
     { field: "state", headerName: "Status", flex: 1, minWidth: 130 },
@@ -114,6 +118,7 @@ export default function IncidentsAnalysis() {
     { field: "opened", headerName: "Opened", flex: 1, minWidth: 150 },
   ];
 
+  // hne ken page t7allet bla selection, nwarri message bach l user yarja3 a5ter rows loul
   if (!rows.length) {
     return (
       <Box className="print-dashboard-root">
@@ -130,22 +135,27 @@ export default function IncidentsAnalysis() {
     );
   }
 
+  // hne KPIs générales elli n7asbouhom men selected rows
   const total = rows.length;
   const backlog = openBacklogRows.length;
   const major = majorRows.length;
   const resolved = closedRows.length;
+  // hne backlog elli ma3andhouch responsible_user واضح
   const unassignedBacklog = countWhere(
     openBacklogRows,
     (row) => !String(row.responsible_user || "").trim()
   );
-  // hne function slaBreached: t3awen ba9i l code fil fichier hedha b logic sghira.
+  // hne n7asbou 9adech men row fiha SLA breached
   const slaBreached = countWhere(rows, (row) => row.sla_breached);
+  // hne moyenne mta3 duration العامة
   const avgHandle = average(rows, "duration");
+  // hne moyenne mta3 business_duration
   const avgBusiness = average(rows, "business_duration");
-  // hne function avgMajorResolution: t3awen ba9i l code fil fichier hedha b logic sghira.
+  // hne moyenne mta3 duration bark للmajor incidents
   const avgMajorResolution = average(rows, "duration", (row) => row.is_major);
-  // hne function focusedServices: t3awen ba9i l code fil fichier hedha b logic sghira.
+  // hne top services men major incidents bach nesta3mlohom ken vue mrakza 3la major
   const focusedServices = useMemo(() => countBy(majorRows, "affected_service"), [majorRows]);
+  // hne series chahrya 7aseb service/group/site bach nwarriw tendances détaillées
   const serviceMonthly = useMemo(
     () => monthlyBreakdownInRange(rows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
     [rows]
@@ -159,16 +169,18 @@ export default function IncidentsAnalysis() {
     [rows]
   );
 
-  // hne function focusedView: t3awen ba9i l code fil fichier hedha b logic sghira.
+  // hne ken fama selectedKpi, nbniw dashboard  7aseb kpi   
   const focusedView = useMemo(() => {
     if (!selectedKpi) return null;
 
     const kpiId = selectedKpi.kpi_id;
+    // hne base mochtarka: titre w note bach  focused view testa3malhom.
     const base = {
       title: `${selectedKpi.kpi_id} - ${selectedKpi.name}`,
       note: selectedKpi.description || "Focused KPI dashboard built from your selected incident rows.",
     };
 
+    // hne 7aseb kpi_id n7adou cards/charts/extras .
     switch (kpiId) {
       case "INC-01":
         return {
@@ -317,6 +329,7 @@ export default function IncidentsAnalysis() {
             },
           ],
         };
+      // hne fallback ken l KPI ma3andhech mapping direct: nfahmouha men title/description/formula
       default:
         {
           const descriptor = [
@@ -328,6 +341,7 @@ export default function IncidentsAnalysis() {
             .join(" ")
             .toLowerCase();
 
+          // hne nal9tou type mta3 l KPI men keywords bach na5terou anou dashboard 5ir
           if (hasKeyword(descriptor, ["sla", "breach", "compliance", "response", "resolution"])) {
             return {
               ...base,
@@ -470,6 +484,7 @@ export default function IncidentsAnalysis() {
     groupMonthly,
   ]);
   const summarySections = useMemo(
+    // hne nbniw executive summary automatique men ahem chiffres w repartitions
     () =>
       buildIncidentInsights({
         rows,
@@ -494,6 +509,7 @@ export default function IncidentsAnalysis() {
               : `${total} selected incidents - KPI view aligned to the monthly report style`
           }
         />
+        {/* hne actions lfo9: retour lel incidents w export PDF */}
         <Stack direction="row" spacing={1} className="print-export-hidden">
           <Button variant="outlined" onClick={() => navigate("/incidents")}>
             Back
@@ -514,12 +530,14 @@ export default function IncidentsAnalysis() {
 
       {focusedView ? (
         <>
+          {/* hne cards tab3a KPI  */}
           <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
             {focusedView.cards.map((card) => (
               <KpiCard key={card.title} title={card.title} value={card.value} note={card.note} />
             ))}
           </Stack>
 
+          {/* hne chart principale: line ken l KPI mebnya 3la trend, sinon bar chart */}
           {focusedView.line ? (
             <ChartCard title={focusedView.line.title} note={focusedView.note}>
               <ResponsiveLine
@@ -562,6 +580,7 @@ export default function IncidentsAnalysis() {
             </ChartCard>
           )}
 
+          {/* hne charts zeyda ken l KPI a7tejetou */}
           {focusedView.extras?.length ? (
             <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mt={2}>
               {focusedView.extras.map((extra) => (
@@ -605,6 +624,7 @@ export default function IncidentsAnalysis() {
             </Stack>
           ) : null}
 
+          {/* hne tableau louta ywarri nafs selected scope elli l analysis sar 3laha*/}
           <Paper sx={{ p: 2, mt: 2 }}>
             <Typography variant="h6" mb={1.5}>
               Selected Incident Scope
@@ -623,6 +643,7 @@ export default function IncidentsAnalysis() {
         </>
       ) : (
         <>
+      {/* hne KPI cards générales ken ma fama hata KPI mo5tera */}
       <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
         <KpiCard
           title="Incident Backlog"
@@ -646,6 +667,7 @@ export default function IncidentsAnalysis() {
         />
       </Stack>
 
+      {/* hne charts générales: trend backlog w open vs resolved par mois */}
       <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mb={2}>
         <ChartCard
           title="Incident Management KPI Results - Across Selected Period"
@@ -696,6 +718,7 @@ export default function IncidentsAnalysis() {
         </ChartCard>
       </Stack>
 
+      {/* hne KPI bloc zeyed 3la durations w SLA compliance */}
       <Stack direction={{ xs: "column", lg: "row" }} spacing={2} mb={2}>
         <KpiCard
           title="Avg. Time To Handle"
@@ -719,6 +742,7 @@ export default function IncidentsAnalysis() {
         />
       </Stack>
 
+      {/* hne highlights sri3a 3la service/site/group elli dhahrin akther fil scope */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Typography variant="h6" mb={1}>
           KPI Highlights
@@ -731,6 +755,7 @@ export default function IncidentsAnalysis() {
         </Stack>
       </Paper>
 
+      {/* hne deep dive charts 7aseb service w site */}
       <Stack direction={{ xs: "column", xl: "row" }} spacing={2} mb={2}>
         <ChartCard
           title="Top 10 Impacted Services"
@@ -769,6 +794,7 @@ export default function IncidentsAnalysis() {
         </ChartCard>
       </Stack>
 
+      {/* hne chart 5asa bil groups  */}
       <ChartCard
         title="Top 10 Responsible Groups"
         note="Deep dive by the groups carrying most of the selected incidents."
@@ -788,6 +814,7 @@ export default function IncidentsAnalysis() {
         />
       </ChartCard>
 
+      {/* hne tableau ali luser ychouf bih rows ali sar 3lihom lanalyse  */}
       <Paper sx={{ p: 2, mt: 2 }}>
         <Typography variant="h6" mb={1.5}>
           Selected Incident Scope

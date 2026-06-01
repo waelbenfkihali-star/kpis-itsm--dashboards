@@ -15,10 +15,12 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from .ai_dashboard import build_ai_dashboard_intent
-from .models import Incident, Request, Change
+from .kpi_defaults import DEFAULT_KPIS
+from .models import Incident, Request, Change, KpiDefinition
 from .serializers import (
     ChangeSerializer,
     IncidentSerializer,
+    KpiDefinitionSerializer,
     RequestSerializer,
     CurrentUserUpdateSerializer,
     PasswordChangeSerializer,
@@ -26,6 +28,36 @@ from .serializers import (
     TeamMemberAdminUpdateSerializer,
     TeamMemberSerializer,
 )
+
+
+def sync_default_kpis():
+    for item in DEFAULT_KPIS:
+        defaults = {
+            "name": item.get("name", "").strip(),
+            "owner": item.get("owner", "").strip(),
+            "module": item.get("module", "").strip(),
+            "dimension": item.get("dimension", "").strip(),
+            "target": item.get("target", "").strip(),
+            "frequency": item.get("frequency", "").strip(),
+            "unit": item.get("unit", "").strip(),
+            "formula": item.get("formula", "").strip(),
+            "source": item.get("source", "").strip(),
+            "status": item.get("status", "Active").strip(),
+            "description": item.get("description", "").strip(),
+            "is_default": True,
+        }
+        obj, created = KpiDefinition.objects.get_or_create(
+            kpi_id=item["kpi_id"].strip(),
+            defaults=defaults,
+        )
+        if not created and obj.is_default:
+            changed = False
+            for field, value in defaults.items():
+                if getattr(obj, field) != value:
+                    setattr(obj, field, value)
+                    changed = True
+            if changed:
+                obj.save()
 
 
 
@@ -432,6 +464,56 @@ def import_excel(request):
         )
 
 
+@api_view(["GET", "POST"])
+def kpis_list(request):
+    sync_default_kpis()
+
+    if request.method == "GET":
+        rows = KpiDefinition.objects.filter(is_deleted=False).order_by("module", "kpi_id", "id")
+        return Response(KpiDefinitionSerializer(rows, many=True).data)
+
+    if not request.user.is_staff:
+        return Response(
+            {"detail": "Only admins can create KPIs."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    serializer = KpiDefinitionSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    row = serializer.save(is_default=False, is_deleted=False)
+    return Response(KpiDefinitionSerializer(row).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["GET", "PATCH", "DELETE"])
+def kpi_detail(request, kpi_id):
+    sync_default_kpis()
+    row = get_object_or_404(KpiDefinition, pk=kpi_id)
+
+    if request.method == "GET":
+        if row.is_deleted:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(KpiDefinitionSerializer(row).data)
+
+    if not request.user.is_staff:
+        return Response(
+            {"detail": "Only admins can manage KPIs."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    if request.method == "DELETE":
+        if row.is_default:
+            row.is_deleted = True
+            row.save(update_fields=["is_deleted", "updated_at"])
+        else:
+            row.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    serializer = KpiDefinitionSerializer(instance=row, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    updated = serializer.save(is_deleted=False)
+    return Response(KpiDefinitionSerializer(updated).data)
+
+
 
 @api_view(["GET"])
 # hne endpoint liste incidents lkol mortbin men l a7deth lel a9dem.
@@ -441,14 +523,12 @@ def incidents_list(request):
 
 
 @api_view(["GET"])
-# hne endpoint liste requests lkol mortbin men l a7deth lel a9dem.
 def requests_list(request):
     rows = Request.objects.all().order_by("-id")
     return Response(RequestSerializer(rows, many=True).data)
 
 
 @api_view(["GET"])
-# hne endpoint liste changes lkol mortbin men l a7deth lel a9dem.
 def changes_list(request):
     rows = Change.objects.all().order_by("-id")
     return Response(ChangeSerializer(rows, many=True).data)
@@ -464,7 +544,6 @@ def incident_detail(request, number):
 
 
 @api_view(["GET"])
-# hne endpoint details mta3 request wa7da hasb number mawjouda fil route.
 def request_detail(request, number):
     row = Request.objects.filter(number=number).first()
     if not row:
@@ -473,7 +552,6 @@ def request_detail(request, number):
 
 
 @api_view(["GET"])
-# hne endpoint details mta3 change wa7da hasb number mawjouda fil route.
 def change_detail(request, number):
     row = Change.objects.filter(number=number).first()
     if not row:
@@ -490,7 +568,6 @@ def delete_incidents(request):
 
 
 @api_view(["POST"])
-# hne endpoint yfasakh requests l mokhtarin b ids w 9adeh men sater temsa7.
 def delete_requests(request):
     ids = request.data.get("ids", [])
     Request.objects.filter(id__in=ids).delete()
@@ -498,7 +575,6 @@ def delete_requests(request):
 
 
 @api_view(["POST"])
-# hne endpoint yfasakh changes l mokhtarin b ids w 9adeh men sater temsa7.
 def delete_changes(request):
     ids = request.data.get("ids", [])
     Change.objects.filter(id__in=ids).delete()

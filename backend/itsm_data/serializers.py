@@ -1,41 +1,80 @@
-# hne serializers mta3 DRF: y7adhrou data 5arja lel frontend w yet7a99ou men data de5la men requests.
+# hne serializers mta3 DRF: y7awlou model objects l JSON w yvalidiw data elli de5la men requests
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Change, Incident, Request, UserProfile
+from .models import Change, Incident, KpiDefinition, Request, UserProfile
 
 
-# hne class IncidentSerializer: tamthel structure wala behavior fil backend.
+# hne serializer mta3 Incident: y5ou kol fields mta3 incident kif ma houma
 class IncidentSerializer(serializers.ModelSerializer):
-    # hne class Meta: tamthel structure wala behavior fil backend.
+    # hne Meta t9oul eli serializer hedhi marbouta b Incident wtraja3 kol fields
     class Meta:
         model = Incident
         fields = "__all__"
 
 
-# hne class RequestSerializer: tamthel structure wala behavior fil backend.
 class RequestSerializer(serializers.ModelSerializer):
-    # hne class Meta: tamthel structure wala behavior fil backend.
     class Meta:
         model = Request
         fields = "__all__"
 
 
-# hne class ChangeSerializer: tamthel structure wala behavior fil backend.
 class ChangeSerializer(serializers.ModelSerializer):
-    # hne class Meta: tamthel structure wala behavior fil backend.
     class Meta:
         model = Change
         fields = "__all__"
 
 
-# hne class TeamMemberSerializer: tamthel structure wala behavior fil backend.
+# hne serializer mta3 KPI definitions: y7adher data lel frontend w yvalidi fields elli l form tab3athhom
+class KpiDefinitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = KpiDefinition
+        fields = [
+            "id",
+            "kpi_id",
+            "name",
+            "owner",
+            "module",
+            "dimension",
+            "target",
+            "frequency",
+            "unit",
+            "formula",
+            "source",
+            "status",
+            "description",
+            "is_default",
+        ]
+        read_only_fields = ["id", "is_default"]
+
+    def validate_kpi_id(self, value):
+        kpi_id = value.strip()
+        queryset = KpiDefinition.objects.filter(kpi_id__iexact=kpi_id)
+        instance = getattr(self, "instance", None)
+        if instance is not None:
+            queryset = queryset.exclude(pk=instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError("A KPI with this identifier already exists.")
+        return kpi_id
+
+    def validate_name(self, value):
+        name = value.strip()
+        queryset = KpiDefinition.objects.filter(name__iexact=name, is_deleted=False)
+        instance = getattr(self, "instance", None)
+        if instance is not None:
+            queryset = queryset.exclude(pk=instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError("A KPI with this name already exists.")
+        return name
+
+
+# hne serializer mta3 user/team member: y7adher data l user b fields zeyda kif access w full_name w avatar
 class TeamMemberSerializer(serializers.ModelSerializer):
     access = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
 
-    # hne class Meta: tamthel structure wala behavior fil backend.
+    # hne Meta t7aded anou serializer hedhi ta5dem 3la User w traja3 fields elli front yesta7a9hom
     class Meta:
         model = User
         fields = [
@@ -50,22 +89,22 @@ class TeamMemberSerializer(serializers.ModelSerializer):
             "access",
         ]
 
-    # hne function get_access: t3awen fil logic mta3 backend dakhil hedha l fichier.
+    # hne n7awlou role mta3 user l text simple: Admin wala User
     def get_access(self, obj):
         return "Admin" if (obj.is_staff or obj.is_superuser) else "User"
 
-    # hne function get_full_name: t3awen fil logic mta3 backend dakhil hedha l fichier.
+    # hne njibou full name ken mawjouda, sinon nraj3ou username bach ma yab9ach feragh
     def get_full_name(self, obj):
         full_name = f"{obj.first_name} {obj.last_name}".strip()
         return full_name or obj.username
 
-    # hne function get_avatar: t3awen fil logic mta3 backend dakhil hedha l fichier.
+    # hne njibou avatar men UserProfile, w ken profile mazel ma t5al9etch n5al9ouha
     def get_avatar(self, obj):
         profile, _ = UserProfile.objects.get_or_create(user=obj)
         return profile.avatar
 
 
-# hne class TeamMemberCreateSerializer: tamthel structure wala behavior fil backend.
+# hne serializer hedha m5ases l create user jdid men page Team/Form
 class TeamMemberCreateSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField(required=False, allow_blank=True)
@@ -74,14 +113,14 @@ class TeamMemberCreateSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, min_length=8, style={"input_type": "password"})
     access = serializers.ChoiceField(choices=["Admin", "User"])
 
-    # hne function validate_username: t3awen fil logic mta3 backend dakhil hedha l fichier.
+    # hne nt2kdou elli username mahech deja mawjouda fil database
     def validate_username(self, value):
         username = value.strip()
         if User.objects.filter(username__iexact=username).exists():
             raise serializers.ValidationError("A user with this username already exists.")
         return username
 
-    # hne function create: t3awen fil logic mta3 backend dakhil hedha l fichier.
+    # hne n5al9ou user jdid w n7addu kenou Admin wala User w ba3d n5al9ou profile mta3ou
     def create(self, validated_data):
         access = validated_data.pop("access")
         password = validated_data.pop("password")
@@ -100,7 +139,7 @@ class TeamMemberCreateSerializer(serializers.Serializer):
         return user
 
 
-# hne class CurrentUserUpdateSerializer: tamthel structure wala behavior fil backend.
+# hne serializer hedha mta3 update profile mta3 l user elli connecté taw
 class CurrentUserUpdateSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     email = serializers.EmailField(required=False, allow_blank=True)
@@ -108,7 +147,7 @@ class CurrentUserUpdateSerializer(serializers.Serializer):
     last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     avatar = serializers.CharField(required=False, allow_blank=True)
 
-    # hne function validate_username: t3awen fil logic mta3 backend dakhil hedha l fichier.
+    # hne ntha9nou elli username jdida ma tet3arech m3a user e5er
     def validate_username(self, value):
         username = value.strip()
         user = self.context["request"].user
@@ -117,7 +156,7 @@ class CurrentUserUpdateSerializer(serializers.Serializer):
             raise serializers.ValidationError("A user with this username already exists.")
         return username
 
-    # hne function update: tbadel resource mawjouda hasb data l msada9 3liha.
+    # hne nbaddlou ma3loumet l user w ken fama avatar n7afdhouha fil profile
     def update(self, instance, validated_data):
         instance.username = validated_data["username"]
         instance.email = validated_data.get("email", "").strip()
@@ -133,12 +172,12 @@ class CurrentUserUpdateSerializer(serializers.Serializer):
         return instance
 
 
-# hne class PasswordChangeSerializer: tamthel structure wala behavior fil backend.
+# hne serializer hedha mta3 tabdil password, soit l user nasfsou wala admin l user e5er
 class PasswordChangeSerializer(serializers.Serializer):
     current_password = serializers.CharField(required=False, allow_blank=True, write_only=True)
     new_password = serializers.CharField(min_length=8, write_only=True)
 
-    # hne function validate: t3awen fil logic mta3 backend dakhil hedha l fichier.
+    # hne ntha9nou current password ken l context y9oul elli lazma
     def validate(self, attrs):
         target_user = self.context["target_user"]
         require_current = self.context.get("require_current_password", False)
@@ -148,7 +187,7 @@ class PasswordChangeSerializer(serializers.Serializer):
 
         return attrs
 
-    # hne function save: t3awen fil logic mta3 backend dakhil hedha l fichier.
+    # hne n7otou password jdida ba3d validation w n7afdhouha fil database
     def save(self, **kwargs):
         user = self.context["target_user"]
         user.set_password(self.validated_data["new_password"])
@@ -156,7 +195,7 @@ class PasswordChangeSerializer(serializers.Serializer):
         return user
 
 
-# hne class TeamMemberAdminUpdateSerializer: tamthel structure wala behavior fil backend.
+# hne serializer hedha mta3 admin ki y7eb ybadel access/email/status mta3 user mo3ayen
 class TeamMemberAdminUpdateSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
@@ -164,7 +203,7 @@ class TeamMemberAdminUpdateSerializer(serializers.Serializer):
     access = serializers.ChoiceField(choices=["Admin", "User"], required=False)
     is_active = serializers.BooleanField(required=False)
 
-    # hne function update: tbadel resource mawjouda hasb data l msada9 3liha.
+    # hne admin ybaddel ken fields elli ba3athhom fil request .
     def update(self, instance, validated_data):
         if "first_name" in validated_data:
             instance.first_name = validated_data["first_name"].strip()

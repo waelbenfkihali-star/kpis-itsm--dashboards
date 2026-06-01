@@ -1,4 +1,4 @@
-// hne saf7et dashboard l ra2isiya: tjib incidents w requests w changes, t7seb KPIs, w ta3mel charts w summary.
+// hne dashboard principal: yjib data mta3 incidents, requests w changes, y7seb KPIs, w yaffichi cards, charts w summary.
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -33,7 +33,7 @@ import {
   renderLineTooltip,
 } from "../analysis/analysisUtils";
 
-// hne component StatCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne card sghira taffichi KPI wa7ed: icon, title, valeur w note.
 function StatCard({ icon, title, subtitle, value, note }) {
   return (
     <Paper sx={{ p: 2.2, flex: 1, minWidth: 220, borderRadius: 3 }}>
@@ -54,7 +54,7 @@ function StatCard({ icon, title, subtitle, value, note }) {
   );
 }
 
-// hne component DashboardChartCard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne card mta3 chart: taffichi title, note, chart w legend ken mawjoud.
 function DashboardChartCard({ title, note, children, legendItems = [], height = 250, className = "" }) {
   return (
     <Paper className={className} sx={{ p: 2, borderRadius: 3 }}>
@@ -70,12 +70,12 @@ function DashboardChartCard({ title, note, children, legendItems = [], height = 
   );
 }
 
-// hne function takeLastMonths: t3awen ba9i l code fil fichier hedha b logic sghira.
+// hne function t5alli ken les derniers mois 7aseb limit.
 function takeLastMonths(points, limit = 6) {
   return points.slice(-limit);
 }
 
-// hne function takeLastBreakdown: t3awen ba9i l code fil fichier hedha b logic sghira.
+// hne function t5alli ken breakdown mta3 les derniers mois.
 function takeLastBreakdown(breakdown, limit = 6) {
   return {
     keys: breakdown.keys || [],
@@ -83,7 +83,7 @@ function takeLastBreakdown(breakdown, limit = 6) {
   };
 }
 
-// hne function buildIntegerTickValues: tebni structure jdida men data l raw bech chart wala widget yesta3melha.
+// hne function ta3mel tick values s7a7 lel axis mta3 charts bech l graph yji ndhif.
 function buildIntegerTickValues(chart) {
   const values =
     chart.type === "line"
@@ -113,7 +113,7 @@ function buildIntegerTickValues(chart) {
   return ticks;
 }
 
-// hne component Dashboard: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne component dashboard: yjib data, y7adher stats w charts, w yaffichihom.
 export default function Dashboard() {
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
@@ -167,9 +167,9 @@ export default function Dashboard() {
     [changes]
   );
 
-  // hne function charts: t3awen ba9i l code fil fichier hedha b logic sghira.
+  // hne n7adhrou charts lkol mta3 dashboard 7aseb data mta3 incidents, requests w changes.
   const charts = useMemo(() => {
-    // hne function requestsOlderThan60: t3awen ba9i l code fil fichier hedha b logic sghira.
+    // hne n5arjou requests elli mazelt open w 3andhom akther men 60 jours.
     const requestsOlderThan60 = requests.filter((row) => {
       if (["Closed", "Resolved", "Completed"].includes(row.state)) return false;
       if (!row.opened) return false;
@@ -178,7 +178,7 @@ export default function Dashboard() {
       return Date.now() - opened.getTime() > 60 * 24 * 60 * 60 * 1000;
     });
 
-    // hne function pastDueChanges: t3awen ba9i l code fil fichier hedha b logic sghira.
+    // hne n5arjou changes elli fet planned end date mte3hom w mazalou open.
     const pastDueChanges = changes.filter((row) => {
       if (["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)) return false;
       if (!row.planned_end_date) return false;
@@ -359,7 +359,7 @@ export default function Dashboard() {
         }}
       >
         {charts.map((chart) => (
-          /* hne kol chart object men l array yet3ared ka card mosta9la b KPI mokhtalef. */
+          // hne kol chart men array yet3ared fi card wa7dou b KPI mte3ou.
           <DashboardChartCard
             key={chart.title}
             title={chart.title}

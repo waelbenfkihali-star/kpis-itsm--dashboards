@@ -1,4 +1,4 @@
-// hne bloc summary sghir ya3ti fekra 3la aham points 9bal ma l user ychouf charts.
+// hne bloc sghir yetsama Executive Summary: ywarri lel user aham highlights, risks w actions 9bal ma ychouf charts.
 import React from "react";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
@@ -20,7 +20,7 @@ const sectionMeta = {
   },
 };
 
-// hne component ExecutiveSummary: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne ExecutiveSummary component: yaffichi resume sghir mratab hasb sections eli yjiw mel parent.
 export default function ExecutiveSummary({ sections = {} }) {
   const ordered = ["highlights", "risks", "actions"]
     .map((key) => ({

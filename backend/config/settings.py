@@ -1,8 +1,9 @@
+# hne fichier settings principal: fih config mta3 Django, auth, database, apps, w CORS
 import os
 from datetime import timedelta
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# hne BASE_DIR huwa racine mta3 backend bach ba9i les paths ytbniw 3lih
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -91,8 +92,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# hne config mta3 database: ken DB_ENGINE postgres nesta3mel PostgreSQL, sinon n3aytou 3la SQLite
 
 DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").strip().lower()
 

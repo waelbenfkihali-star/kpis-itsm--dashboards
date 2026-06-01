@@ -1,4 +1,4 @@
-// hne page login: l user yodkhel username/password, w ila s7a7 l app y5azen access w refresh tokens.
+// hne page login: l user yodkhel b username w password, w ki yetsa7a7ou yet5aznou tokens w yimchi lel app.
 import { IconButton, Stack, useTheme } from "@mui/material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -8,15 +8,17 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { getApiUrl } from "../../utils/api";
 
-// hne component Login: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne component principal mta3 saf7et login.
 export default function Login({ setMode }) {
   const navigate = useNavigate();
   const theme = useTheme();
-  // hne component API_URL: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+  // hne n7adhrou endpoint mta3 login elli bech naba3thoulou username w password.
   const API_URL = useMemo(() => getApiUrl("/auth/token/"), []);
   const isLight = theme.palette.mode === "light";
 
+  // hne value mta3 username, w law ken remember me mfa3la yjibou men localStorage.
   const [username, setUsername] = useState(localStorage.getItem("saved_user") || "");
+  // hne n5aznou password elli l user yektebha.
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(Boolean(localStorage.getItem("saved_user")));
   const [showPass, setShowPass] = useState(false);
@@ -24,21 +26,25 @@ export default function Login({ setMode }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // hne state sghira lel animation mta3 l page ki tethher awel mara.
   const [mounted, setMounted] = useState(false);
+  // hne reference lel card mta3 login bech n7arrkouha m3a mouse movement.
   const cardRef = useRef(null);
+  // hne n5aznou values mta3 tilt/rotation mta3 l card.
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, sx: 1 });
 
+  // hne nfa3lou intro animation ba3d millisecondat sghar ki l page tethher.
   useEffect(() => {
-    // hne function t: t3awen ba9i l code fil fichier hedha b logic sghira.
     const t = setTimeout(() => setMounted(true), 20);
     return () => clearTimeout(t);
   }, []);
 
+  // hne n3all9ou events 3al card bech tet7arrak hasb position mta3 souris.
   useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
 
-    // hne function onMove: t3awen ba9i l code fil fichier hedha b logic sghira.
+    // hne ki souris tet7arek fou9 l card, n7sbou rotation x/y bech ta3ti effet 3D.
     function onMove(e) {
       // @ts-ignore
       const r = el.getBoundingClientRect();
@@ -54,7 +60,7 @@ export default function Login({ setMode }) {
       });
     }
 
-    // hne function onLeave: t3awen ba9i l code fil fichier hedha b logic sghira.
+    // hne ki souris t5rej men l card, narj3ouha lel position l aslaya.
     function onLeave() {
       setTilt({ rx: 0, ry: 0, sx: 1 });
     }
@@ -71,42 +77,52 @@ export default function Login({ setMode }) {
     };
   }, []);
 
+  // hne function login: tab3eth credentials lel backend, t5azen tokens, w ba3dha tredirecti l dashboard.
   async function login() {
     setLoading(true);
     setError(null);
 
     try {
+      // hne request POST lel endpoint mta3 auth bech net2akdou men login.
       const r = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
+      // hne backend ynajem yarja3 JSON wala text, donc ne9raw response kolha awel.
       const text = await r.text();
       let j = {};
       try {
+        // hne n7awlou response text lel JSON ken tnajjem tetfassar.
         j = text ? JSON.parse(text) : {};
       } catch {
         j = {};
       }
 
+      // hne ken login tfachel, nwarri message elli rja3ha backend wala HTTP status.
       if (!r.ok) {
         // @ts-ignore
         setError(j?.detail || j?.error || text || `Login failed (HTTP ${r.status})`);
         return;
       }
 
+      // hne n5aznou access token bech requests l ba3d ykounou authentified.
       // @ts-ignore
       localStorage.setItem("access", j.access);
+      // hne n5aznou refresh token bech session tetjadded ki yelzem
       // @ts-ignore
       localStorage.setItem("refresh", j.refresh);
 
+      // hne ken remember me mfa3la n5aznou username, sinon na7iyouh.
       if (remember) localStorage.setItem("saved_user", username);
       else localStorage.removeItem("saved_user");
 
+      // hne nwarri success state w ba3d nhezzu l user lel dashboard.
       setSuccess(true);
       setTimeout(() => navigate("/", { replace: true }), 900);
     } catch (e) {
+      // hne nmasikou errors kif network problem wala exception okhra.
       // @ts-ignore
       setError(String(e?.message || e));
     } finally {
@@ -114,6 +130,7 @@ export default function Login({ setMode }) {
     }
   }
 
+  // hne n7sbou ken bouton Sign In lazem ykoun disabled wala le.
   const disabled = !username || !password || loading || success;
   const pageStyle = {
     background: isLight
@@ -121,10 +138,12 @@ export default function Login({ setMode }) {
       : "#040816",
     color: isLight ? "#0f172a" : "#ffffff",
   };
+  // hne style mta3 les blocs secondaires kif badge/pro tip.
   const panelStyle = {
     border: isLight ? "1px solid rgba(15,23,42,0.10)" : "1px solid rgba(255,255,255,0.10)",
     background: isLight ? "rgba(255,255,255,0.76)" : "rgba(255,255,255,0.05)",
   };
+  // hne style mta3 l card principale mta3 login.
   const cardStyle = {
     border: isLight ? "1px solid rgba(15,23,42,0.10)" : "1px solid rgba(255,255,255,0.10)",
     background: isLight ? "rgba(255,255,255,0.84)" : "rgba(255,255,255,0.07)",
@@ -132,8 +151,11 @@ export default function Login({ setMode }) {
       ? "0 45px 110px rgba(148,163,184,0.30)"
       : "0 45px 110px rgba(0,0,0,0.65)",
   };
+  // hne colors mta3 texte secondaire hasb theme.
   const mutedText = { color: isLight ? "#475569" : "#d1d5db" };
+  // hne colors mta3 texte akther 5fif lel notes sghar.
   const subtleText = { color: isLight ? "#64748b" : "#9ca3af" };
+  // hne style mta3 input fields.
   const inputStyle = {
     border: isLight ? "1px solid rgba(15,23,42,0.12)" : "1px solid rgba(255,255,255,0.12)",
     background: isLight ? "rgba(248,250,252,0.92)" : "rgba(255,255,255,0.06)",
@@ -143,12 +165,14 @@ export default function Login({ setMode }) {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={pageStyle}>
+      {/* hne bouton sghir fou9 3al yemin bech nbadlou dark/light mode. */}
       <Stack
         direction="row"
         sx={{ position: "absolute", top: 20, right: 20, zIndex: 1000 }}
       >
         <IconButton
           onClick={() => {
+            // hne n5aznou mode mta3 theme bech yeb9a nafsou ba3d refresh.
             localStorage.setItem(
               "currentMode",
               theme.palette.mode === "dark" ? "light" : "dark"
@@ -162,6 +186,7 @@ export default function Login({ setMode }) {
         </IconButton>
       </Stack>
 
+      {/* hne background decoration bark, ma3andha 7atta relation bil logic mta3 login. */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-72 -left-72 h-[980px] w-[980px] rounded-full blur-3xl bg-cyan-500/18 animate-[pulse_7s_ease-in-out_infinite]" />
         <div className="absolute -bottom-80 -right-80 h-[980px] w-[980px] rounded-full blur-3xl bg-indigo-600/16 animate-[pulse_8s_ease-in-out_infinite]" />
@@ -169,6 +194,7 @@ export default function Login({ setMode }) {
         <div className="absolute bottom-1/4 -left-56 h-[680px] w-[680px] rounded-full blur-3xl bg-sky-500/14 animate-[pulse_10s_ease-in-out_infinite]" />
       </div>
 
+      {/* hne grid/pattern decoration fil background. */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.10] bg-[size:56px_56px]"
         style={{
@@ -178,6 +204,7 @@ export default function Login({ setMode }) {
         }}
       />
 
+      {/* hne overlay texture w radial shadow bech l background yji aghna visuellement. */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay [background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22><filter id=%22n%22 x=%220%22 y=%220%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/></filter><rect width=%22300%22 height=%22300%22 filter=%22url(%23n)%22 opacity=%220.35%22/></svg>')]" />
       <div
         className="pointer-events-none absolute inset-0"
@@ -188,12 +215,14 @@ export default function Login({ setMode }) {
         }}
       />
 
+      {/* hne circles mta3 animation fil background bech t3ti ambiance. */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[10%] top-[15%] h-28 w-28 rounded-full bg-cyan-400/10 blur-xl animate-[floaty_10s_ease-in-out_infinite]" />
         <div className="absolute right-[12%] top-[55%] h-36 w-36 rounded-full bg-indigo-400/10 blur-xl animate-[floaty_12s_ease-in-out_infinite]" />
         <div className="absolute left-[20%] bottom-[18%] h-44 w-44 rounded-full bg-blue-400/10 blur-2xl animate-[floaty_14s_ease-in-out_infinite]" />
       </div>
 
+      {/* hne wrapper principal elli y7ot contenu login fi wost l page. */}
       <div className="relative min-h-screen flex items-center justify-center p-6">
         <div
           className={[
@@ -202,6 +231,7 @@ export default function Login({ setMode }) {
           ].join(" ")}
           style={{ transition: "all 600ms cubic-bezier(.2,.8,.2,1)" }}
         >
+          {/* hne colonne lisar: présentation sghira 3al plateforme w features mta3ha. */}
           <div className="hidden lg:block">
             <div className="max-w-xl">
               <div className="inline-flex items-center gap-3 rounded-2xl px-4 py-2 backdrop-blur-xl" style={panelStyle}>
@@ -241,6 +271,7 @@ export default function Login({ setMode }) {
             </div>
           </div>
 
+          {/* hne colonne limin: card mta3 login elli l user yet3amel m3aha. */}
           <div className="flex justify-center">
             <div
               ref={cardRef}
@@ -250,14 +281,17 @@ export default function Login({ setMode }) {
                 transition: "transform 140ms ease-out",
               }}
             >
+              {/* hne halo/ombre wara l card bark pour design. */}
               <div className="absolute -inset-[2px] rounded-[30px] blur-2xl bg-gradient-to-r from-cyan-500/30 via-blue-600/25 to-indigo-600/30" />
 
               <div className="relative rounded-[30px] backdrop-blur-2xl overflow-hidden" style={cardStyle}>
+                {/* hne stripe lfo9ania mta3 décoration. */}
                 <div className="h-[6px] bg-gradient-to-r from-cyan-400 via-blue-600 to-indigo-600" />
                 <div className="pointer-events-none absolute -top-24 -left-24 h-56 w-56 rotate-12 bg-white/10 blur-2xl" />
                 <div className="pointer-events-none absolute -bottom-28 -right-28 h-72 w-72 rotate-12 bg-cyan-400/10 blur-3xl" />
 
                 <div className="p-7 sm:p-8">
+                  {/* hne header mta3 l card: logo + esm plateforme + version. */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="relative">
@@ -280,6 +314,7 @@ export default function Login({ setMode }) {
                     <Badge text="v1.0" />
                   </div>
 
+                  {/* hne title principal mta3 saf7et login. */}
                   <div className="mt-6">
                     <div className="text-2xl font-semibold">Sign in</div>
                     <div className="text-sm mt-1" style={mutedText}>
@@ -287,6 +322,7 @@ export default function Login({ setMode }) {
                     </div>
                   </div>
 
+                  {/* hne message d'erreur yban ken login tfachel. */}
                   {error && (
                     <div className="mt-5 rounded-2xl border border-red-400/25 bg-red-500/10 px-4 py-3">
                       <div className="flex items-start justify-between gap-3">
@@ -305,6 +341,7 @@ export default function Login({ setMode }) {
                     </div>
                   )}
 
+                  {/* hne bloc mta3 les champs + actions mta3 login. */}
                   <div className="mt-6 space-y-4">
                     <
 // @ts-ignore
@@ -349,12 +386,14 @@ export default function Login({ setMode }) {
                       />
                     </Field>
 
+                    {/* hne warning ken Caps Lock ch3al bech l user ma yaghletch fil password. */}
                     {capsOn && (
                       <div className="rounded-2xl border border-yellow-300/20 bg-yellow-500/10 px-4 py-2 text-xs text-yellow-200">
                         Caps Lock is ON
                       </div>
                     )}
 
+                    {/* hne remember me + lien forgot password. */}
                     <div className="flex items-center justify-between">
                       <label className="flex items-center gap-2 text-sm select-none" style={mutedText}>
                         <input
@@ -376,6 +415,7 @@ export default function Login({ setMode }) {
                       </button>
                     </div>
 
+                    {/* hne bouton principal: ya3mel login wala yori spinner waqt authenticating. */}
                     <button
                       disabled={disabled}
                       onClick={login}
@@ -397,12 +437,14 @@ export default function Login({ setMode }) {
                       )}
                     </button>
 
+                    {/* hne note sghira ta3ti infos 3la sécurité mta3 système. */}
                     <div className="text-[11px] text-center leading-relaxed" style={subtleText}>
                       Internal system • password is never stored • actions can be audited
                     </div>
                   </div>
                 </div>
 
+                {/* hne footer sghir ta7t l card. */}
                 <div
                   className="px-7 py-4 text-xs flex items-center justify-between"
                   style={{
@@ -414,6 +456,7 @@ export default function Login({ setMode }) {
                   <span style={mutedText}>LEONI • Internal</span>
                 </div>
 
+                {/* hne overlay success yban ba3d login mrigel 9bal redirect. */}
                 {success && (
                   <div
                     className="absolute inset-0 flex items-center justify-center backdrop-blur-xl"
@@ -438,6 +481,7 @@ export default function Login({ setMode }) {
         </div>
       </div>
 
+      {/* hne animations CSS elli yesta3mlouhom spinner w background elements. */}
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes pulse { 0%,100% { transform: scale(1); opacity: .85; } 50% { transform: scale(1.06); opacity: 1; } }
@@ -447,12 +491,12 @@ export default function Login({ setMode }) {
   );
 }
 
-// hne function clamp: t3awen ba9i l code fil fichier hedha b logic sghira.
+// hne function tsakker ay valeur bin minimum w maximum bech tilt ma ykabbarch barcha.
 function clamp(min, max, v) {
   return Math.max(min, Math.min(max, v));
 }
 
-// hne component Field: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne component helper lel label + input bloc bech username/password yjiw بنفس الستايل.
 function Field({ label, right, children, isLight }) {
   return (
     <div>
@@ -470,7 +514,7 @@ function Field({ label, right, children, isLight }) {
   );
 }
 
-// hne component Stat: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne component sghir ywarri stat fil colonne lisar kif Security wala KPI.
 function Stat({ label, value }) {
   const theme = useTheme();
   const isLight = theme.palette.mode === "light";
@@ -496,7 +540,7 @@ function Stat({ label, value }) {
   );
 }
 
-// hne component Badge: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne badge sghira tori version mta3 plateforme.
 function Badge({ text }) {
   const theme = useTheme();
   const isLight = theme.palette.mode === "light";
@@ -515,7 +559,7 @@ function Badge({ text }) {
   );
 }
 
-// hne component Spinner: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne spinner sghir yban dakhil bouton login waqt request mazelt temchi.
 function Spinner() {
   return (
     <span
@@ -525,7 +569,7 @@ function Spinner() {
   );
 }
 
-// hne component CheckIcon: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
+// hne icon success elli tban fil overlay ba3d login.
 function CheckIcon() {
   return (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">

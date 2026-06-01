@@ -21,6 +21,7 @@ const KpiForm = () => {
 
   const [form, setForm] = useState(KPI_INITIAL_FORM);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
   // hne function setField: t3awen ba9i l code fil fichier hedha b logic sghira.
   function setField(key, value) {
@@ -44,24 +45,25 @@ const KpiForm = () => {
   }
 
   // hne function submit: form wala request lel backend w teta3amel m3a success wala error.
-  function submit() {
+  async function submit() {
 
-    if (!isValid) return;
+    if (!isValid || saving) return;
 
-    const validationMessage = validateKpi(form);
-    if (validationMessage) {
-      setError(validationMessage);
-      return;
+    try {
+      setSaving(true);
+      const validationMessage = await validateKpi(form);
+      if (validationMessage) {
+        setError(validationMessage);
+        return;
+      }
+
+      await upsertKpi(form);
+      navigate("/MyKpis");
+    } catch (e) {
+      setError(String(e.message || e));
+    } finally {
+      setSaving(false);
     }
-
-    const newKpi = {
-      id: Date.now(),
-      ...form,
-    };
-
-    upsertKpi(newKpi);
-
-    navigate("/MyKpis");
 
   }
 
@@ -89,9 +91,9 @@ const KpiForm = () => {
           <Button
             variant="contained"
             onClick={submit}
-            disabled={!isValid}
+            disabled={!isValid || saving}
           >
-            Save KPI
+            {saving ? "Saving..." : "Save KPI"}
           </Button>
 
           <Button
