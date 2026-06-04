@@ -234,7 +234,6 @@ export default function Profile() {
       };
     });
   }
-
   async function handleAvatarUpload(event) {
     const file = event.target.files?.[0];
     if (!file) return;

@@ -73,7 +73,6 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     access = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
-
     # hne Meta t7aded anou serializer hedhi ta5dem 3la User w traja3 fields elli front yesta7a9hom
     class Meta:
         model = User
@@ -167,8 +166,7 @@ class CurrentUserUpdateSerializer(serializers.Serializer):
         profile, _ = UserProfile.objects.get_or_create(user=instance)
         if "avatar" in validated_data:
             profile.avatar = validated_data.get("avatar", "")
-            profile.save(update_fields=["avatar"])
-
+        profile.save()
         return instance
 
 

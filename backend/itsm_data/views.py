@@ -50,14 +50,6 @@ def sync_default_kpis():
             kpi_id=item["kpi_id"].strip(),
             defaults=defaults,
         )
-        if not created and obj.is_default:
-            changed = False
-            for field, value in defaults.items():
-                if getattr(obj, field) != value:
-                    setattr(obj, field, value)
-                    changed = True
-            if changed:
-                obj.save()
 
 
 
@@ -469,7 +461,10 @@ def kpis_list(request):
     sync_default_kpis()
 
     if request.method == "GET":
-        rows = KpiDefinition.objects.filter(is_deleted=False).order_by("module", "kpi_id", "id")
+        rows = KpiDefinition.objects.filter(is_deleted=False)
+        if not request.user.is_staff:
+            rows = rows.filter(status__iexact="Active")
+        rows = rows.order_by("module", "kpi_id", "id")
         return Response(KpiDefinitionSerializer(rows, many=True).data)
 
     if not request.user.is_staff:
@@ -491,6 +486,8 @@ def kpi_detail(request, kpi_id):
 
     if request.method == "GET":
         if row.is_deleted:
+            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+        if row.status.strip().lower() == "retired" and not request.user.is_staff:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response(KpiDefinitionSerializer(row).data)
 

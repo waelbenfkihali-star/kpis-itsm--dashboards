@@ -13,7 +13,7 @@ import Header from "../../components/Header";
 import KpiFieldsForm from "./KpiFieldsForm";
 import { KPI_INITIAL_FORM } from "./kpiFormConfig";
 
-import { getKpiById, loadKpis, upsertKpi } from "./kpiStorage";
+import { getKpiById, loadKpis, upsertKpi, validateKpi } from "./kpiStorage";
 
 // hne component EditKpi: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const EditKpi = () => {
@@ -114,6 +114,11 @@ const EditKpi = () => {
 
     try {
       setSaving(true);
+      const validationMessage = await validateKpi(form);
+      if (validationMessage) {
+        setError(validationMessage);
+        return;
+      }
       await upsertKpi(form);
       navigate("/MyKpis");
     } catch (e) {

@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
+    "drf_spectacular",
     "corsheaders",
     "itsm_data",
 ]
@@ -51,6 +52,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "KPIs ITSM Dashboards API",
+    "DESCRIPTION": "API documentation for the KPIs ITSM Dashboards backend.",
+    "VERSION": "1.0.0",
 }
 
 SIMPLE_JWT = {

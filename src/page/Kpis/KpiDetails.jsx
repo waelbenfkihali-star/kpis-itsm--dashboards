@@ -71,6 +71,7 @@ export default function KpiDetails() {
 
   const modulePath = getModulePath(row.module);
   const moduleLabel = getModuleLabel(row.module);
+  const isRetired = String(row.status || "").trim().toLowerCase() === "retired";
 
   return (
     <Box>
@@ -93,6 +94,7 @@ export default function KpiDetails() {
           <Button
             variant="contained"
             color="success"
+            disabled={isRetired}
             onClick={() =>
               navigate(modulePath, {
                 state: { selectedKpi: row },
@@ -109,6 +111,12 @@ export default function KpiDetails() {
           </Button>
         </Box>
       </Box>
+
+      {isRetired ? (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          This KPI is retired. It cannot be used again until an admin changes its status back to Active.
+        </Alert>
+      ) : null}
 
       <Paper elevation={1} sx={{ p: 2, borderRadius: "14px", mb: 2 }}>
         <Stack

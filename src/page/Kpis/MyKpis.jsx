@@ -200,21 +200,39 @@ const MyKpis = () => {
           <Typography
             onClick={(e) => {
               e.stopPropagation();
+              if (String(params.row.status || "").trim().toLowerCase() === "retired") {
+                return;
+              }
               navigate(getModulePath(params.row.module), {
                 state: { selectedKpi: params.row },
               });
             }}
             sx={{
               fontWeight: 700,
-              cursor: "pointer",
+              cursor:
+                String(params.row.status || "").trim().toLowerCase() === "retired"
+                  ? "not-allowed"
+                  : "pointer",
+              opacity:
+                String(params.row.status || "").trim().toLowerCase() === "retired"
+                  ? 0.6
+                  : 1,
               transition: "all 0.18s ease",
               "&:hover": {
-                color: "primary.main",
+                color:
+                  String(params.row.status || "").trim().toLowerCase() === "retired"
+                    ? "inherit"
+                    : "primary.main",
                 textShadow: (theme) =>
-                  theme.palette.mode === "dark"
-                    ? "0 0 10px rgba(144, 202, 249, 0.45)"
-                    : "0 0 8px rgba(25, 118, 210, 0.22)",
-                transform: "translateY(-1px)",
+                  String(params.row.status || "").trim().toLowerCase() === "retired"
+                    ? "none"
+                    : theme.palette.mode === "dark"
+                      ? "0 0 10px rgba(144, 202, 249, 0.45)"
+                      : "0 0 8px rgba(25, 118, 210, 0.22)",
+                transform:
+                  String(params.row.status || "").trim().toLowerCase() === "retired"
+                    ? "none"
+                    : "translateY(-1px)",
               },
             }}
           >

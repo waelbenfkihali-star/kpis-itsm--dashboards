@@ -1,9 +1,11 @@
 # hne tests backend bech net2akdou elli APIs l ra2isiya tekhdem kif ma .
+import datetime
+
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import UserProfile
+from .models import KpiDefinition, UserProfile
 
 
 # hne class TeamApiTests: tamthel structure wala behavior fil backend.
@@ -12,6 +14,7 @@ class TeamApiTests(APITestCase):
     def setUp(self):
         self.admin = User.objects.create_user(
             username="wael",
+            email="wael@example.com",
             password="StrongPass123!",
             is_staff=True,
             is_superuser=True,
@@ -20,10 +23,13 @@ class TeamApiTests(APITestCase):
         )
         self.user = User.objects.create_user(
             username="ritha",
+            email="ritha.initial@example.com",
             password="StrongPass123!",
             first_name="Ritha",
+            last_name="Ben Ali",
         )
-
+        UserProfile.objects.get_or_create(user=self.admin)
+        UserProfile.objects.get_or_create(user=self.user)
     # hne test test_me_returns_authenticated_user: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_me_returns_authenticated_user(self):
         self.client.force_authenticate(user=self.admin)
@@ -33,6 +39,7 @@ class TeamApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["username"], "wael")
         self.assertEqual(response.data["access"], "Admin")
+        self.assertEqual(response.data["email"], "wael@example.com")
 
     # hne test test_team_list_returns_existing_accounts: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_team_list_returns_existing_accounts(self):
@@ -104,7 +111,7 @@ class TeamApiTests(APITestCase):
         profile = UserProfile.objects.get(user=self.user)
         self.assertEqual(self.user.username, "ritha.updated")
         self.assertEqual(profile.avatar, "data:image/png;base64,abc123")
-
+        self.assertEqual(self.user.email, "ritha@example.com")
     # hne test test_admin_can_deactivate_and_reset_password: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_admin_can_deactivate_and_reset_password(self):
         self.client.force_authenticate(user=self.admin)
@@ -125,3 +132,78 @@ class TeamApiTests(APITestCase):
         self.user.refresh_from_db()
         self.assertFalse(self.user.is_active)
         self.assertTrue(self.user.check_password("NewStrongPass456!"))
+
+
+class KpiApiTests(APITestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            username="kpiadmin",
+            password="StrongPass123!",
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.user = User.objects.create_user(
+            username="kpiuser",
+            password="StrongPass123!",
+        )
+
+    def test_default_kpi_update_persists_after_listing(self):
+        self.client.force_authenticate(user=self.admin)
+
+        list_response = self.client.get("/api/kpis/")
+        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+        kpi_id = list_response.data[0]["id"]
+
+        update_response = self.client.patch(
+            f"/api/kpis/{kpi_id}/",
+            {
+                "name": "Updated KPI Name",
+                "owner": "Updated Owner",
+            },
+            format="json",
+        )
+
+        self.assertEqual(update_response.status_code, status.HTTP_200_OK)
+
+        refreshed_list = self.client.get("/api/kpis/")
+        self.assertEqual(refreshed_list.status_code, status.HTTP_200_OK)
+
+        updated_row = next(item for item in refreshed_list.data if item["id"] == kpi_id)
+        self.assertEqual(updated_row["name"], "Updated KPI Name")
+        self.assertEqual(updated_row["owner"], "Updated Owner")
+
+        stored = KpiDefinition.objects.get(pk=kpi_id)
+        self.assertEqual(stored.name, "Updated KPI Name")
+        self.assertEqual(stored.owner, "Updated Owner")
+
+    def test_retired_kpi_is_hidden_from_non_admin_until_reactivated(self):
+        self.client.force_authenticate(user=self.admin)
+        list_response = self.client.get("/api/kpis/")
+        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+
+        retired_row = next(item for item in list_response.data if item["status"] == "Retired")
+        retired_id = retired_row["id"]
+
+        self.client.force_authenticate(user=self.user)
+        non_admin_list = self.client.get("/api/kpis/")
+        self.assertEqual(non_admin_list.status_code, status.HTTP_200_OK)
+        self.assertFalse(any(item["id"] == retired_id for item in non_admin_list.data))
+
+        non_admin_detail = self.client.get(f"/api/kpis/{retired_id}/")
+        self.assertEqual(non_admin_detail.status_code, status.HTTP_404_NOT_FOUND)
+
+        self.client.force_authenticate(user=self.admin)
+        admin_detail = self.client.get(f"/api/kpis/{retired_id}/")
+        self.assertEqual(admin_detail.status_code, status.HTTP_200_OK)
+
+        reactivate_response = self.client.patch(
+            f"/api/kpis/{retired_id}/",
+            {"status": "Active"},
+            format="json",
+        )
+        self.assertEqual(reactivate_response.status_code, status.HTTP_200_OK)
+
+        self.client.force_authenticate(user=self.user)
+        reloaded_list = self.client.get("/api/kpis/")
+        self.assertEqual(reloaded_list.status_code, status.HTTP_200_OK)
+        self.assertTrue(any(item["id"] == retired_id for item in reloaded_list.data))

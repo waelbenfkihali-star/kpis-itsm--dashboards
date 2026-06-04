@@ -99,3 +99,9 @@ For DevOps, the minimum clean handoff is:
 - `frontend`: Vite dev server
 - `backend`: Django app
 - `postgres`: PostgreSQL 16 with persistent Docker volume
+
+
+
+
+
+docker compose exec postgres psql -U itsm_user -d itsm_dashboard

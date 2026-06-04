@@ -281,6 +281,7 @@ const Form = () => {
                 helperText={errors.lastName ? "Last name is required and must contain at least 3 characters." : "Used for team visibility and profile identity."}
                 {...register("lastName", { required: true, minLength: 3 })}
               />
+              
             </Grid>
           </Grid>
 
@@ -304,8 +305,18 @@ const Form = () => {
                 {...register("email", { required: true, pattern: regEmail })}
               />
             </Grid>
+          </Grid>
 
-            <Grid item xs={12} md={5}>
+          <Divider />
+
+          <SectionTitle
+            icon={<LockOutlinedIcon color="warning" />}
+            title="Security Setup"
+            subtitle="Create a strong initial password so the new account is ready to sign in safely."
+          />
+
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={8}>
               <TextField
                 fullWidth
                 variant="filled"
