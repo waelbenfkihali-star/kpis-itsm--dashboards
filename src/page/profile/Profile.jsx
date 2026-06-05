@@ -363,6 +363,7 @@ export default function Profile() {
         new_password: "",
         confirm_password: "",
       });
+      await reloadCurrentUser?.();
       setPasswordMessage({ type: "success", text: "Password updated successfully." });
     } catch (error) {
       setPasswordMessage({ type: "error", text: error.message || "Unable to update password." });
@@ -511,6 +512,12 @@ export default function Profile() {
               {profileMessage.text && (
                 <Alert severity={profileMessage.type || "info"} sx={{ mb: 2 }}>
                   {profileMessage.text}
+                </Alert>
+              )}
+
+              {currentUser?.must_change_password && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  Your current password is temporary. Please update it before continuing.
                 </Alert>
               )}
 

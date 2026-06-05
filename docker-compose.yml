@@ -49,6 +49,16 @@ services:
       - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_DASHBOARD_MODEL=${OPENAI_DASHBOARD_MODEL:-gpt-5}
+      - EMAIL_BACKEND=${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+      - EMAIL_HOST=${EMAIL_HOST:-}
+      - EMAIL_PORT=${EMAIL_PORT:-587}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER:-}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD:-}
+      - EMAIL_USE_TLS=${EMAIL_USE_TLS:-true}
+      - EMAIL_USE_SSL=${EMAIL_USE_SSL:-false}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL:-LEONI IT <no-reply@leoni.local>}
+      - ACCOUNT_EMAIL_BRAND=${ACCOUNT_EMAIL_BRAND:-LEONI IT}
+      - APP_LOGIN_URL=${APP_LOGIN_URL:-http://localhost:5173/login}
     volumes:
       - ./backend:/app
     restart: unless-stopped

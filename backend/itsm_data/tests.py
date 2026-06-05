@@ -2,6 +2,8 @@
 import datetime
 
 from django.contrib.auth.models import User
+from django.core import mail
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -40,6 +42,7 @@ class TeamApiTests(APITestCase):
         self.assertEqual(response.data["username"], "wael")
         self.assertEqual(response.data["access"], "Admin")
         self.assertEqual(response.data["email"], "wael@example.com")
+        self.assertFalse(response.data["must_change_password"])
 
     # hne test test_team_list_returns_existing_accounts: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_team_list_returns_existing_accounts(self):
@@ -53,6 +56,12 @@ class TeamApiTests(APITestCase):
         self.assertIn("ritha", usernames)
 
     # hne test test_admin_can_create_admin_account: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="LEONI IT <no-reply@leoni.local>",
+        ACCOUNT_EMAIL_BRAND="LEONI IT",
+        APP_LOGIN_URL="http://localhost:5173/login",
+    )
     def test_admin_can_create_admin_account(self):
         self.client.force_authenticate(user=self.admin)
 
@@ -73,6 +82,11 @@ class TeamApiTests(APITestCase):
         created = User.objects.get(username="newadmin")
         self.assertTrue(created.is_staff)
         self.assertTrue(created.is_superuser)
+        self.assertTrue(created.profile.must_change_password)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["newadmin@example.com"])
+        self.assertIn("newadmin", mail.outbox[0].body)
+        self.assertIn("StrongPass123!", mail.outbox[0].body)
 
     # hne test test_non_admin_cannot_create_account: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_non_admin_cannot_create_account(self):
@@ -132,6 +146,27 @@ class TeamApiTests(APITestCase):
         self.user.refresh_from_db()
         self.assertFalse(self.user.is_active)
         self.assertTrue(self.user.check_password("NewStrongPass456!"))
+        self.assertTrue(self.user.profile.must_change_password)
+
+    def test_user_password_change_clears_temporary_password_flag(self):
+        self.client.force_authenticate(user=self.user)
+        profile = UserProfile.objects.get(user=self.user)
+        profile.must_change_password = True
+        profile.save(update_fields=["must_change_password"])
+
+        response = self.client.post(
+            "/api/auth/me/password/",
+            {
+                "current_password": "StrongPass123!",
+                "new_password": "MyOwnNewPass789!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("MyOwnNewPass789!"))
+        self.assertFalse(self.user.profile.must_change_password)
 
 
 class KpiApiTests(APITestCase):
