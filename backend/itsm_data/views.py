@@ -13,6 +13,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
+from django.core.mail import EmailMultiAlternatives
 
 from .ai_dashboard import build_ai_dashboard_intent
 from .kpi_defaults import DEFAULT_KPIS
@@ -28,8 +29,6 @@ from .serializers import (
     TeamMemberAdminUpdateSerializer,
     TeamMemberSerializer,
     logger,
-    send_account_deactivated_email,
-    send_account_deleted_email,
 )
 
 
@@ -725,11 +724,6 @@ def team_member_detail(request, user_id):
                 {"detail": "You cannot delete your own account."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Mail on account deletion is disabled for now.
-        # try:
-        #     send_account_deleted_email(user)
-        # except Exception:
-        #     logger.exception("Failed to send account deletion email to %s", user.email)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -738,18 +732,11 @@ def team_member_detail(request, user_id):
             {"detail": "You cannot deactivate your own account."},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
-    was_active = user.is_active
+    
     serializer = TeamMemberAdminUpdateSerializer(instance=user, data=request.data, partial=True)
     serializer.is_valid(raise_exception=True)
     serializer.update(user, serializer.validated_data)
-    if was_active and user.is_active is False:
-        # Mail on account deactivation is disabled for now.
-        # try:
-        #     send_account_deactivated_email(user)
-        # except Exception:
-        #     logger.exception("Failed to send account deactivation email to %s", user.email)
-        pass
+
     return Response(TeamMemberSerializer(user).data)
 
 

@@ -149,9 +149,7 @@ class TeamApiTests(APITestCase):
         self.user.refresh_from_db()
         self.assertFalse(self.user.is_active)
         self.assertTrue(self.user.check_password("NewStrongPass456!"))
-        self.assertEqual(len(mail.outbox), 2)
-        self.assertEqual(mail.outbox[0].to, ["ritha.initial@example.com"])
-        self.assertIn("deactivated", mail.outbox[0].subject.lower())
+        self.assertEqual(len(mail.outbox), 0)
 
     @override_settings(
         EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
@@ -165,9 +163,7 @@ class TeamApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(User.objects.filter(pk=self.user.id).exists())
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].to, ["ritha.initial@example.com"])
-        self.assertIn("deleted", mail.outbox[0].subject.lower())
+        self.assertEqual(len(mail.outbox), 0)
 
 
 class KpiApiTests(APITestCase):
