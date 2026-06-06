@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import InsightAssistant from "./components/InsightAssistant";
 import TopBar from "./components/TopBar";
 import SideBar from "./components/SideBar";
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { fetchCurrentUser } from "./utils/api";
 
 // hne spacer sghir bech contenu mta3 page mayjich ta7t TopBar.
@@ -20,7 +20,6 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 // hne App component: ylam layout lkol ba3d login w y3addi current user lel pages dakhlin.
 export default function App({ mode, setMode }) {
-  const location = useLocation();
   // hne net7akmou ken sidebar ma7loula walla msakkra.
   const [open, setOpen] = React.useState(false);
 
@@ -64,10 +63,6 @@ export default function App({ mode, setMode }) {
 
   // hne ki App tet7al awel mara, nchargiw infos mta3 current user automatiquement.
   React.useEffect(() => loadCurrentUser(), [loadCurrentUser]);
-
-  if (currentUser?.must_change_password && location.pathname !== "/profile") {
-    return <Navigate to="/profile" replace />;
-  }
 
   return (
     <>

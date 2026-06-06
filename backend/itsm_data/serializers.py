@@ -42,6 +42,48 @@ def send_account_created_email(user, raw_password):
       </body>
     </html>
     """
+    
+
+    message = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[recipient],
+    )
+    message.attach_alternative(html_body, "text/html")
+    message.send(fail_silently=False)
+
+def send_account_updated_email(user, raw_password):
+    recipient = str(user.email or "").strip()
+    if not recipient:
+        return
+
+    brand = settings.ACCOUNT_EMAIL_BRAND
+    login_url = settings.APP_LOGIN_URL
+    subject = f"{brand} account updated"
+    text_body = (
+        f"Hello {user.get_full_name() or user.username},\n\n"
+        f"Your {brand} account has been updated.\n\n"
+        f"Username: {user.username}\n"
+        f"Password: {raw_password}\n"
+        f"Login URL: {login_url}\n\n"
+        "Please sign in and change your password as soon as possible.\n\n"
+        f"{brand}"
+    )
+    html_body = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; color: #1f2937;">
+        <h2 style="margin-bottom: 8px;">{brand}</h2>
+        <p>Hello {user.get_full_name() or user.username},</p>
+        <p>Your account has been updated successfully.</p>
+        <p><strong>Username:</strong> {user.username}<br />
+        <strong>Password:</strong> {raw_password}</p>
+        <p><strong>Login URL:</strong> <a href="{login_url}">{login_url}</a></p>
+        <p>Please sign in and change your password as soon as possible.</p>
+      </body>
+    </html>
+    """
+    
 
     message = EmailMultiAlternatives(
         subject=subject,
@@ -53,6 +95,109 @@ def send_account_created_email(user, raw_password):
     message.send(fail_silently=False)
 
 
+def send_account_deactivated_email(user):
+    recipient = str(user.email or "").strip()
+    if not recipient:
+        return
+
+    brand = settings.ACCOUNT_EMAIL_BRAND
+    subject = f"{brand} account deactivated"
+    text_body = (
+        f"Hello {user.get_full_name() or user.username},\n\n"
+        f"Your {brand} account has been deactivated.\n\n"
+        "If you think this is a mistake, please contact your administrator.\n\n"
+        f"{brand}"
+    )
+    html_body = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; color: #1f2937;">
+        <h2 style="margin-bottom: 8px;">{brand}</h2>
+        <p>Hello {user.get_full_name() or user.username},</p>
+        <p>Your account has been deactivated.</p>
+        <p>If you think this is a mistake, please contact your administrator.</p>
+      </body>
+    </html>
+    """
+
+    message = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[recipient],
+    )
+    message.attach_alternative(html_body, "text/html")
+    message.send(fail_silently=False)
+
+
+def send_account_deleted_email(user):
+    recipient = str(user.email or "").strip()
+    if not recipient:
+        return
+
+    brand = settings.ACCOUNT_EMAIL_BRAND
+    subject = f"{brand} account deleted"
+    text_body = (
+        f"Hello {user.get_full_name() or user.username},\n\n"
+        f"Your {brand} account has been deleted.\n\n"
+        "If you did not expect this action, please contact your administrator.\n\n"
+        f"{brand}"
+    )
+    html_body = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; color: #1f2937;">
+        <h2 style="margin-bottom: 8px;">{brand}</h2>
+        <p>Hello {user.get_full_name() or user.username},</p>
+        <p>Your account has been deleted.</p>
+        <p>If you did not expect this action, please contact your administrator.</p>
+      </body>
+    </html>
+    """
+
+    message = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[recipient],
+    )
+    message.attach_alternative(html_body, "text/html")
+    message.send(fail_silently=False)
+
+def send_account_deactivated_email(user, raw_password):
+    recipient = str(user.email or "").strip()
+    if not recipient:
+        return
+
+    brand = settings.ACCOUNT_EMAIL_BRAND
+    login_url = settings.APP_LOGIN_URL
+    subject = f"{brand} account deactivated"
+    text_body = (
+        f"Hello {user.get_full_name() or user.username},\n\n"
+        f"Your {brand} account has been deactivated.\n\n"
+        f"Username: {user.username}\n"
+        "your account has been deactivated.\n\n"
+        f"{brand}"
+    )
+    html_body = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; color: #1f2937;">
+        <h2 style="margin-bottom: 8px;">{brand}</h2>
+        <p>Hello {user.get_full_name() or user.username},</p>
+        <p>Your account has been deactivated successfully.</p>
+        <p><strong>Username:</strong> {user.username}</p>
+        <p>Your account has been deactivated, you can contact support for more information.</p>
+      </body>
+    </html>
+    """
+    
+
+    message = EmailMultiAlternatives(
+        subject=subject,
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[recipient],
+    )
+    message.attach_alternative(html_body, "text/html")
+    message.send(fail_silently=False)    
 # hne serializer mta3 Incident: y5ou kol fields mta3 incident kif ma houma
 class IncidentSerializer(serializers.ModelSerializer):
     # hne Meta t9oul eli serializer hedhi marbouta b Incident wtraja3 kol fields
@@ -121,7 +266,6 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     access = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
-    must_change_password = serializers.SerializerMethodField()
     # hne Meta t7aded anou serializer hedhi ta5dem 3la User w traja3 fields elli front yesta7a9hom
     class Meta:
         model = User
@@ -135,7 +279,6 @@ class TeamMemberSerializer(serializers.ModelSerializer):
             "avatar",
             "is_active",
             "access",
-            "must_change_password",
         ]
 
     # hne n7awlou role mta3 user l text simple: Admin wala User
@@ -151,10 +294,6 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         profile, _ = UserProfile.objects.get_or_create(user=obj)
         return profile.avatar
-
-    def get_must_change_password(self, obj):
-        profile, _ = UserProfile.objects.get_or_create(user=obj)
-        return profile.must_change_password
 
 
 # hne serializer hedha m5ases l create user jdid men page Team/Form
@@ -188,9 +327,7 @@ class TeamMemberCreateSerializer(serializers.Serializer):
         )
         user.set_password(password)
         user.save()
-        profile, _ = UserProfile.objects.get_or_create(user=user)
-        profile.must_change_password = True
-        profile.save(update_fields=["must_change_password"])
+        UserProfile.objects.get_or_create(user=user)
         try:
             send_account_created_email(user, password)
         except Exception:
@@ -250,10 +387,11 @@ class PasswordChangeSerializer(serializers.Serializer):
         user = self.context["target_user"]
         user.set_password(self.validated_data["new_password"])
         user.save(update_fields=["password"])
-        profile, _ = UserProfile.objects.get_or_create(user=user)
-        require_current = self.context.get("require_current_password", False)
-        profile.must_change_password = not require_current
-        profile.save(update_fields=["must_change_password"])
+        # Mail on password update/reset is disabled for now.
+        # try:
+        #     send_account_updated_email(user, self.validated_data["new_password"])
+        # except Exception:
+        #     logger.exception("Failed to send account update email to %s", user.email)
         return user
 
 
@@ -280,4 +418,9 @@ class TeamMemberAdminUpdateSerializer(serializers.Serializer):
         if "is_active" in validated_data:
             instance.is_active = validated_data["is_active"]
         instance.save()
+        try:
+            if not instance.is_active:
+                send_account_deactivated_email(instance, "")
+        except Exception:
+            logger.exception("Failed to send account deactivation email to %s", instance.email)
         return instance

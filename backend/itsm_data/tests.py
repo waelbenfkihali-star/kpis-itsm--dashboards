@@ -42,7 +42,6 @@ class TeamApiTests(APITestCase):
         self.assertEqual(response.data["username"], "wael")
         self.assertEqual(response.data["access"], "Admin")
         self.assertEqual(response.data["email"], "wael@example.com")
-        self.assertFalse(response.data["must_change_password"])
 
     # hne test test_team_list_returns_existing_accounts: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     def test_team_list_returns_existing_accounts(self):
@@ -82,7 +81,6 @@ class TeamApiTests(APITestCase):
         created = User.objects.get(username="newadmin")
         self.assertTrue(created.is_staff)
         self.assertTrue(created.is_superuser)
-        self.assertTrue(created.profile.must_change_password)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, ["newadmin@example.com"])
         self.assertIn("newadmin", mail.outbox[0].body)
@@ -127,6 +125,11 @@ class TeamApiTests(APITestCase):
         self.assertEqual(profile.avatar, "data:image/png;base64,abc123")
         self.assertEqual(self.user.email, "ritha@example.com")
     # hne test test_admin_can_deactivate_and_reset_password: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="LEONI IT <no-reply@leoni.local>",
+        ACCOUNT_EMAIL_BRAND="LEONI IT",
+    )
     def test_admin_can_deactivate_and_reset_password(self):
         self.client.force_authenticate(user=self.admin)
 
@@ -146,27 +149,25 @@ class TeamApiTests(APITestCase):
         self.user.refresh_from_db()
         self.assertFalse(self.user.is_active)
         self.assertTrue(self.user.check_password("NewStrongPass456!"))
-        self.assertTrue(self.user.profile.must_change_password)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[0].to, ["ritha.initial@example.com"])
+        self.assertIn("deactivated", mail.outbox[0].subject.lower())
 
-    def test_user_password_change_clears_temporary_password_flag(self):
-        self.client.force_authenticate(user=self.user)
-        profile = UserProfile.objects.get(user=self.user)
-        profile.must_change_password = True
-        profile.save(update_fields=["must_change_password"])
+    @override_settings(
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        DEFAULT_FROM_EMAIL="LEONI IT <no-reply@leoni.local>",
+        ACCOUNT_EMAIL_BRAND="LEONI IT",
+    )
+    def test_admin_can_delete_account_and_email_user(self):
+        self.client.force_authenticate(user=self.admin)
 
-        response = self.client.post(
-            "/api/auth/me/password/",
-            {
-                "current_password": "StrongPass123!",
-                "new_password": "MyOwnNewPass789!",
-            },
-            format="json",
-        )
+        response = self.client.delete(f"/api/team/{self.user.id}/")
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.user.refresh_from_db()
-        self.assertTrue(self.user.check_password("MyOwnNewPass789!"))
-        self.assertFalse(self.user.profile.must_change_password)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(User.objects.filter(pk=self.user.id).exists())
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["ritha.initial@example.com"])
+        self.assertIn("deleted", mail.outbox[0].subject.lower())
 
 
 class KpiApiTests(APITestCase):
