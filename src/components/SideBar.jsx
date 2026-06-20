@@ -62,11 +62,21 @@ const Drawer = styled(MuiDrawer, {
   boxSizing: "border-box",
   ...(open && {
     ...openedMixin(theme),
-    "& .MuiDrawer-paper": openedMixin(theme),
+    "& .MuiDrawer-paper": {
+      ...openedMixin(theme),
+      backgroundColor: "#0f172a",
+      color: "#f8fafc",
+      borderRight: "1px solid rgba(148, 163, 184, 0.18)",
+    },
   }),
   ...(!open && {
     ...closedMixin(theme),
-    "& .MuiDrawer-paper": closedMixin(theme),
+    "& .MuiDrawer-paper": {
+      ...closedMixin(theme),
+      backgroundColor: "#0f172a",
+      color: "#f8fafc",
+      borderRight: "1px solid rgba(168, 148, 184, 0.18)",
+    },
   }),
 }));
 
@@ -211,10 +221,12 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
                   px: 2.5,
                   bgcolor:
                     location.pathname === item.path
-                      ? theme.palette.mode === "dark"
-                        ? grey[800]
-                        : grey[300]
+                      ? "rgba(59, 130, 246, 0.22)"
                       : null,
+                  color: "#f8fafc",
+                  "&:hover": {
+                    bgcolor: "rgba(59, 130, 246, 0.16)",
+                  },
                 }}
               >
                 <ListItemIcon
@@ -252,10 +264,12 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
                   px: 2.5,
                   bgcolor:
                     location.pathname === item.path
-                      ? theme.palette.mode === "dark"
-                        ? grey[800]
-                        : grey[300]
+                      ? "rgba(59, 130, 246, 0.22)"
                       : null,
+                  color: "#f8fafc",
+                  "&:hover": {
+                    bgcolor: "rgba(59, 130, 246, 0.16)",
+                  },
                 }}
               >
                 <ListItemIcon
@@ -295,10 +309,12 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
                       px: 2.5,
                       bgcolor:
                         location.pathname === item.path
-                          ? theme.palette.mode === "dark"
-                            ? grey[800]
-                            : grey[300]
+                          ? "rgba(59, 130, 246, 0.22)"
                           : null,
+                      color: "#f8fafc",
+                      "&:hover": {
+                        bgcolor: "rgba(59, 130, 246, 0.16)",
+                      },
                     }}
                   >
                     <ListItemIcon
@@ -338,10 +354,12 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
                   px: 2.5,
                   bgcolor:
                     location.pathname === item.path
-                      ? theme.palette.mode === "dark"
-                        ? grey[800]
-                        : grey[300]
+                      ? "rgba(59, 130, 246, 0.22)"
                       : null,
+                  color: "#f8fafc",
+                  "&:hover": {
+                    bgcolor: "rgba(59, 130, 246, 0.16)",
+                  },
                 }}
               >
                 <ListItemIcon

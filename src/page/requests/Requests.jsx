@@ -13,7 +13,7 @@ import {
   Typography
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
 import GlobalScopeFilters from "../../components/GlobalScopeFilters";
@@ -24,6 +24,8 @@ export default function Requests() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentUser } = useOutletContext();
+  const isAdmin = currentUser?.access === "Admin";
   const selectedKpi = location.state?.selectedKpi || null;
 
   const [rows, setRows] = useState([]);
@@ -239,13 +241,15 @@ export default function Requests() {
 
       <Stack direction="row" justifyContent="space-between" sx={{ mb:2 }}>
 
-        <DeleteToolbar
-          selectedIds={selectedIds}
-          setSelectedIds={setSelectedIds}
-          rows={rows}
-          setRows={setRows}
-          api="/requests/delete/"
-        />
+        {isAdmin ? (
+          <DeleteToolbar
+            selectedIds={selectedIds}
+            setSelectedIds={setSelectedIds}
+            rows={rows}
+            setRows={setRows}
+            api="/requests/delete/"
+          />
+        ) : <Box />}
 
         <Button
           variant="contained"

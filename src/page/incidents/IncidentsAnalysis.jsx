@@ -69,6 +69,11 @@ function hasKeyword(text, keywords) {
   return keywords.some((keyword) => text.includes(keyword));
 }
 
+function isServiceDeskRow(row) {
+  const descriptor = `${row?.responsible_group || ""} ${row?.service_owner || ""}`.toLowerCase();
+  return descriptor.includes("service desk") || descriptor.includes("servicedesk");
+}
+
 // hne component : ta9ra selection jeya men page incidents w tbni dashboard 3liha
 export default function IncidentsAnalysis() {
   const navigate = useNavigate();
@@ -90,6 +95,20 @@ export default function IncidentsAnalysis() {
   const closedRows = useMemo(
     () => rows.filter((row) => ["Closed", "Resolved"].includes(row.state)),
     [rows]
+  );
+  const serviceDeskClosedRows = useMemo(
+    () => closedRows.filter((row) => isServiceDeskRow(row)),
+    [closedRows]
+  );
+  const resolvedWithinOneHourRows = useMemo(
+    () =>
+      closedRows.filter((row) => {
+        const duration = Number(row.duration);
+        const businessDuration = Number(row.business_duration);
+        return (Number.isFinite(duration) && duration > 0 && duration <= 1)
+          || (Number.isFinite(businessDuration) && businessDuration > 0 && businessDuration <= 1);
+      }),
+    [closedRows]
   );
 
   const backlogMonthly = useMemo(
@@ -206,6 +225,34 @@ export default function IncidentsAnalysis() {
             },
           ],
         };
+      case "INC-02":
+        return {
+          ...base,
+          cards: [
+            { title: "Avg Resolution Time", value: avgHandle || "-", note: "Average elapsed handle duration across the selected incidents" },
+            { title: "Avg Business Resolution", value: avgBusiness || "-", note: "Average business duration for the selected scope" },
+            { title: "Resolved Incidents", value: resolved, note: `${ratio(resolved, total)}% of the selected incidents are already closed` },
+          ],
+          line: {
+            title: "Resolution Trend by Month",
+            data: monthlySeriesInRange(closedRows, "resolved", rows, "opened"),
+            label: "Resolved Incidents",
+          },
+          extras: [
+            {
+              title: "Resolved Incidents by Priority",
+              note: "Shows which priorities contribute most to resolved workload.",
+              type: "bar",
+              data: countBy(closedRows, "priority"),
+            },
+            {
+              title: "Resolved Volume by Group per Month",
+              note: "Monthly comparison of responsible groups handling incident resolution.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(closedRows, "resolved", "responsible_group", 5, "Unknown", rows, "opened"),
+            },
+          ],
+        };
       case "INC-03":
         return {
           ...base,
@@ -227,6 +274,58 @@ export default function IncidentsAnalysis() {
               note: "Operational ownership view for the selected backlog scope.",
               type: "bar",
               data: groups,
+            },
+          ],
+        };
+      case "INC-04":
+        return {
+          ...base,
+          cards: [
+            { title: "Service Desk Closure Rate", value: `${ratio(serviceDeskClosedRows.length, resolved || 1)}%`, note: "Resolved incidents handled by the service desk" },
+            { title: "Closed by Service Desk", value: serviceDeskClosedRows.length, note: "Resolved incidents attributed to service desk ownership" },
+            { title: "Total Resolved", value: resolved, note: "Reference closure volume in the selected scope" },
+          ],
+          chart: { title: "Service Desk Closures by Service", data: countBy(serviceDeskClosedRows, "affected_service") },
+          extras: [
+            {
+              title: "Service Desk Closures per Month",
+              note: "Monthly view of closure contribution from the service desk.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(serviceDeskClosedRows, "resolved", "affected_service", 5, "Unknown", rows, "opened"),
+            },
+            {
+              title: "Service Desk Closures by Resolution Code",
+              note: "Shows the most frequent resolution outcomes inside service desk closures.",
+              type: "bar",
+              data: countBy(serviceDeskClosedRows, "resolution_code"),
+            },
+          ],
+        };
+      case "INC-05":
+        return {
+          ...base,
+          cards: [
+            { title: "Resolved in 1 Hour", value: resolvedWithinOneHourRows.length, note: "Incidents resolved within one hour based on duration fields" },
+            { title: "Fast Resolution Rate", value: `${ratio(resolvedWithinOneHourRows.length, resolved || 1)}%`, note: "Share of resolved incidents closed in one hour or less" },
+            { title: "Avg Resolution Time", value: avgHandle || "-", note: "Average elapsed duration for the selected scope" },
+          ],
+          line: {
+            title: "Fast Resolution Trend",
+            data: monthlySeriesInRange(resolvedWithinOneHourRows, "resolved", rows, "opened"),
+            label: "Resolved in 1 Hour",
+          },
+          extras: [
+            {
+              title: "Fast Resolutions by Service",
+              note: "Shows where one-hour resolution performance is strongest.",
+              type: "bar",
+              data: countBy(resolvedWithinOneHourRows, "affected_service"),
+            },
+            {
+              title: "Fast Resolutions by Group per Month",
+              note: "Monthly comparison of groups achieving one-hour resolution.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(resolvedWithinOneHourRows, "resolved", "responsible_group", 5, "Unknown", rows, "opened"),
             },
           ],
         };
@@ -479,8 +578,11 @@ export default function IncidentsAnalysis() {
     rows,
     avgHandle,
     avgBusiness,
+    closedRows,
     openBacklogRows,
     majorRows,
+    resolvedWithinOneHourRows,
+    serviceDeskClosedRows,
     groupMonthly,
   ]);
   const summarySections = useMemo(

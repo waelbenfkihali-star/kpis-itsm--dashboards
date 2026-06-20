@@ -19,7 +19,7 @@ import {
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import PageFilters from "../../components/PageFilters";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -33,6 +33,8 @@ import { getModulePath } from "../analysis/kpiNavigation";
 const MyKpis = () => {
 
   const navigate = useNavigate();
+  const { currentUser } = useOutletContext();
+  const isAdmin = currentUser?.access === "Admin";
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -288,27 +290,31 @@ const MyKpis = () => {
               <VisibilityOutlinedIcon fontSize="small" />
             </IconButton>
 
-            <IconButton
-              color="primary"
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/EditKpi/${params.id}`);
-              }}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
+            {isAdmin ? (
+              <>
+                <IconButton
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/EditKpi/${params.id}`);
+                  }}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
 
-            <IconButton
-              color="error"
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setDeleteId(params.id);
-              }}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
+                <IconButton
+                  color="error"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteId(params.id);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </>
+            ) : null}
 
           </Box>
 
@@ -352,14 +358,16 @@ const MyKpis = () => {
 
           </Typography>
 
-          <Button
-            variant="contained"
-            startIcon={<AddOutlinedIcon />}
-            onClick={() => navigate("/Kpiform")}
-            sx={{ textTransform: "capitalize" }}
-          >
-            Define KPI
-          </Button>
+          {isAdmin ? (
+            <Button
+              variant="contained"
+              startIcon={<AddOutlinedIcon />}
+              onClick={() => navigate("/Kpiform")}
+              sx={{ textTransform: "capitalize" }}
+            >
+              Define KPI
+            </Button>
+          ) : null}
 
         </Box>
 

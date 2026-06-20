@@ -87,6 +87,11 @@ const Form = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
+      username: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
       role: "User",
     },
   });
@@ -270,6 +275,7 @@ const Form = () => {
                 {...register("firstName", { required: true, minLength: 3 })}
               />
             </Grid>
+            
 
             <Grid item xs={12} md={4}>
               <TextField

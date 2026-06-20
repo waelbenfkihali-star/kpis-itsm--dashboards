@@ -464,8 +464,6 @@ def kpis_list(request):
 
     if request.method == "GET":
         rows = KpiDefinition.objects.filter(is_deleted=False)
-        if not request.user.is_staff:
-            rows = rows.filter(status__iexact="Active")
         rows = rows.order_by("module", "kpi_id", "id")
         return Response(KpiDefinitionSerializer(rows, many=True).data)
 
@@ -488,8 +486,6 @@ def kpi_detail(request, kpi_id):
 
     if request.method == "GET":
         if row.is_deleted:
-            return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
-        if row.status.strip().lower() == "retired" and not request.user.is_staff:
             return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
         return Response(KpiDefinitionSerializer(row).data)
 
@@ -730,6 +726,12 @@ def team_member_detail(request, user_id):
     if user.pk == request.user.pk and "is_active" in request.data and request.data.get("is_active") is False:
         return Response(
             {"detail": "You cannot deactivate your own account."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if user.is_staff or user.is_superuser:
+        return Response(
+            {"detail": "Admin accounts cannot be edited here."},
             status=status.HTTP_400_BAD_REQUEST,
         )
     

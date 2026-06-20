@@ -107,3 +107,4 @@ For DevOps, the minimum clean handoff is:
 docker compose exec postgres psql -U itsm_user -d itsm_dashboard
 docker compose exec backend python manage.py makemigrations
 docker compose exec backend python manage.py migrate
+InputLabelProps={{ shrink: true }}

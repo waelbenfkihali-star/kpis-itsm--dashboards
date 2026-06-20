@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 
 import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
@@ -26,6 +26,8 @@ export default function Incidents() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentUser } = useOutletContext();
+  const isAdmin = currentUser?.access === "Admin";
 
   // hne nchofo ken fama KPI jey mel page okhra bech na3mlou analyse 3lih.
   const selectedKpi = location.state?.selectedKpi || null;
@@ -48,7 +50,8 @@ export default function Incidents() {
     states: [],
     priorities: [],
     services: [],
-    groups: []
+    groups: [],
+    majors: []
   });
 
   // hne filters mta3 date dÃ©but w date fin.
@@ -97,6 +100,7 @@ export default function Incidents() {
     () => [...new Set(rows.map((r) => r.responsible_group).filter(Boolean))],
     [rows]
   );
+  const majorOptions = useMemo(() => ["Yes", "No"], []);
 
   // hne nfiltriw incidents Ø­Ø³Ø¨ filters elli l user 7atthom.
   const filteredRows = useMemo(() => {
@@ -127,6 +131,11 @@ export default function Incidents() {
       if (filters.groups.length && !filters.groups.includes(r.responsible_group))
         return false;
 
+      if (filters.majors.length) {
+        const majorLabel = r.is_major ? "Yes" : "No";
+        if (!filters.majors.includes(majorLabel)) return false;
+      }
+
       // hne filter date from.
       if (dateFrom && new Date(r.opened) < new Date(dateFrom))
         return false;
@@ -150,6 +159,7 @@ export default function Incidents() {
         filters.priorities.length,
         filters.services.length,
         filters.groups.length,
+        filters.majors.length,
         dateFrom,
         dateTo,
       ].filter(Boolean).length,
@@ -177,7 +187,8 @@ export default function Incidents() {
       states: [],
       priorities: [],
       services: [],
-      groups: []
+      groups: [],
+      majors: []
     });
     setDateFrom("");
     setDateTo("");
@@ -310,13 +321,15 @@ export default function Incidents() {
         }}
       >
 
-        <DeleteToolbar
-          selectedIds={selectedIds}
-          setSelectedIds={setSelectedIds}
-          rows={rows}
-          setRows={setRows}
-          api="/incidents/delete/"
-        />
+        {isAdmin ? (
+          <DeleteToolbar
+            selectedIds={selectedIds}
+            setSelectedIds={setSelectedIds}
+            rows={rows}
+            setRows={setRows}
+            api="/incidents/delete/"
+          />
+        ) : <Box />}
 
         <Button
           variant="contained"
@@ -348,6 +361,16 @@ export default function Incidents() {
           onChange={(e, v) => setFilters({ ...filters, priorities: v })}
           renderInput={(params) => (
             <TextField {...params} label="Priority" size="small" />
+          )}
+          sx={{ width: 220 }}
+        />
+        <Autocomplete
+          multiple
+          options={majorOptions}
+          value={filters.majors}
+          onChange={(e, v) => setFilters({ ...filters, majors: v })}
+          renderInput={(params) => (
+            <TextField {...params} label="Major" size="small" />
           )}
           sx={{ width: 220 }}
         />

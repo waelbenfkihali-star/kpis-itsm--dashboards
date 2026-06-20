@@ -1,5 +1,6 @@
 # hne serializers mta3 DRF: y7awlou model objects l JSON w yvalidiw data elli de5la men requests
 import logging
+import profile
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -154,8 +155,7 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         profile, _ = UserProfile.objects.get_or_create(user=obj)
         return profile.avatar
-
-
+    
 # hne serializer hedha m5ases l create user jdid men page Team/Form
 class TeamMemberCreateSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
@@ -252,14 +252,27 @@ class PasswordChangeSerializer(serializers.Serializer):
 
 # hne serializer hedha mta3 admin ki y7eb ybadel access/email/status mta3 user mo3ayen
 class TeamMemberAdminUpdateSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150, required=False)
     first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     email = serializers.EmailField(required=False, allow_blank=True)
     access = serializers.ChoiceField(choices=["Admin", "User"], required=False)
     is_active = serializers.BooleanField(required=False)
 
+    def validate_username(self, value):
+        username = value.strip()
+        instance = getattr(self, "instance", None)
+        queryset = User.objects.filter(username__iexact=username)
+        if instance is not None:
+            queryset = queryset.exclude(pk=instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        return username
+
     # hne admin ybaddel ken fields elli ba3athhom fil request .
     def update(self, instance, validated_data):
+        if "username" in validated_data:
+            instance.username = validated_data["username"].strip()
         if "first_name" in validated_data:
             instance.first_name = validated_data["first_name"].strip()
         if "last_name" in validated_data:

@@ -12,6 +12,7 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  MenuItem,
   Paper,
   Stack,
   TextField,
@@ -22,6 +23,7 @@ import {
 import {
   AdminPanelSettingsOutlined,
   DeleteOutline,
+  EditOutlined,
   LockOpenOutlined,
   LockResetOutlined,
   PersonOffOutlined,
@@ -48,6 +50,14 @@ export default function Team() {
   });
   const [passwordDialog, setPasswordDialog] = React.useState({ open: false, user: null });
   const [deleteDialog, setDeleteDialog] = React.useState({ open: false, user: null });
+  const [editDialog, setEditDialog] = React.useState({ open: false, user: null });
+  const [editForm, setEditForm] = React.useState({
+    username: "",
+    first_name: "",
+    last_name: "",
+    email: "",
+    access: "User",
+  });
   const [newPassword, setNewPassword] = React.useState("");
 
   const isAdmin = currentUser?.access === "Admin";
@@ -136,8 +146,39 @@ export default function Team() {
       setSuccess(message);
       await loadTeam();
       await reloadCurrentUser?.();
+      return true;
     } catch (err) {
       setError(err.message || "Unable to update account.");
+      return false;
+    }
+  }
+
+  function openEditDialog(user) {
+    setEditDialog({ open: true, user });
+    setEditForm({
+      username: user.username || "",
+      first_name: user.first_name || "",
+      last_name: user.last_name || "",
+      email: user.email || "",
+      access: user.access || "User",
+    });
+  }
+
+  function updateEditField(field, value) {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function saveEditedMember() {
+    if (!editDialog.user) return;
+
+    const updated = await updateMember(
+      editDialog.user.id,
+      editForm,
+      `${editForm.username || editDialog.user.username} updated successfully.`
+    );
+
+    if (updated) {
+      setEditDialog({ open: false, user: null });
     }
   }
 
@@ -265,9 +306,22 @@ export default function Team() {
         }
 
         const isSelf = row.id === currentUser?.id;
+        const canEdit = row.access === "User" && !isSelf;
 
         return (
           <Stack direction="row" spacing={0.5}>
+            {canEdit ? (
+              <Tooltip title="Edit account">
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => openEditDialog(row)}
+                >
+                  <EditOutlined fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            ) : null}
+
             <Tooltip title={row.is_active ? "Deactivate account" : "Activate account"}>
               <span>
                 <IconButton
@@ -405,6 +459,54 @@ export default function Team() {
         <DialogActions>
           <Button onClick={() => setPasswordDialog({ open: false, user: null })}>Cancel</Button>
           <Button variant="contained" onClick={resetPassword}>Reset Password</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={editDialog.open} onClose={() => setEditDialog({ open: false, user: null })} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Account</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <TextField
+              autoFocus
+              fullWidth
+              label="Username"
+              value={editForm.username}
+              onChange={(event) => updateEditField("username", event.target.value)}
+            />
+            <TextField
+              fullWidth
+              label="First Name"
+              value={editForm.first_name}
+              onChange={(event) => updateEditField("first_name", event.target.value)}
+            />
+            <TextField
+              fullWidth
+              label="Last Name"
+              value={editForm.last_name}
+              onChange={(event) => updateEditField("last_name", event.target.value)}
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              type="email"
+              value={editForm.email}
+              onChange={(event) => updateEditField("email", event.target.value)}
+            />
+            <TextField
+              select
+              fullWidth
+              label="Access"
+              value={editForm.access}
+              onChange={(event) => updateEditField("access", event.target.value)}
+            >
+              <MenuItem value="Admin">Admin</MenuItem>
+              <MenuItem value="User">User</MenuItem>
+            </TextField>
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialog({ open: false, user: null })}>Cancel</Button>
+          <Button variant="contained" onClick={saveEditedMember}>Save Changes</Button>
         </DialogActions>
       </Dialog>
 

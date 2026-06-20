@@ -527,7 +527,8 @@ export default function Profile() {
                 <Grid item xs={12} md={6}>
                   <TextField fullWidth label="Last Name" value={profileForm.last_name} onChange={updateProfileField("last_name")} />
                 </Grid>
-              </Grid>
+              </Grid>  
+              
 
               <Divider sx={{ my: 3 }} />
 

@@ -343,9 +343,9 @@ export default function Login({ setMode }) {
 
                   {/* hne bloc mta3 les champs + actions mta3 login. */}
                   <div className="mt-6 space-y-4">
-                    <
-// @ts-ignore
-                    Field label="Username" isLight={isLight}>
+                    
+
+                    <Field label="Username" isLight={isLight} right={undefined}>
                       <input
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}

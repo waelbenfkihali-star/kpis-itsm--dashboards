@@ -15,10 +15,10 @@ const AppBar = styled(MuiAppBar, {
   // @ts-ignore
 })(({ theme, open }) => ({
   zIndex: theme.zIndex.drawer + 1,
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
+  backgroundColor: "#0f172a",
+  color: "#f8fafc",
   boxShadow: "none",
-  borderBottom: `1px solid ${theme.palette.divider}`,
+  borderBottom: "1px solid rgba(148, 163, 184, 0.18)",
   transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -35,8 +35,12 @@ const AppBar = styled(MuiAppBar, {
 
 // hedhi function sghira t7adher style mta3 les boutons elli fel top bar.
 const actionButtonSx = (theme) => ({
-  border: `1px solid ${theme.palette.divider}`,
+  border: "1px solid rgba(148, 163, 184, 0.18)",
   borderRadius: 2,
+  color: "#f8fafc",
+  "&:hover": {
+    backgroundColor: "rgba(59, 130, 246, 0.16)",
+  },
 });
 
 // hedha component TopBar: houwa l partie elli todhher fou9 fel app.
@@ -71,7 +75,7 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
           <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
             ITSM KPI Dashboard
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: "rgba(248, 250, 252, 0.72)" }}>
             Incidents, requests, changes and KPI tracking
           </Typography>
         </Box>
@@ -121,9 +125,12 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
               gap: 1,
               px: 1,
               py: 0.5,
-              border: `1px solid ${theme.palette.divider}`,
+              border: "1px solid rgba(148, 163, 184, 0.18)",
               borderRadius: 2,
               cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(59, 130, 246, 0.12)",
+              },
             }}
           >
             {currentUser?.avatar ? (
@@ -141,7 +148,7 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
               <Typography variant="body2" fontWeight={700} lineHeight={1.1}>
                 {displayName}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: "rgba(248, 250, 252, 0.72)" }}>
                 View profile
               </Typography>
             </Box>
