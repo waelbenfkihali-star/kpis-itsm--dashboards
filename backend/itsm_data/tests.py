@@ -7,7 +7,7 @@ from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import KpiDefinition, UserProfile
+from .models import Change, Incident, KpiDefinition, Request, UserProfile
 
 
 # hne class TeamApiTests: tamthel structure wala behavior fil backend.
@@ -53,6 +53,32 @@ class TeamApiTests(APITestCase):
         usernames = [row["username"] for row in response.data]
         self.assertIn("wael", usernames)
         self.assertIn("ritha", usernames)
+
+    def test_archived_user_is_hidden_from_team_list(self):
+        profile = UserProfile.objects.get(user=self.user)
+        profile.is_archived = True
+        profile.save(update_fields=["is_archived"])
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.get("/api/team/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        usernames = [row["username"] for row in response.data]
+        self.assertIn("wael", usernames)
+        self.assertNotIn("ritha", usernames)
+
+    def test_archived_user_can_be_listed_with_archived_query_param(self):
+        profile = UserProfile.objects.get(user=self.user)
+        profile.is_archived = True
+        profile.save(update_fields=["is_archived"])
+        self.client.force_authenticate(user=self.admin)
+
+        response = self.client.get("/api/team/?archived=true")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        usernames = [row["username"] for row in response.data]
+        self.assertIn("ritha", usernames)
+        self.assertNotIn("wael", usernames)
 
     # hne test test_admin_can_create_admin_account: yet2aked elli behavior hedha ma yetkasserch m3a changes jdod.
     @override_settings(
@@ -165,6 +191,51 @@ class TeamApiTests(APITestCase):
         self.assertFalse(User.objects.filter(pk=self.user.id).exists())
         self.assertEqual(len(mail.outbox), 0)
 
+    def test_archived_user_cannot_be_updated_or_reset(self):
+        profile = UserProfile.objects.get(user=self.user)
+        profile.is_archived = True
+        profile.save(update_fields=["is_archived"])
+        self.client.force_authenticate(user=self.admin)
+
+        update_response = self.client.patch(
+            f"/api/team/{self.user.id}/",
+            {"first_name": "Blocked"},
+            format="json",
+        )
+        password_response = self.client.post(
+            f"/api/team/{self.user.id}/password/",
+            {"new_password": "NewStrongPass456!"},
+            format="json",
+        )
+
+        self.assertEqual(update_response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(password_response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_archived_current_user_is_hidden_from_me_endpoints(self):
+        profile = UserProfile.objects.get(user=self.user)
+        profile.is_archived = True
+        profile.save(update_fields=["is_archived"])
+        self.client.force_authenticate(user=self.user)
+
+        me_response = self.client.get("/api/auth/me/")
+        update_response = self.client.patch(
+            "/api/auth/me/update/",
+            {"username": "ritha.updated"},
+            format="json",
+        )
+        password_response = self.client.post(
+            "/api/auth/me/password/",
+            {
+                "current_password": "StrongPass123!",
+                "new_password": "NewStrongPass456!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(me_response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(update_response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(password_response.status_code, status.HTTP_404_NOT_FOUND)
+
 
 class KpiApiTests(APITestCase):
     def setUp(self):
@@ -239,3 +310,110 @@ class KpiApiTests(APITestCase):
         reloaded_list = self.client.get("/api/kpis/")
         self.assertEqual(reloaded_list.status_code, status.HTTP_200_OK)
         self.assertTrue(any(item["id"] == retired_id for item in reloaded_list.data))
+
+    def test_default_kpi_delete_removes_row_for_everyone(self):
+        self.client.force_authenticate(user=self.admin)
+
+        list_response = self.client.get("/api/kpis/")
+        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+        kpi_id = list_response.data[0]["id"]
+        kpi_code = list_response.data[0]["kpi_id"]
+
+        delete_response = self.client.delete(f"/api/kpis/{kpi_id}/")
+        self.assertEqual(delete_response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(KpiDefinition.objects.filter(pk=kpi_id).exists())
+
+        reloaded_admin_list = self.client.get("/api/kpis/")
+        self.assertEqual(reloaded_admin_list.status_code, status.HTTP_200_OK)
+        self.assertFalse(any(item["kpi_id"] == kpi_code for item in reloaded_admin_list.data))
+
+        self.client.force_authenticate(user=self.user)
+        reloaded_user_list = self.client.get("/api/kpis/")
+        self.assertEqual(reloaded_user_list.status_code, status.HTTP_200_OK)
+        self.assertFalse(any(item["kpi_id"] == kpi_code for item in reloaded_user_list.data))
+
+
+class ArchiveListApiTests(APITestCase):
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            username="archiveadmin",
+            password="StrongPass123!",
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.user = User.objects.create_user(
+            username="archiveuser",
+            password="StrongPass123!",
+        )
+        self.active_incident = Incident.objects.create(number="INC001", is_archived=False)
+        self.archived_incident = Incident.objects.create(number="INC999", is_archived=True)
+        self.active_request = Request.objects.create(number="REQ001", is_archived=False)
+        self.archived_request = Request.objects.create(number="REQ999", is_archived=True)
+        self.active_change = Change.objects.create(number="CHG001", is_archived=False)
+        self.archived_change = Change.objects.create(number="CHG999", is_archived=True)
+        self.active_kpi = KpiDefinition.objects.create(
+            kpi_id="TST-01",
+            name="Active KPI",
+            owner="Owner",
+            module="Incidents",
+            is_deleted=False,
+        )
+        self.deleted_kpi = KpiDefinition.objects.create(
+            kpi_id="TST-99",
+            name="Deleted KPI",
+            owner="Owner",
+            module="Incidents",
+            is_deleted=True,
+        )
+
+    def test_incidents_list_can_return_archived_rows(self):
+        self.client.force_authenticate(user=self.user)
+
+        active_response = self.client.get("/api/incidents/")
+        archived_response = self.client.get("/api/incidents/?archived=true")
+
+        self.assertEqual(active_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(archived_response.status_code, status.HTTP_200_OK)
+        self.assertTrue(any(item["number"] == "INC001" for item in active_response.data))
+        self.assertFalse(any(item["number"] == "INC999" for item in active_response.data))
+        self.assertTrue(any(item["number"] == "INC999" for item in archived_response.data))
+        self.assertFalse(any(item["number"] == "INC001" for item in archived_response.data))
+
+    def test_requests_list_can_return_archived_rows(self):
+        self.client.force_authenticate(user=self.user)
+
+        active_response = self.client.get("/api/requests/")
+        archived_response = self.client.get("/api/requests/?archived=true")
+
+        self.assertEqual(active_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(archived_response.status_code, status.HTTP_200_OK)
+        self.assertTrue(any(item["number"] == "REQ001" for item in active_response.data))
+        self.assertFalse(any(item["number"] == "REQ999" for item in active_response.data))
+        self.assertTrue(any(item["number"] == "REQ999" for item in archived_response.data))
+        self.assertFalse(any(item["number"] == "REQ001" for item in archived_response.data))
+
+    def test_changes_list_can_return_archived_rows(self):
+        self.client.force_authenticate(user=self.user)
+
+        active_response = self.client.get("/api/changes/")
+        archived_response = self.client.get("/api/changes/?archived=true")
+
+        self.assertEqual(active_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(archived_response.status_code, status.HTTP_200_OK)
+        self.assertTrue(any(item["number"] == "CHG001" for item in active_response.data))
+        self.assertFalse(any(item["number"] == "CHG999" for item in active_response.data))
+        self.assertTrue(any(item["number"] == "CHG999" for item in archived_response.data))
+        self.assertFalse(any(item["number"] == "CHG001" for item in archived_response.data))
+
+    def test_kpis_list_can_return_deleted_rows_for_admin(self):
+        self.client.force_authenticate(user=self.admin)
+
+        active_response = self.client.get("/api/kpis/")
+        deleted_response = self.client.get("/api/kpis/?deleted=true")
+
+        self.assertEqual(active_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(deleted_response.status_code, status.HTTP_200_OK)
+        self.assertTrue(any(item["kpi_id"] == "TST-01" for item in active_response.data))
+        self.assertFalse(any(item["kpi_id"] == "TST-99" for item in active_response.data))
+        self.assertTrue(any(item["kpi_id"] == "TST-99" for item in deleted_response.data))
+        self.assertFalse(any(item["kpi_id"] == "TST-01" for item in deleted_response.data))

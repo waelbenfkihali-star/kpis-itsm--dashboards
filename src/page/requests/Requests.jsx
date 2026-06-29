@@ -10,7 +10,8 @@ import {
   Autocomplete,
   Button,
   Paper,
-  Typography
+  Typography,
+  useTheme
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
@@ -18,12 +19,36 @@ import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
 import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
+import { getChipSx } from "../../theme";
+
+function isOnOrAfter(value, boundary) {
+  if (!boundary) return true;
+  if (!value) return false;
+  const dateValue = new Date(value);
+  const dateBoundary = new Date(boundary);
+  if (Number.isNaN(dateValue.getTime()) || Number.isNaN(dateBoundary.getTime())) {
+    return false;
+  }
+  return dateValue >= dateBoundary;
+}
+
+function isOnOrBefore(value, boundary) {
+  if (!boundary) return true;
+  if (!value) return false;
+  const dateValue = new Date(value);
+  const dateBoundary = new Date(boundary);
+  if (Number.isNaN(dateValue.getTime()) || Number.isNaN(dateBoundary.getTime())) {
+    return false;
+  }
+  return dateValue <= dateBoundary;
+}
 
 // hne component Requests: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function Requests() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
   const { currentUser } = useOutletContext();
   const isAdmin = currentUser?.access === "Admin";
   const selectedKpi = location.state?.selectedKpi || null;
@@ -110,16 +135,16 @@ export default function Requests() {
       if (filters.users.length && !filters.users.includes(r.requested_for))
         return false;
 
-      if (filters.openedFrom && new Date(r.opened) < new Date(filters.openedFrom))
+      if (!isOnOrAfter(r.opened, filters.openedFrom))
         return false;
 
-      if (filters.openedTo && new Date(r.opened) > new Date(filters.openedTo))
+      if (!isOnOrBefore(r.opened, filters.openedTo))
         return false;
 
-      if (filters.closedFrom && new Date(r.closed) < new Date(filters.closedFrom))
+      if (!isOnOrAfter(r.closed, filters.closedFrom))
         return false;
 
-      if (filters.closedTo && new Date(r.closed) > new Date(filters.closedTo))
+      if (!isOnOrBefore(r.closed, filters.closedTo))
         return false;
 
       return true;
@@ -183,13 +208,13 @@ export default function Requests() {
       renderCell: (params) => {
 
         const value = params.value || "";
-        let color = "default";
+        let tone = "neutral";
 
-        if (value === "Open") color = "warning";
-        else if (value === "In Progress") color = "info";
-        else if (value === "Closed") color = "success";
+        if (value === "Open") tone = "warning";
+        else if (value === "In Progress") tone = "info";
+        else if (value === "Closed") tone = "success";
 
-        return <Chip label={value} color={color} size="small" />;
+        return <Chip label={value} size="small" sx={getChipSx(theme, tone)} />;
 
       }
     },
@@ -253,9 +278,15 @@ export default function Requests() {
 
         <Button
           variant="contained"
-          color="success"
           disabled={!selectedIds.length}
           onClick={handleAnalyse}
+          sx={{
+            backgroundColor: "#2f855a",
+            color: "#ffffff",
+            "&:hover": {
+              backgroundColor: "#276749",
+            },
+          }}
         >
           {selectedKpi ? `Analyse ${selectedKpi.kpi_id}` : "Analyse"}
         </Button>

@@ -30,10 +30,16 @@ export default function ExportPdfButton({ fileName = "dashboard-export", label =
   return (
     <Button
       variant="contained"
-      color="error"
       startIcon={<PictureAsPdfOutlinedIcon />}
       onClick={handleExport}
       className="print-export-hidden"
+      sx={{
+        backgroundColor: "#dc2626",
+        color: "#ffffff",
+        "&:hover": {
+          backgroundColor: "#b91c1c",
+        },
+      }}
     >
       {label}
     </Button>

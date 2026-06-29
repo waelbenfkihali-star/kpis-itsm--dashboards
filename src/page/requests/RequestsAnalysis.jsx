@@ -87,6 +87,15 @@ export default function RequestsAnalysis() {
     () => rows.filter((row) => ["Closed", "Resolved", "Completed"].includes(row.state)),
     [rows]
   );
+  const olderThan60Rows = useMemo(
+    () =>
+      openRows.filter((row) => {
+        if (!row.opened) return false;
+        const opened = new Date(row.opened);
+        return !Number.isNaN(opened.getTime()) && Date.now() - opened.getTime() > 60 * 24 * 60 * 60 * 1000;
+      }),
+    [openRows]
+  );
 
   // hne function openedMonthly: t3awen ba9i l code fil fichier hedha b logic sghira.
   const openedMonthly = useMemo(() => monthlySeriesInRange(rows, "opened", rows, "opened"), [rows]);
@@ -100,6 +109,7 @@ export default function RequestsAnalysis() {
   const services = useMemo(() => countBy(rows, "it_service"), [rows]);
   // hne function groups: t3awen ba9i l code fil fichier hedha b logic sghira.
   const groups = useMemo(() => countBy(rows, "responsible_group"), [rows]);
+  const openGroups = useMemo(() => countBy(openRows, "responsible_group"), [openRows]);
   // hne function requestedFor: t3awen ba9i l code fil fichier hedha b logic sghira.
   const requestedFor = useMemo(() => countBy(rows, "requested_for"), [rows]);
   // hne function items: t3awen ba9i l code fil fichier hedha b logic sghira.
@@ -148,7 +158,7 @@ export default function RequestsAnalysis() {
   const backlog = openRows.length;
   const closed = closedRows.length;
   // hne function olderThan60: t3awen ba9i l code fil fichier hedha b logic sghira.
-  const olderThan60 = agingStateData.find((item) => item.aging === "> 60 Days")?.total || 0;
+  const olderThan60 = olderThan60Rows.length;
   const modernWorkplaceClosed = countWhere(
     closedRows,
     (row) => String(row.it_service || "").toLowerCase().includes("modern workplace")
@@ -169,7 +179,7 @@ export default function RequestsAnalysis() {
           cards: [
             { title: "Open Request Backlog", value: backlog, note: `${ratio(backlog, total)}% of scope is still open` },
             { title: "> 60 Days Backlog", value: olderThan60, note: "Old requests requiring attention" },
-            { title: "Top Group", value: groups[0]?.label || "-", note: "Group carrying the biggest backlog" },
+            { title: "Top Group", value: countBy(openRows, "responsible_group")[0]?.label || "-", note: "Group carrying the biggest backlog" },
           ],
           chart: { title: "Backlog Aging by State", type: "stacked", data: agingStateData },
           extras: [
@@ -183,7 +193,7 @@ export default function RequestsAnalysis() {
               title: "Backlog by Service",
               note: "Business service view of the selected backlog scope.",
               type: "bar",
-              data: services,
+              data: countBy(openRows, "it_service"),
             },
           ],
         };
@@ -192,10 +202,10 @@ export default function RequestsAnalysis() {
           ...base,
           cards: [
             { title: "Closed Requests", value: closed, note: `${ratio(closed, total)}% of selected requests are closed` },
-            { title: "Top Service", value: services[0]?.label || "-", note: "Service with highest closure volume" },
-            { title: "Top Request Item", value: items[0]?.label || "-", note: "Most requested item in selected scope" },
+            { title: "Top Service", value: countBy(closedRows, "it_service")[0]?.label || "-", note: "Service with highest closure volume" },
+            { title: "Top Request Item", value: countBy(closedRows, "item")[0]?.label || "-", note: "Most requested item in selected scope" },
           ],
-          chart: { title: "Closed Request Contributors", type: "bar", data: services },
+          chart: { title: "Closed Request Contributors", type: "bar", data: countBy(closedRows, "it_service") },
           extras: [
             {
               title: "Closed Requests by Service per Month",
@@ -207,7 +217,7 @@ export default function RequestsAnalysis() {
               title: "Closed Requests by Item",
               note: "Which request items contributed most to closure volume.",
               type: "bar",
-              data: items,
+              data: countBy(closedRows, "item"),
             },
           ],
         };
@@ -241,21 +251,21 @@ export default function RequestsAnalysis() {
           cards: [
             { title: "> 60 Days Backlog", value: olderThan60, note: "Aging backlog over 60 days" },
             { title: "Open Requests", value: backlog, note: "Current open scope" },
-            { title: "Top Group", value: groups[0]?.label || "-", note: "Group most impacted by old requests" },
+            { title: "Top Group", value: countBy(olderThan60Rows, "responsible_group")[0]?.label || "-", note: "Group most impacted by old requests" },
           ],
-          chart: { title: "Aging by Responsible Group", type: "bar", data: groups },
+          chart: { title: "Aging by Responsible Group", type: "bar", data: countBy(olderThan60Rows, "responsible_group") },
           extras: [
             {
               title: "Old Backlog by Group per Month",
               note: "Month over month view of the groups driving older backlog.",
               type: "stacked",
-              ...monthlyBreakdownInRange(openRows.filter((row) => row.opened && row.state), "opened", "responsible_group", 5, "Unknown", rows, "opened"),
+              ...monthlyBreakdownInRange(olderThan60Rows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Old Backlog by Item",
               note: "Shows which request items stay open the longest.",
               type: "bar",
-              data: items,
+              data: countBy(olderThan60Rows, "item"),
             },
           ],
         };
@@ -267,7 +277,7 @@ export default function RequestsAnalysis() {
             { title: "Closed Requests", value: closed, note: "Closed or completed rows in scope" },
             { title: "Open Requests", value: backlog, note: "Remaining backlog rows" },
           ],
-          chart: { title: "Closure Contributors by Service", type: "bar", data: services },
+          chart: { title: "Closure Contributors by Service", type: "bar", data: countBy(closedRows, "it_service") },
           extras: [
             {
               title: "Closure Rate Support View by Service per Month",
@@ -279,7 +289,7 @@ export default function RequestsAnalysis() {
               title: "Closure Contributors by Group",
               note: "Operational ownership perspective behind closure performance.",
               type: "bar",
-              data: groups,
+              data: countBy(closedRows, "responsible_group"),
             },
           ],
         };
@@ -307,6 +317,54 @@ export default function RequestsAnalysis() {
             },
           ],
         };
+              case "REQ-07":
+        return {
+          ...base,
+          cards: [
+            {
+              title: "Requests in Scope",
+              value: total,
+              note: "Rows selected for KPI analysis",
+            },
+            {
+              title: "Top Requested For",
+              value: countBy(rows, "requested_for")[0]?.label || "-",
+              note: "User or population receiving the most requests",
+            },
+            {
+              title: "Open Backlog",
+              value: backlog,
+              note: `${ratio(backlog, total)}% of selected requests are still open`,
+            },
+          ],
+          chart: {
+            title: "Requests by Requested For",
+            type: "bar",
+            data: countBy(rows, "requested_for"),
+          },
+          extras: [
+            {
+              title: "Requests by Requested For per Month",
+              note: "Monthly comparison of the top requested-for populations.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(
+                rows,
+                "opened",
+                "requested_for",
+                5,
+                "Unknown",
+                rows,
+                "opened"
+              ),
+            },
+            {
+              title: "Requests by Service",
+              note: "Service view of the same selected request scope.",
+              type: "bar",
+              data: countBy(rows, "it_service"),
+            },
+          ],
+        };
       default:
         {
           const descriptor = [
@@ -324,7 +382,7 @@ export default function RequestsAnalysis() {
               cards: [
                 { title: "Open Backlog", value: backlog, note: `${ratio(backlog, total)}% of scope remains open` },
                 { title: "> 60 Days Backlog", value: olderThan60, note: "Older requests still pending" },
-                { title: "Top Group", value: groups[0]?.label || "-", note: "Group most represented in backlog" },
+                { title: "Top Group", value: openGroups[0]?.label || "-", note: "Group most represented in backlog" },
               ],
               chart: { title: "Backlog Aging by State", type: "stacked", data: agingStateData },
               extras: [
@@ -338,7 +396,7 @@ export default function RequestsAnalysis() {
                   title: "Backlog by Service",
                   note: "Service view of the same selected request backlog.",
                   type: "bar",
-                  data: services,
+                  data: countBy(openRows, "it_service"),
                 },
               ],
             };
@@ -350,9 +408,9 @@ export default function RequestsAnalysis() {
               cards: [
                 { title: "Closed Requests", value: closed, note: `${ratio(closed, total)}% of scope is closed` },
                 { title: "Closure Rate", value: `${ratio(closed, total)}%`, note: "Calculated from selected rows" },
-                { title: "Top Service", value: services[0]?.label || "-", note: "Service with the highest closure volume" },
+                { title: "Top Service", value: countBy(closedRows, "it_service")[0]?.label || "-", note: "Service with the highest closure volume" },
               ],
-              chart: { title: "Closed Requests by Service", type: "bar", data: services },
+              chart: { title: "Closed Requests by Service", type: "bar", data: countBy(closedRows, "it_service") },
               extras: [
                 {
                   title: "Closed Requests by Service per Month",
@@ -364,7 +422,7 @@ export default function RequestsAnalysis() {
                   title: "Closed Requests by Group",
                   note: "Operational ownership view for the closure scope.",
                   type: "bar",
-                  data: groups,
+                  data: countBy(closedRows, "responsible_group"),
                 },
               ],
             };
@@ -421,7 +479,7 @@ export default function RequestsAnalysis() {
           };
         }
     }
-  }, [selectedKpi, backlog, total, olderThan60, groups, closed, services, items, openedMonthly, requestedFor, agingStateData, openRows, closedRows, serviceMonthly, groupMonthly, itemMonthly]);
+  }, [selectedKpi, backlog, total, olderThan60, olderThan60Rows, groups, openGroups, closed, services, items, openedMonthly, requestedFor, agingStateData, openRows, closedRows, serviceMonthly, groupMonthly, itemMonthly]);
   const summarySections = useMemo(
     () =>
       buildRequestInsights({
@@ -678,7 +736,7 @@ export default function RequestsAnalysis() {
         <Stack direction="row" flexWrap="wrap" gap={1}>
           <Chip label={`Top service: ${services[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
           <Chip label={`Top item: ${items[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
-          <Chip label={`Top group: ${groups[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
+          <Chip label={`Top group: ${openGroups[0]?.label || "Unknown"}`} color="primary" variant="outlined" />
           <Chip
             label={`${modernWorkplaceClosed} closed requests tied to Modern Workplace`}
             color="secondary"
@@ -713,10 +771,10 @@ export default function RequestsAnalysis() {
           title="Aging by Group Level"
           note="Distribution of backlog volume by responsible group."
           height={300}
-          legendItems={makeLegendItems(groups.slice(0, 6).map((item) => item.label))}
+          legendItems={makeLegendItems(openGroups.slice(0, 6).map((item) => item.label))}
         >
           <ResponsivePie
-            data={groups.slice(0, 6).map((item, index) => ({
+            data={openGroups.slice(0, 6).map((item, index) => ({
               id: item.label,
               label: item.label,
               value: item.value,
@@ -740,7 +798,7 @@ export default function RequestsAnalysis() {
           note="Backlog concentration by responsible group."
         >
           <ResponsiveBar
-            data={groups.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
+            data={openGroups.slice(0, 10).map((item) => ({ label: item.label, value: item.value }))}
             keys={["value"]}
             indexBy="label"
             margin={{ top: 20, right: 20, bottom: 90, left: 50 }}

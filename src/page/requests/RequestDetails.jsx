@@ -56,7 +56,7 @@ export default function RequestDetails() {
   return (
     <Box>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Header title={`REQUEST ${row.number}`} subTitle={`${row.state || "-"} • ${row.item || "-"}`} />
+        <Header title={`REQUEST ${row.number}`} subTitle={`${row.state || "-"} - ${row.item || "-"}`} />
         <Button variant="outlined" onClick={() => navigate("/requests")}>Back</Button>
       </Box>
 

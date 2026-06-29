@@ -13,10 +13,7 @@ const Header = ({title, subTitle, isDashboard=false}) => {
     <Typography
       className="print-main-title"
       sx={{
-        color:
-          theme.palette.mode === "dark"
-            ? theme.palette.info.light
-            : theme.palette.primary.main,
+        color: theme.appColors.layout.heading,
         fontWeight: "bold",
       }}
       variant="h5"

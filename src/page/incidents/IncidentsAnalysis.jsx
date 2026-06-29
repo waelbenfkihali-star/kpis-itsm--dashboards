@@ -96,6 +96,14 @@ export default function IncidentsAnalysis() {
     () => rows.filter((row) => ["Closed", "Resolved"].includes(row.state)),
     [rows]
   );
+  const responseBreachRows = useMemo(
+    () => rows.filter((row) => row.sla_breached),
+    [rows]
+  );
+  const resolutionBreachRows = useMemo(
+    () => closedRows.filter((row) => row.sla_breached),
+    [closedRows]
+  );
   const serviceDeskClosedRows = useMemo(
     () => closedRows.filter((row) => isServiceDeskRow(row)),
     [closedRows]
@@ -166,10 +174,14 @@ export default function IncidentsAnalysis() {
   );
   // hne n7asbou 9adech men row fiha SLA breached
   const slaBreached = countWhere(rows, (row) => row.sla_breached);
+  const responseBreaches = responseBreachRows.length;
+  const resolutionBreaches = resolutionBreachRows.length;
   // hne moyenne mta3 duration العامة
   const avgHandle = average(rows, "duration");
   // hne moyenne mta3 business_duration
   const avgBusiness = average(rows, "business_duration");
+  const avgResolvedHandle = average(closedRows, "duration");
+  const avgResolvedBusiness = average(closedRows, "business_duration");
   // hne moyenne mta3 duration bark للmajor incidents
   const avgMajorResolution = average(rows, "duration", (row) => row.is_major);
   // hne top services men major incidents bach nesta3mlohom ken vue mrakza 3la major
@@ -229,8 +241,8 @@ export default function IncidentsAnalysis() {
         return {
           ...base,
           cards: [
-            { title: "Avg Resolution Time", value: avgHandle || "-", note: "Average elapsed handle duration across the selected incidents" },
-            { title: "Avg Business Resolution", value: avgBusiness || "-", note: "Average business duration for the selected scope" },
+            { title: "Avg Resolution Time", value: avgResolvedHandle || "-", note: "Average elapsed handle duration across resolved incidents" },
+            { title: "Avg Business Resolution", value: avgResolvedBusiness || "-", note: "Average business duration across resolved incidents" },
             { title: "Resolved Incidents", value: resolved, note: `${ratio(resolved, total)}% of the selected incidents are already closed` },
           ],
           line: {
@@ -259,9 +271,9 @@ export default function IncidentsAnalysis() {
           cards: [
             { title: "Open Incident Backlog", value: backlog, note: `${ratio(backlog, total)}% of selected incidents are open` },
             { title: "Unassigned Backlog", value: unassignedBacklog, note: "Backlog without responsible user" },
-            { title: "Top Service", value: services[0]?.label || "-", note: "Service carrying the largest backlog" },
+            { title: "Top Service", value: countBy(openBacklogRows, "affected_service")[0]?.label || "-", note: "Service carrying the largest backlog" },
           ],
-          chart: { title: "Current Backlog by IT Service", data: services },
+          chart: { title: "Current Backlog by IT Service", data: countBy(openBacklogRows, "affected_service") },
           extras: [
             {
               title: "Backlog by Service per Month",
@@ -273,7 +285,7 @@ export default function IncidentsAnalysis() {
               title: "Backlog by Responsible Group",
               note: "Operational ownership view for the selected backlog scope.",
               type: "bar",
-              data: groups,
+              data: countBy(openBacklogRows, "responsible_group"),
             },
           ],
         };
@@ -354,77 +366,193 @@ export default function IncidentsAnalysis() {
           ],
         };
       case "INC-07":
+        return {
+          ...base,
+          cards: [
+            { title: "Top Backlog Service", value: countBy(openBacklogRows, "affected_service")[0]?.label || "-", note: "Service carrying the highest active incident backlog" },
+            { title: "Open Backlog", value: backlog, note: `${ratio(backlog, total)}% of selected incidents are still open` },
+            { title: "Unassigned Backlog", value: unassignedBacklog, note: "Open incidents with no responsible user" },
+          ],
+          chart: { title: "Current Backlog by IT Service", data: countBy(openBacklogRows, "affected_service") },
+          extras: [
+            {
+              title: "Backlog by Service per Month",
+              note: "Monthly comparison between the services contributing most to active backlog.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(openBacklogRows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
+            },
+            {
+              title: "Backlog by Site per Month",
+              note: "Shows where the active backlog is concentrated by site over time.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(openBacklogRows, "opened", "location", 5, "Unknown", rows, "opened"),
+            },
+          ],
+        };
       case "INC-08":
         return {
           ...base,
           cards: [
-            { title: "Top Service", value: services[0]?.label || "-", note: "Service most impacted in the selected scope" },
-            { title: "Incidents in Scope", value: total, note: "Rows selected for this KPI" },
-            { title: "Major Incidents", value: major, note: "Major count within selected scope" },
+            { title: "Major Incidents", value: major, note: `${ratio(major, total)}% of selected incidents are major` },
+            { title: "Top Major Service", value: focusedServices[0]?.label || "-", note: "Service most affected by major incidents" },
+            { title: "Total Selection", value: total, note: "Incident scope used for KPI analysis" },
           ],
-          chart: { title: "Service Breakdown", data: services },
+          chart: { title: "Major Incidents by IT Service", data: focusedServices },
           extras: [
             {
-              title: "Service Comparison per Month",
-              note: "Monthly comparison between the top impacted services.",
+              title: "Major Incidents by Service per Month",
+              note: "Monthly comparison between services most impacted by major incidents.",
               type: "stacked",
-              ...serviceMonthly,
+              ...monthlyBreakdownInRange(majorRows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
             },
             {
-              title: "Site Comparison per Month",
-              note: "Shows which sites are repeatedly impacted across months.",
-              type: "stacked",
-              ...siteMonthly,
+              title: "Major Incidents by Site",
+              note: "Additional geographical view of major incident concentration.",
+              type: "bar",
+              data: countBy(majorRows, "location"),
             },
           ],
         };
       case "INC-09":
-      case "INC-15":
         return {
           ...base,
           cards: [
-            { title: "SLA Breached Incidents", value: slaBreached, note: `${ratio(slaBreached, total)}% of scope breached SLA` },
-            { title: "Compliance Rate", value: `${100 - ratio(slaBreached, total)}%`, note: "Calculated from selected rows" },
-            { title: "Open Backlog", value: backlog, note: "Open incidents still under monitoring" },
+            { title: "Past Due Response", value: responseBreaches, note: `${ratio(responseBreaches, total)}% of scope breached response expectations` },
+            { title: "Response Compliance", value: `${100 - ratio(responseBreaches, total)}%`, note: "Calculated from the selected incident scope" },
+            { title: "Open Backlog", value: backlog, note: "Open incidents still under response monitoring" },
           ],
-          chart: { title: "Breached Incidents by Group", data: groups },
+          chart: { title: "Response Breaches by Responsible Group", data: countBy(responseBreachRows, "responsible_group") },
           extras: [
             {
-              title: "Breached Incidents by Group per Month",
-              note: "Monthly comparison of groups most exposed to SLA breaches.",
+              title: "Response Breaches by Group per Month",
+              note: "Monthly comparison of groups most exposed to response SLA breaches.",
               type: "stacked",
-              ...monthlyBreakdownInRange(rows.filter((row) => row.sla_breached), "opened", "responsible_group", 5, "Unknown", rows, "opened"),
+              ...monthlyBreakdownInRange(responseBreachRows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
-              title: "Breached Incidents by Service",
-              note: "Shows where the SLA issue is concentrated by service.",
+              title: "Response Breaches by Service",
+              note: "Shows which services are most represented in the response breach scope.",
               type: "bar",
-              data: countBy(rows.filter((row) => row.sla_breached), "affected_service"),
+              data: countBy(responseBreachRows, "affected_service"),
             },
           ],
         };
       case "INC-12":
+        return {
+          ...base,
+          cards: [
+            { title: "Resolution Compliance", value: `${100 - ratio(resolutionBreaches, resolved || 1)}%`, note: "Resolution KPI compliance from resolved incidents" },
+            { title: "Resolution Breaches", value: resolutionBreaches, note: "Resolved incidents outside the expected resolution target" },
+            { title: "Resolved Incidents", value: resolved, note: "Resolved or closed incidents in selected scope" },
+          ],
+          chart: { title: "Resolution SLA Impact by Responsible Group", data: countBy(resolutionBreachRows, "responsible_group") },
+          extras: [
+            {
+              title: "Resolution Pressure by Group per Month",
+              note: "Month over month resolution SLA pressure on the top responsible groups.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(resolutionBreachRows, "resolved", "responsible_group", 5, "Unknown", rows, "opened"),
+            },
+            {
+              title: "Resolution Pressure by Service",
+              note: "Additional view of services represented in the resolution compliance scope.",
+              type: "bar",
+              data: countBy(resolutionBreachRows, "affected_service"),
+            },
+          ],
+        };
       case "INC-13":
         return {
           ...base,
           cards: [
-            { title: "Compliance Rate", value: `${100 - ratio(slaBreached, total)}%`, note: "KPI compliance from selected scope" },
-            { title: "Breached Incidents", value: slaBreached, note: "Incidents outside SLA target" },
-            { title: "Resolved", value: resolved, note: "Resolved incidents in selected scope" },
+            { title: "First Response Compliance", value: `${100 - ratio(responseBreaches, total)}%`, note: "First response KPI compliance from selected scope" },
+            { title: "Response Breaches", value: responseBreaches, note: "Incidents outside the expected first response target" },
+            { title: "Incidents in Scope", value: total, note: "Rows selected for this KPI" },
           ],
-          chart: { title: "SLA Impact by Responsible Group", data: groups },
+          chart: { title: "First Response SLA Impact by Responsible Group", data: countBy(responseBreachRows, "responsible_group") },
           extras: [
             {
-              title: "Compliance Pressure by Group per Month",
-              note: "Month over month SLA pressure on the top responsible groups.",
+              title: "First Response Pressure by Group per Month",
+              note: "Month over month first response SLA pressure on the top responsible groups.",
               type: "stacked",
-              ...groupMonthly,
+              ...monthlyBreakdownInRange(responseBreachRows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
-              title: "Compliance Pressure by Service",
-              note: "Additional business-facing view by impacted services.",
+              title: "First Response Pressure by Service",
+              note: "Additional view of services represented in the first response compliance scope.",
               type: "bar",
-              data: services,
+              data: countBy(responseBreachRows, "affected_service"),
+            },
+          ],
+        };
+      case "INC-15":
+        return {
+          ...base,
+          cards: [
+            { title: "Past Due Resolution", value: resolutionBreaches, note: `${ratio(resolutionBreaches, resolved || 1)}% of resolved scope breached resolution expectations` },
+            { title: "Resolution Compliance", value: `${100 - ratio(resolutionBreaches, resolved || 1)}%`, note: "Calculated from resolved incidents in the selected scope" },
+            { title: "Resolved Incidents", value: resolved, note: "Resolved tickets used as KPI reference volume" },
+          ],
+          chart: { title: "Resolution Breaches by Responsible Group", data: countBy(resolutionBreachRows, "responsible_group") },
+          extras: [
+            {
+              title: "Resolution Breaches by Group per Month",
+              note: "Monthly comparison of groups most exposed to resolution SLA breaches.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(resolutionBreachRows, "resolved", "responsible_group", 5, "Unknown", rows, "opened"),
+            },
+            {
+              title: "Resolution Breaches by Service",
+              note: "Shows which services are most represented in the resolution breach scope.",
+              type: "bar",
+              data: countBy(resolutionBreachRows, "affected_service"),
+            },
+          ],
+        };
+              case "INC-16":
+        return {
+          ...base,
+          cards: [
+            {
+              title: "Open Incidents",
+              value: backlog,
+              note: `${ratio(backlog, total)}% of selected incidents are still open`,
+            },
+            {
+              title: "Top Responsible Group",
+              value: countBy(openBacklogRows, "responsible_group")[0]?.label || "-",
+              note: "Group carrying the highest open incident backlog",
+            },
+            {
+              title: "Unassigned Backlog",
+              value: unassignedBacklog,
+              note: "Open incidents without a responsible user",
+            },
+          ],
+          chart: {
+            title: "Open Incidents by Responsible Group",
+            data: countBy(openBacklogRows, "responsible_group"),
+          },
+          extras: [
+            {
+              title: "Open Incidents by Group per Month",
+              note: "Monthly comparison of top responsible groups inside the open incident backlog.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(
+                openBacklogRows,
+                "opened",
+                "responsible_group",
+                5,
+                "Unknown",
+                rows,
+                "opened"
+              ),
+            },
+            {
+              title: "Open Incidents by Service",
+              note: "Service view of the same open incident scope.",
+              type: "bar",
+              data: countBy(openBacklogRows, "affected_service"),
             },
           ],
         };
@@ -578,10 +706,16 @@ export default function IncidentsAnalysis() {
     rows,
     avgHandle,
     avgBusiness,
+    avgResolvedHandle,
+    avgResolvedBusiness,
     closedRows,
     openBacklogRows,
     majorRows,
     resolvedWithinOneHourRows,
+    responseBreachRows,
+    responseBreaches,
+    resolutionBreachRows,
+    resolutionBreaches,
     serviceDeskClosedRows,
     groupMonthly,
   ]);

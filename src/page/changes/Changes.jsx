@@ -10,7 +10,8 @@ import {
   Autocomplete,
   Button,
   Paper,
-  Typography
+  Typography,
+  useTheme
 } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
@@ -18,12 +19,14 @@ import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
 import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
+import { getChipSx } from "../../theme";
 
 // hne component Changes: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function Changes() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
   const { currentUser } = useOutletContext();
   const isAdmin = currentUser?.access === "Admin";
   const selectedKpi = location.state?.selectedKpi || null;
@@ -170,13 +173,13 @@ export default function Changes() {
       renderCell: (params) => {
 
         const value = params.value || "";
-        let color = "default";
+        let tone = "neutral";
 
-        if (value === "Closed") color = "success";
-        else if (value === "Scheduled") color = "warning";
-        else if (value === "Implementation") color = "info";
+        if (value === "Closed") tone = "success";
+        else if (value === "Scheduled") tone = "warning";
+        else if (value === "Implementation") tone = "info";
 
-        return <Chip label={value} color={color} size="small" />;
+        return <Chip label={value} size="small" sx={getChipSx(theme, tone)} />;
 
       }
     },
@@ -240,9 +243,15 @@ export default function Changes() {
 
         <Button
           variant="contained"
-          color="success"
           disabled={!selectedIds.length}
           onClick={handleAnalyse}
+          sx={{
+            backgroundColor: "#2f855a",
+            color: "#ffffff",
+            "&:hover": {
+              backgroundColor: "#276749",
+            },
+          }}
         >
           {selectedKpi ? `Analyse ${selectedKpi.kpi_id}` : "Analyse"}
         </Button>

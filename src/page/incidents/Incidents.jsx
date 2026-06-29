@@ -10,7 +10,8 @@ import {
   Autocomplete,
   Button,
   Paper,
-  Typography
+  Typography,
+  useTheme
 } from "@mui/material";
 
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
@@ -20,12 +21,14 @@ import Header from "../../components/Header";
 import DeleteToolbar from "../../components/DeleteToolbar";
 import GlobalScopeFilters from "../../components/GlobalScopeFilters";
 import { apiFetch } from "../../utils/api";
+import { getChipSx } from "../../theme";
 
 // hne component mta3 incidents: yjib data men backend w yaffichiha fi tableau.
 export default function Incidents() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
   const { currentUser } = useOutletContext();
   const isAdmin = currentUser?.access === "Admin";
 
@@ -221,14 +224,14 @@ export default function Incidents() {
 
         // hne nbadlou couleur mta3 status Ø­Ø³Ø¨ valeur.
         const value = String(params.value || "");
-        let color = "default";
+        let tone = "neutral";
 
-        if (value === "Open") color = "error";
-        else if (value === "In Progress") color = "warning";
-        else if (value === "Resolved") color = "success";
-        else if (value === "Closed") color = "info";
+        if (value === "Open") tone = "danger";
+        else if (value === "In Progress") tone = "warning";
+        else if (value === "Resolved") tone = "success";
+        else if (value === "Closed") tone = "info";
 
-        return <Chip label={value || "-"} color={color} size="small" />;
+        return <Chip label={value || "-"} size="small" sx={getChipSx(theme, tone)} />;
 
       },
     },
@@ -258,9 +261,9 @@ export default function Incidents() {
       minWidth: 90,
       renderCell: (params) =>
         params.value ? (
-          <Chip label="Yes" color="error" size="small" />
+          <Chip label="Yes" size="small" sx={getChipSx(theme, "danger")} />
         ) : (
-          <Chip label="No" variant="outlined" size="small" />
+          <Chip label="No" variant="outlined" size="small" sx={getChipSx(theme, "neutral", "outlined")} />
         ),
     },
 
@@ -271,13 +274,13 @@ export default function Incidents() {
       minWidth: 130,
       renderCell: (params) =>
         params.value ? (
-          <Chip label="Yes" color="warning" size="small" />
+          <Chip label="Yes" size="small" sx={getChipSx(theme, "warning")} />
         ) : (
-          <Chip label="No" color="success" variant="outlined" size="small" />
+          <Chip label="No" variant="outlined" size="small" sx={getChipSx(theme, "success", "outlined")} />
         ),
     },
 
-  ], []);
+  ], [theme]);
 
   return (
 
@@ -333,12 +336,19 @@ export default function Incidents() {
 
         <Button
           variant="contained"
-          color="success"
           disabled={!selectedIds.length}
           onClick={handleAnalyse}
+          sx={{
+            backgroundColor: "#2f855a",
+            color: "#ffffff",
+            "&:hover": {
+              backgroundColor: "#276749",
+            },
+          }}
         >
           {selectedKpi ? `Analyse ${selectedKpi.kpi_id}` : "Analyse"}
         </Button>
+        
 
       </Box>
 

@@ -14,11 +14,20 @@ const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
   // @ts-ignore
 })(({ theme, open }) => ({
+  ...(function () {
+    const isLight = theme.palette.mode === "light";
+    const appBarBg = isLight ? "#ffffff" : "#0f172a";
+    const appBarText = isLight ? "#0f172a" : "#f8fafc";
+    const appBarBorder = isLight
+      ? "1px solid rgba(15, 23, 42, 0.08)"
+      : "1px solid rgba(148, 163, 184, 0.18)";
+
+    return {
   zIndex: theme.zIndex.drawer + 1,
-  backgroundColor: "#0f172a",
-  color: "#f8fafc",
+  backgroundColor: appBarBg,
+  color: appBarText,
   boxShadow: "none",
-  borderBottom: "1px solid rgba(148, 163, 184, 0.18)",
+  borderBottom: appBarBorder,
   transition: theme.transitions.create(["width", "margin"], {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -31,17 +40,28 @@ const AppBar = styled(MuiAppBar, {
       duration: theme.transitions.duration.enteringScreen,
     }),
   }),
+    };
+  })(),
 }));
 
 // hedhi function sghira t7adher style mta3 les boutons elli fel top bar.
-const actionButtonSx = (theme) => ({
-  border: "1px solid rgba(148, 163, 184, 0.18)",
+const actionButtonSx = (theme) => {
+  const isLight = theme.palette.mode === "light";
+  const shellBorder = isLight
+    ? "1px solid rgba(15, 23, 42, 0.08)"
+    : "1px solid rgba(148, 163, 184, 0.18)";
+  const shellText = isLight ? "#0f172a" : "#f8fafc";
+  const shellHover = isLight ? "rgba(37, 99, 235, 0.08)" : "rgba(59, 130, 246, 0.16)";
+
+  return ({
+  border: shellBorder,
   borderRadius: 2,
-  color: "#f8fafc",
+  color: shellText,
   "&:hover": {
-    backgroundColor: "rgba(59, 130, 246, 0.16)",
+    backgroundColor: shellHover,
   },
 });
+};
 
 // hedha component TopBar: houwa l partie elli todhher fou9 fel app.
 const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
@@ -49,6 +69,12 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
   const navigate = useNavigate();
   const displayName =
     currentUser?.full_name || currentUser?.username || "Workspace user";
+  const isLight = theme.palette.mode === "light";
+  const subTextColor = isLight ? "rgba(15, 23, 42, 0.68)" : "rgba(248, 250, 252, 0.72)";
+  const profileHoverBg = isLight ? "rgba(37, 99, 235, 0.08)" : "rgba(59, 130, 246, 0.16)";
+  const profileBorder = isLight
+    ? "1px solid rgba(15, 23, 42, 0.08)"
+    : "1px solid rgba(148, 163, 184, 0.18)";
 
   return (
     <AppBar
@@ -75,7 +101,7 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
           <Typography variant="h6" fontWeight={700} lineHeight={1.1}>
             ITSM KPI Dashboard
           </Typography>
-          <Typography variant="body2" sx={{ color: "rgba(248, 250, 252, 0.72)" }}>
+          <Typography variant="body2" sx={{ color: subTextColor }}>
             Incidents, requests, changes and KPI tracking
           </Typography>
         </Box>
@@ -95,7 +121,13 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
                 );
               }}
               color="inherit"
-              sx={actionButtonSx(theme)}
+              sx={{
+                ...actionButtonSx(theme),
+                color: "#d97706",
+                "&:hover": {
+                  backgroundColor: "#fef3c7",
+                },
+              }}
             >
               <LightModeOutlinedIcon />
             </IconButton>
@@ -111,7 +143,13 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
                 );
               }}
               color="inherit"
-              sx={actionButtonSx(theme)}
+              sx={{
+                ...actionButtonSx(theme),
+                color: "#d97706",
+                "&:hover": {
+                  backgroundColor: "#fef3c7",
+                },
+              }}
             >
               <DarkModeOutlinedIcon />
             </IconButton>
@@ -125,11 +163,11 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
               gap: 1,
               px: 1,
               py: 0.5,
-              border: "1px solid rgba(148, 163, 184, 0.18)",
+              border: profileBorder,
               borderRadius: 2,
               cursor: "pointer",
               "&:hover": {
-                backgroundColor: "rgba(59, 130, 246, 0.12)",
+                backgroundColor: profileHoverBg,
               },
             }}
           >
@@ -148,7 +186,7 @@ const TopBar = ({ open, handleDrawerOpen, setMode, currentUser }) => {
               <Typography variant="body2" fontWeight={700} lineHeight={1.1}>
                 {displayName}
               </Typography>
-              <Typography variant="caption" sx={{ color: "rgba(248, 250, 252, 0.72)" }}>
+              <Typography variant="caption" sx={{ color: subTextColor }}>
                 View profile
               </Typography>
             </Box>

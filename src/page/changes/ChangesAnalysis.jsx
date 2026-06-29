@@ -83,6 +83,35 @@ export default function ChangesAnalysis() {
     () => monthlyDualSeriesInRange(rows, "opened", "closed", "Opened", "Closed", rows, "opened"),
     [rows]
   );
+  const criticalRows = useMemo(
+    () => rows.filter((row) => row.priority === "P1"),
+    [rows]
+  );
+  const openRows = useMemo(
+    () =>
+      rows.filter(
+        (row) => !["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)
+      ),
+    [rows]
+  );
+  const closedRows = useMemo(
+    () =>
+      rows.filter((row) => ["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)),
+    [rows]
+  );
+  const emergencyRows = useMemo(
+    () => rows.filter((row) => String(row.type || "").toLowerCase().includes("emergency")),
+    [rows]
+  );
+  const pastDueRows = useMemo(
+    () =>
+      openRows.filter(
+        (row) =>
+          diffInDays(row.planned_end_date, new Date()) !== null &&
+          diffInDays(row.planned_end_date, new Date()) > 0
+      ),
+    [openRows]
+  );
   // hne function services: t3awen ba9i l code fil fichier hedha b logic sghira.
   const services = useMemo(() => countBy(rows, "affected_service"), [rows]);
   // hne function groups: t3awen ba9i l code fil fichier hedha b logic sghira.
@@ -134,26 +163,11 @@ export default function ChangesAnalysis() {
 
   const total = rows.length;
   // hne function critical: t3awen ba9i l code fil fichier hedha b logic sghira.
-  const critical = countWhere(rows, (row) => row.priority === "P1");
-  const open = countWhere(
-    rows,
-    (row) => !["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)
-  );
-  const closed = countWhere(
-    rows,
-    (row) => ["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)
-  );
-  const emergency = countWhere(
-    rows,
-    (row) => String(row.type || "").toLowerCase().includes("emergency")
-  );
-  const pastDue = countWhere(
-    rows,
-    (row) =>
-      !row.closed &&
-      diffInDays(row.planned_end_date, new Date()) !== null &&
-      diffInDays(row.planned_end_date, new Date()) > 0
-  );
+  const critical = criticalRows.length;
+  const open = openRows.length;
+  const closed = closedRows.length;
+  const emergency = emergencyRows.length;
+  const pastDue = pastDueRows.length;
   // hne function focusedView: t3awen ba9i l code fil fichier hedha b logic sghira.
   const focusedView = useMemo(() => {
     if (!selectedKpi) return null;
@@ -170,21 +184,21 @@ export default function ChangesAnalysis() {
           cards: [
             { title: "Past Due Changes", value: pastDue, note: "Changes past planned end date" },
             { title: "Open Changes", value: open, note: "Open change backlog in selected scope" },
-            { title: "Top Group", value: groups[0]?.label || "-", note: "Group most affected by past due work" },
+            { title: "Top Group", value: countBy(pastDueRows, "responsible_group")[0]?.label || "-", note: "Group most affected by past due work" },
           ],
-          chart: { title: "Past Due Changes by Group", data: groups },
+          chart: { title: "Past Due Changes by Group", data: countBy(pastDueRows, "responsible_group") },
           extras: [
             {
               title: "Past Due Change Pressure by Group per Month",
               note: "Monthly comparison between the groups carrying delayed changes.",
               type: "stacked",
-              ...groupMonthly,
+              ...monthlyBreakdownInRange(pastDueRows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Past Due Changes by Service",
               note: "Business-facing view of delayed change concentration.",
               type: "bar",
-              data: services,
+              data: countBy(pastDueRows, "affected_service"),
             },
           ],
         };
@@ -193,22 +207,22 @@ export default function ChangesAnalysis() {
           ...base,
           cards: [
             { title: "Critical Changes", value: critical, note: `${ratio(critical, total)}% of scope is critical` },
-            { title: "Open Critical Pressure", value: open, note: "Open selected changes still under execution" },
-            { title: "Top Service", value: services[0]?.label || "-", note: "Service most impacted in selected scope" },
+            { title: "Open Critical Pressure", value: countWhere(criticalRows, (row) => !["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)), note: "Open critical changes still under execution" },
+            { title: "Top Service", value: countBy(criticalRows, "affected_service")[0]?.label || "-", note: "Service most impacted in the critical scope" },
           ],
-          chart: { title: "Critical Change Distribution by Service", data: services },
+          chart: { title: "Critical Change Distribution by Service", data: countBy(criticalRows, "affected_service") },
           extras: [
             {
               title: "Critical Changes by Service per Month",
               note: "Monthly service comparison for critical changes.",
               type: "stacked",
-              ...monthlyBreakdownInRange(rows.filter((row) => row.priority === "P1"), "opened", "affected_service", 5, "Unknown", rows, "opened"),
+              ...monthlyBreakdownInRange(criticalRows, "opened", "affected_service", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Critical Changes by Group",
               note: "Operational ownership view for critical changes.",
               type: "bar",
-              data: groups,
+              data: countBy(criticalRows, "responsible_group"),
             },
           ],
         };
@@ -241,22 +255,22 @@ export default function ChangesAnalysis() {
           ...base,
           cards: [
             { title: "Emergency Changes", value: emergency, note: `${ratio(emergency, total)}% of scope is emergency type` },
-            { title: "Open Changes", value: open, note: "Emergency operational pressure inside selected scope" },
-            { title: "Top Group", value: groups[0]?.label || "-", note: "Group most exposed to emergency work" },
+            { title: "Open Changes", value: countWhere(emergencyRows, (row) => !["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)), note: "Emergency operational pressure inside selected scope" },
+            { title: "Top Group", value: countBy(emergencyRows, "responsible_group")[0]?.label || "-", note: "Group most exposed to emergency work" },
           ],
-          chart: { title: "Emergency Change Distribution by Group", data: groups },
+          chart: { title: "Emergency Change Distribution by Group", data: countBy(emergencyRows, "responsible_group") },
           extras: [
             {
               title: "Emergency Changes by Group per Month",
               note: "Monthly comparison of emergency workload by group.",
               type: "stacked",
-              ...monthlyBreakdownInRange(rows.filter((row) => String(row.type || "").toLowerCase().includes("emergency")), "opened", "responsible_group", 5, "Unknown", rows, "opened"),
+              ...monthlyBreakdownInRange(emergencyRows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Emergency Changes by Service",
               note: "Service view for emergency change concentration.",
               type: "bar",
-              data: services,
+              data: countBy(emergencyRows, "affected_service"),
             },
           ],
         };
@@ -268,19 +282,19 @@ export default function ChangesAnalysis() {
             { title: "Closed Changes", value: closed, note: "Closed or implemented changes" },
             { title: "Open Changes", value: open, note: "Still pending selected changes" },
           ],
-          chart: { title: "Closed Change Distribution by Service", data: services },
+          chart: { title: "Closed Change Distribution by Service", data: countBy(closedRows, "affected_service") },
           extras: [
             {
               title: "Closed Changes by Service per Month",
               note: "Monthly comparison of closure volume across top services.",
               type: "stacked",
-              ...monthlyBreakdownInRange(rows.filter((row) => ["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)), "closed", "affected_service", 5, "Unknown", rows, "opened"),
+              ...monthlyBreakdownInRange(closedRows, "closed", "affected_service", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Closed Changes by Group",
               note: "Operational ownership behind closure performance.",
               type: "bar",
-              data: groups,
+              data: countBy(closedRows, "responsible_group"),
             },
           ],
         };
@@ -290,21 +304,66 @@ export default function ChangesAnalysis() {
           cards: [
             { title: "Open Change Backlog", value: open, note: `${ratio(open, total)}% of selected scope remains open` },
             { title: "Past Due Changes", value: pastDue, note: "Open changes that exceeded planned date" },
-            { title: "Top Group", value: groups[0]?.label || "-", note: "Group carrying the largest backlog" },
+            { title: "Top Group", value: countBy(openRows, "responsible_group")[0]?.label || "-", note: "Group carrying the largest backlog" },
           ],
-          chart: { title: "Open Change Backlog by Group", data: groups },
+          chart: { title: "Open Change Backlog by Group", data: countBy(openRows, "responsible_group") },
           extras: [
             {
               title: "Open Change Backlog by Group per Month",
               note: "Monthly comparison of the open backlog by responsible group.",
               type: "stacked",
-              ...groupMonthly,
+              ...monthlyBreakdownInRange(openRows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
             },
             {
               title: "Open Change Backlog by Type",
               note: "Shows which change types dominate the selected backlog.",
               type: "bar",
-              data: types,
+              data: countBy(openRows, "type"),
+            },
+          ],
+        };
+              case "CHG-07":
+        return {
+          ...base,
+          cards: [
+            {
+              title: "Emergency Changes",
+              value: emergency,
+              note: `${ratio(emergency, total)}% of selected changes are emergency type`,
+            },
+            {
+              title: "Top Responsible Group",
+              value:
+                countBy(
+                  rows.filter((row) =>
+                    String(row.type || "").toLowerCase().includes("emergency")
+                  ),
+                  "responsible_group"
+                )[0]?.label || "-",
+              note: "Group carrying the highest emergency change workload",
+            },
+            {
+              title: "Open Changes",
+              value: countWhere(emergencyRows, (row) => !["Closed", "Resolved", "Implemented", "Completed"].includes(row.state)),
+              note: "Open emergency changes still under execution in the selected scope",
+            },
+          ],
+          chart: {
+            title: "Emergency Changes by Responsible Group",
+            data: countBy(emergencyRows, "responsible_group"),
+          },
+          extras: [
+            {
+              title: "Emergency Changes by Group per Month",
+              note: "Monthly comparison of the responsible groups carrying emergency changes.",
+              type: "stacked",
+              ...monthlyBreakdownInRange(emergencyRows, "opened", "responsible_group", 5, "Unknown", rows, "opened"),
+            },
+            {
+              title: "Emergency Changes by Service",
+              note: "Service view of the same emergency change scope.",
+              type: "bar",
+              data: countBy(emergencyRows, "affected_service"),
             },
           ],
         };
@@ -448,7 +507,7 @@ export default function ChangesAnalysis() {
           };
         }
     }
-  }, [selectedKpi, pastDue, open, groups, critical, total, services, closed, emergency, openedMonthly, rows, groupMonthly, serviceMonthly, typeMonthly]);
+  }, [selectedKpi, pastDue, pastDueRows, open, openRows, groups, critical, criticalRows, total, services, closed, closedRows, emergency, emergencyRows, openedMonthly, rows, groupMonthly, serviceMonthly, typeMonthly]);
   const summarySections = useMemo(
     () =>
       buildChangeInsights({

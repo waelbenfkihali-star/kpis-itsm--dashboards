@@ -35,6 +35,7 @@ class Incident(models.Model):
     service_request = models.CharField(max_length=255, blank=True, null=True)
     is_major = models.BooleanField(default=False)
     sla_breached = models.BooleanField(default=False)
+    is_archived = models.BooleanField(default=False)
 
     # hne __str__ yraja3 esm ma9rou2 lel incident bach yban sahl fil admin wela logs
     def __str__(self):
@@ -67,6 +68,7 @@ class Request(models.Model):
     closed = models.CharField(max_length=100, blank=True, null=True)
     closed_by = models.CharField(max_length=255, blank=True, null=True)
     it_service = models.CharField(max_length=255, blank=True, null=True)
+    is_archived = models.BooleanField(default=False)
 
     def __str__(self):
         return self.number or f"Request {self.pk}"
@@ -98,6 +100,7 @@ class Change(models.Model):
     category = models.CharField(max_length=100, blank=True, null=True)
     close_code = models.CharField(max_length=255, blank=True, null=True)
     close_notes = models.TextField(blank=True, null=True)
+    is_archived = models.BooleanField(default=False)
 
     def __str__(self):
         return self.number or f"Change {self.pk}"
@@ -130,6 +133,8 @@ class KpiDefinition(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     avatar = models.TextField(blank=True, default="")
+    is_archived = models.BooleanField(default=False)
+   
 
     def __str__(self):
         return f"Profile for {self.user.username}"

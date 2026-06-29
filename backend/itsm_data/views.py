@@ -6,6 +6,7 @@ from collections import defaultdict
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.permissions import AllowAny
@@ -17,7 +18,7 @@ from django.core.mail import EmailMultiAlternatives
 
 from .ai_dashboard import build_ai_dashboard_intent
 from .kpi_defaults import DEFAULT_KPIS
-from .models import Incident, Request, Change, KpiDefinition
+from .models import Incident, Request, Change, KpiDefinition, UserProfile
 from .serializers import (
     ChangeSerializer,
     IncidentSerializer,
@@ -33,6 +34,10 @@ from .serializers import (
 
 
 def sync_default_kpis():
+    # Seed default KPIs only once when the table is empty.
+    if KpiDefinition.objects.exists():
+        return
+
     for item in DEFAULT_KPIS:
         defaults = {
             "name": item.get("name", "").strip(),
@@ -73,23 +78,23 @@ def build_ai_data_context():
     return {
         "modules": {
             "incidents": {
-                "service_values": sample_distinct_values(Incident.objects.all(), "affected_service"),
-                "group_values": sample_distinct_values(Incident.objects.all(), "responsible_group"),
-                "division_values": sample_distinct_values(Incident.objects.all(), "location_division"),
-                "ci_values": sample_distinct_values(Incident.objects.all(), "configuration_item"),
+                "service_values": sample_distinct_values(Incident.objects.filter(is_archived=False), "affected_service"),
+                "group_values": sample_distinct_values(Incident.objects.filter(is_archived=False), "responsible_group"),
+                "division_values": sample_distinct_values(Incident.objects.filter(is_archived=False), "location_division"),
+                "ci_values": sample_distinct_values(Incident.objects.filter(is_archived=False), "configuration_item"),
             },
             "requests": {
-                "service_values": sample_distinct_values(Request.objects.all(), "it_service"),
-                "group_values": sample_distinct_values(Request.objects.all(), "responsible_group"),
-                "division_values": sample_distinct_values(Request.objects.all(), "location_division"),
-                "item_values": sample_distinct_values(Request.objects.all(), "item"),
+                "service_values": sample_distinct_values(Request.objects.filter(is_archived=False), "it_service"),
+                "group_values": sample_distinct_values(Request.objects.filter(is_archived=False), "responsible_group"),
+                "division_values": sample_distinct_values(Request.objects.filter(is_archived=False), "location_division"),
+                "item_values": sample_distinct_values(Request.objects.filter(is_archived=False), "item"),
             },
             "changes": {
-                "service_values": sample_distinct_values(Change.objects.all(), "affected_service"),
-                "group_values": sample_distinct_values(Change.objects.all(), "responsible_group"),
-                "division_values": sample_distinct_values(Change.objects.all(), "location_division"),
-                "ci_values": sample_distinct_values(Change.objects.all(), "configuration_item"),
-                "type_values": sample_distinct_values(Change.objects.all(), "type"),
+                "service_values": sample_distinct_values(Change.objects.filter(is_archived=False), "affected_service"),
+                "group_values": sample_distinct_values(Change.objects.filter(is_archived=False), "responsible_group"),
+                "division_values": sample_distinct_values(Change.objects.filter(is_archived=False), "location_division"),
+                "ci_values": sample_distinct_values(Change.objects.filter(is_archived=False), "configuration_item"),
+                "type_values": sample_distinct_values(Change.objects.filter(is_archived=False), "type"),
             },
         },
         "guidance": {
@@ -463,7 +468,8 @@ def kpis_list(request):
     sync_default_kpis()
 
     if request.method == "GET":
-        rows = KpiDefinition.objects.filter(is_deleted=False)
+        include_deleted = str(request.query_params.get("deleted", "")).strip().lower() == "true"
+        rows = KpiDefinition.objects.filter(is_deleted=True if include_deleted else False)
         rows = rows.order_by("module", "kpi_id", "id")
         return Response(KpiDefinitionSerializer(rows, many=True).data)
 
@@ -496,11 +502,7 @@ def kpi_detail(request, kpi_id):
         )
 
     if request.method == "DELETE":
-        if row.is_default:
-            row.is_deleted = True
-            row.save(update_fields=["is_deleted", "updated_at"])
-        else:
-            row.delete()
+        row.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     serializer = KpiDefinitionSerializer(instance=row, data=request.data, partial=True)
@@ -513,26 +515,29 @@ def kpi_detail(request, kpi_id):
 @api_view(["GET"])
 # hne endpoint liste incidents lkol mortbin men l a7deth lel a9dem.
 def incidents_list(request):
-    rows = Incident.objects.all().order_by("-id")
+    archived = str(request.query_params.get("archived", "")).strip().lower() == "true"
+    rows = Incident.objects.filter(is_archived=archived).order_by("-id")
     return Response(IncidentSerializer(rows, many=True).data)
 
 
 @api_view(["GET"])
 def requests_list(request):
-    rows = Request.objects.all().order_by("-id")
+    archived = str(request.query_params.get("archived", "")).strip().lower() == "true"
+    rows = Request.objects.filter(is_archived=archived).order_by("-id")
     return Response(RequestSerializer(rows, many=True).data)
 
 
 @api_view(["GET"])
 def changes_list(request):
-    rows = Change.objects.all().order_by("-id")
+    archived = str(request.query_params.get("archived", "")).strip().lower() == "true"
+    rows = Change.objects.filter(is_archived=archived).order_by("-id")
     return Response(ChangeSerializer(rows, many=True).data)
 
 
 @api_view(["GET"])
 # hne endpoint details mta3 incident wa7da hasb number mawjouda fil route.
 def incident_detail(request, number):
-    row = Incident.objects.filter(number=number).first()
+    row = Incident.objects.filter(number=number, is_archived=False).first()
     if not row:
         return Response({"detail": "Not found"}, status=404)
     return Response(IncidentSerializer(row).data)
@@ -540,7 +545,7 @@ def incident_detail(request, number):
 
 @api_view(["GET"])
 def request_detail(request, number):
-    row = Request.objects.filter(number=number).first()
+    row = Request.objects.filter(number=number, is_archived=False).first()
     if not row:
         return Response({"detail": "Not found"}, status=404)
     return Response(RequestSerializer(row).data)
@@ -548,7 +553,7 @@ def request_detail(request, number):
 
 @api_view(["GET"])
 def change_detail(request, number):
-    row = Change.objects.filter(number=number).first()
+    row = Change.objects.filter(number=number, is_archived=False).first()
     if not row:
         return Response({"detail": "Not found"}, status=404)
     return Response(ChangeSerializer(row).data)
@@ -594,21 +599,21 @@ def monthly_stats(request):
         text = str(date_str)
         return text[:7]  # YYYY-MM
 
-    for r in Incident.objects.all():
+    for r in Incident.objects.filter(is_archived=False):
         m = get_month(r.opened)
         if not m:
             continue
         data[m]["month"] = m
         data[m]["Incidents"] += 1
 
-    for r in Request.objects.all():
+    for r in Request.objects.filter(is_archived=False):
         m = get_month(r.opened)
         if not m:
             continue
         data[m]["month"] = m
         data[m]["Requests"] += 1
 
-    for r in Change.objects.all():
+    for r in Change.objects.filter(is_archived=False):
         m = get_month(r.opened)
         if not m:
             continue
@@ -651,12 +656,19 @@ def ai_dashboard_query(request):
 @api_view(["GET"])
 # hne endpoint data mta3 l user elli 3amel login taw.
 def current_user(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if profile.is_archived:
+        return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
     return Response(TeamMemberSerializer(request.user).data)
 
 
 @api_view(["PATCH"])
 # hne endpoint ybadel ma3loumet l user l 7ali w l neskha l mou7adtha.
 def update_current_user(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if profile.is_archived:
+        return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
     serializer = CurrentUserUpdateSerializer(
         instance=request.user,
         data=request.data,
@@ -671,6 +683,10 @@ def update_current_user(request):
 @api_view(["POST"])
 # hne endpoint ybadel password mta3 l user l 7ali ba3d validation.
 def change_current_user_password(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if profile.is_archived:
+        return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
     serializer = PasswordChangeSerializer(
         data=request.data,
         context={
@@ -688,7 +704,15 @@ def change_current_user_password(request):
 # hne endpoint fil GET les comptes lkol, w fil POST y5lo9 account jdid ila elli ba3eth request admin.
 def team_members(request):
     if request.method == "GET":
-        users = User.objects.all().order_by("-is_superuser", "-is_staff", "username")
+        archived = str(request.query_params.get("archived", "")).strip().lower() == "true"
+        if archived:
+            users = User.objects.filter(profile__is_archived=True)
+        else:
+            users = User.objects.filter(
+                Q(profile__isnull=True) | Q(profile__is_archived=False)
+                
+            )
+        users = users.order_by("-is_superuser", "-is_staff", "username")
         return Response(TeamMemberSerializer(users, many=True).data)
 
     if not request.user.is_staff:
@@ -713,6 +737,10 @@ def team_member_detail(request, user_id):
         )
 
     user = get_object_or_404(User, pk=user_id)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+
+    if profile.is_archived:
+        return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "DELETE":
         if user.pk == request.user.pk:
@@ -752,6 +780,10 @@ def team_member_password(request, user_id):
         )
 
     user = get_object_or_404(User, pk=user_id)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    if profile.is_archived:
+        return Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+
     serializer = PasswordChangeSerializer(
         data=request.data,
         context={

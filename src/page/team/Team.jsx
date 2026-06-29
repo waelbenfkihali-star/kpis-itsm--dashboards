@@ -35,6 +35,7 @@ import Header from "../../components/Header";
 import PageFilters from "../../components/PageFilters";
 import { apiFetchJson } from "../../utils/api";
 
+
 // hne component Team: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 export default function Team() {
   const theme = useTheme();
@@ -306,28 +307,29 @@ export default function Team() {
         }
 
         const isSelf = row.id === currentUser?.id;
-        const canEdit = row.access === "User" && !isSelf;
+        const canManageUserAccount = row.access === "User" && !isSelf;
+
+        if (!canManageUserAccount) {
+          return <Typography variant="body2" color="text.secondary">View only</Typography>;
+        }
 
         return (
           <Stack direction="row" spacing={0.5}>
-            {canEdit ? (
-              <Tooltip title="Edit account">
-                <IconButton
-                  size="small"
-                  color="primary"
-                  onClick={() => openEditDialog(row)}
-                >
-                  <EditOutlined fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            ) : null}
+            <Tooltip title="Edit account">
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={() => openEditDialog(row)}
+              >
+                <EditOutlined fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
             <Tooltip title={row.is_active ? "Deactivate account" : "Activate account"}>
               <span>
                 <IconButton
                   size="small"
                   color={row.is_active ? "warning" : "success"}
-                  disabled={isSelf && row.is_active}
                   onClick={() =>
                     updateMember(
                       row.id,

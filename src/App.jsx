@@ -85,7 +85,15 @@ export default function App({ mode, setMode }) {
         />
 
         {/* hne zone principale win pages tetbadel 7aseb route. */}
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            backgroundColor: mode === "light" ? "#f6f6f6" : "#0b1220",
+            minHeight: "100vh",
+          }}
+        >
 
           {/* hne espace ykhalli contenu aligned m3a TopBar. */}
           <DrawerHeader />

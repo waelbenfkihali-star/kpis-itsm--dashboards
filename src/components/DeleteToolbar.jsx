@@ -82,20 +82,31 @@ export default function DeleteToolbar({
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         <Button
           variant="contained"
-          color="error"
           startIcon={<DeleteIcon />}
           disabled={!selectedIds.length}
           onClick={() => setOpen(true)}
+          sx={{
+            backgroundColor: "#dc2626",
+            color: "#ffffff",
+            "&:hover": { backgroundColor: "#b91c1c" },
+          }}
         >
           Delete Selected
         </Button>
 
         <Button
           variant="outlined"
-          color="error"
           startIcon={<DeleteIcon />}
           disabled={!rows.length}
           onClick={() => setOpen(true)}
+          sx={{
+            color: "#dc2626",
+            borderColor: "rgba(220, 38, 38, 0.42)",
+            "&:hover": {
+              borderColor: "#dc2626",
+              backgroundColor: "#fee2e2",
+            },
+          }}
         >
           Delete All
         </Button>
@@ -109,13 +120,35 @@ export default function DeleteToolbar({
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => setOpen(false)}
+            sx={{
+              color: "#475569",
+              "&:hover": { backgroundColor: "#e2e8f0" },
+            }}
+          >
+            Cancel
+          </Button>
 
-          <Button color="error" onClick={deleteSelected}>
+          <Button
+            onClick={deleteSelected}
+            sx={{
+              color: "#dc2626",
+              "&:hover": { backgroundColor: "#fee2e2" },
+            }}
+          >
             Delete Selected
           </Button>
 
-          <Button color="error" variant="contained" onClick={deleteAll}>
+          <Button
+            variant="contained"
+            onClick={deleteAll}
+            sx={{
+              backgroundColor: "#dc2626",
+              color: "#ffffff",
+              "&:hover": { backgroundColor: "#b91c1c" },
+            }}
+          >
             Delete All
           </Button>
         </DialogActions>

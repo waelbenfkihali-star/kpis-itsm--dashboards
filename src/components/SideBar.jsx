@@ -19,7 +19,6 @@ import QueryStatsOutlinedIcon from "@mui/icons-material/QueryStatsOutlined";
 import PlaylistAddCircleOutlinedIcon from "@mui/icons-material/PlaylistAddCircleOutlined";
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
-import { grey } from "@mui/material/colors";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import BuildCircleOutlinedIcon from "@mui/icons-material/BuildCircleOutlined";
@@ -55,30 +54,39 @@ const closedMixin = (theme) => ({
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
   // @ts-ignore
-})(({ theme, open }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: "nowrap",
-  boxSizing: "border-box",
-  ...(open && {
-    ...openedMixin(theme),
-    "& .MuiDrawer-paper": {
+})(({ theme, open }) => {
+  const isLight = theme.palette.mode === "light";
+  const drawerBg = isLight ? "#ffffff" : "#0f172a";
+  const drawerText = isLight ? "#0f172a" : "#f8fafc";
+  const drawerBorder = isLight
+    ? "1px solid rgba(15, 23, 42, 0.08)"
+    : "1px solid rgba(148, 163, 184, 0.18)";
+
+  return {
+    width: drawerWidth,
+    flexShrink: 0,
+    whiteSpace: "nowrap",
+    boxSizing: "border-box",
+    ...(open && {
       ...openedMixin(theme),
-      backgroundColor: "#0f172a",
-      color: "#f8fafc",
-      borderRight: "1px solid rgba(148, 163, 184, 0.18)",
-    },
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    "& .MuiDrawer-paper": {
+      "& .MuiDrawer-paper": {
+        ...openedMixin(theme),
+        backgroundColor: drawerBg,
+        color: drawerText,
+        borderRight: drawerBorder,
+      },
+    }),
+    ...(!open && {
       ...closedMixin(theme),
-      backgroundColor: "#0f172a",
-      color: "#f8fafc",
-      borderRight: "1px solid rgba(168, 148, 184, 0.18)",
-    },
-  }),
-}));
+      "& .MuiDrawer-paper": {
+        ...closedMixin(theme),
+        backgroundColor: drawerBg,
+        color: drawerText,
+        borderRight: drawerBorder,
+      },
+    }),
+  };
+});
 
 // hne component DrawerHeader: mas2oul 3la affichage joz2 men l interface wala page kamla men l app.
 const DrawerHeader = styled("div")(({ theme }) => ({
@@ -144,6 +152,10 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
   let location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
+  const isLight = theme.palette.mode === "light";
+  const navTextColor = isLight ? "#0f172a" : "#f8fafc";
+  const navActiveBg = isLight ? "rgba(37, 99, 235, 0.12)" : "rgba(59, 130, 246, 0.22)";
+  const navHoverBg = isLight ? "rgba(37, 99, 235, 0.08)" : "rgba(59, 130, 246, 0.16)";
   // hne function logout: t3awen ba9i l code fil fichier hedha b logic sghira.
   const logout = () => {
   localStorage.removeItem("access");
@@ -221,11 +233,11 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
                   px: 2.5,
                   bgcolor:
                     location.pathname === item.path
-                      ? "rgba(59, 130, 246, 0.22)"
+                      ? navActiveBg
                       : null,
-                  color: "#f8fafc",
+                  color: navTextColor,
                   "&:hover": {
-                    bgcolor: "rgba(59, 130, 246, 0.16)",
+                    bgcolor: navHoverBg,
                   },
                 }}
               >
@@ -264,11 +276,11 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
                   px: 2.5,
                   bgcolor:
                     location.pathname === item.path
-                      ? "rgba(59, 130, 246, 0.22)"
+                      ? navActiveBg
                       : null,
-                  color: "#f8fafc",
+                  color: navTextColor,
                   "&:hover": {
-                    bgcolor: "rgba(59, 130, 246, 0.16)",
+                    bgcolor: navHoverBg,
                   },
                 }}
               >
@@ -309,11 +321,11 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
                       px: 2.5,
                       bgcolor:
                         location.pathname === item.path
-                          ? "rgba(59, 130, 246, 0.22)"
+                          ? navActiveBg
                           : null,
-                      color: "#f8fafc",
+                      color: navTextColor,
                       "&:hover": {
-                        bgcolor: "rgba(59, 130, 246, 0.16)",
+                        bgcolor: navHoverBg,
                       },
                     }}
                   >
@@ -354,11 +366,11 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
                   px: 2.5,
                   bgcolor:
                     location.pathname === item.path
-                      ? "rgba(59, 130, 246, 0.22)"
+                      ? navActiveBg
                       : null,
-                  color: "#f8fafc",
+                  color: navTextColor,
                   "&:hover": {
-                    bgcolor: "rgba(59, 130, 246, 0.16)",
+                    bgcolor: navHoverBg,
                   },
                 }}
               >
@@ -392,6 +404,10 @@ const SideBar = ({ open, handleDrawerClose, currentUser }) => {
                 minHeight: 48,
                 justifyContent: open ? "initial" : "center",
                 px: 2.5,
+                color: "#dc2626",
+                "&:hover": {
+                  backgroundColor: "#fee2e2",
+                },
               }}
             >
               <ListItemIcon

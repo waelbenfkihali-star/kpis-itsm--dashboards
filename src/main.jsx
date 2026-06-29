@@ -76,6 +76,7 @@ function RootRouter() {
             >
 
               <Route index element={<Dashboard />} />
+              
 
               <Route path="incidents" element={<Incidents />} />
               <Route path="requests" element={<Requests />} />

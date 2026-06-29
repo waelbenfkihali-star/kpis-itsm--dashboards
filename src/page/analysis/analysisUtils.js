@@ -275,16 +275,7 @@ export function makeLineData(points, label) {
   ];
 }
 
-export const CHART_COLORS = [
-  "#c26d3a",
-  "#7a8f46",
-  "#a44a3f",
-  "#3f7c85",
-  "#8b5e83",
-  "#d4a239",
-  "#5b6c8f",
-  "#b86f7a",
-];
+export const CHART_COLORS = APP_CHART_COLORS;
 
 // hne function getChartColor: ta9ra valeur mocht9a men data l 7aliya.
 export function getChartColor(index = 0) {
@@ -328,3 +319,4 @@ ${datum.id}
 Value: ${datum.value}
 `;
 }
+import { APP_CHART_COLORS } from "../../theme";

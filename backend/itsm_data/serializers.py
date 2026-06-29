@@ -1,6 +1,6 @@
 # hne serializers mta3 DRF: y7awlou model objects l JSON w yvalidiw data elli de5la men requests
 import logging
-import profile
+from datetime import date
 
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -127,6 +127,7 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     access = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     avatar = serializers.SerializerMethodField()
+    is_archived = serializers.SerializerMethodField()
     # hne Meta t7aded anou serializer hedhi ta5dem 3la User w traja3 fields elli front yesta7a9hom
     class Meta:
         model = User
@@ -139,6 +140,7 @@ class TeamMemberSerializer(serializers.ModelSerializer):
             "full_name",
             "avatar",
             "is_active",
+            "is_archived",
             "access",
         ]
 
@@ -155,6 +157,10 @@ class TeamMemberSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         profile, _ = UserProfile.objects.get_or_create(user=obj)
         return profile.avatar
+
+    def get_is_archived(self, obj):
+        profile, _ = UserProfile.objects.get_or_create(user=obj)
+        return profile.is_archived
     
 # hne serializer hedha m5ases l create user jdid men page Team/Form
 class TeamMemberCreateSerializer(serializers.Serializer):
@@ -176,6 +182,7 @@ class TeamMemberCreateSerializer(serializers.Serializer):
     def create(self, validated_data):
         access = validated_data.pop("access")
         password = validated_data.pop("password")
+
         user = User(
             username=validated_data["username"],
             email=validated_data.get("email", "").strip(),
@@ -187,7 +194,7 @@ class TeamMemberCreateSerializer(serializers.Serializer):
         )
         user.set_password(password)
         user.save()
-        UserProfile.objects.get_or_create(user=user)
+
         try:
             send_account_created_email(user, password)
         except Exception:
